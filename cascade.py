@@ -73,8 +73,8 @@ def ccd_transform(S):
 ##########################
 
 
-def read_input(buf=None):
-    buf = buf or sys.stdin.read()
+def read_input():
+    buf = sys.stdin.read()
     path = tempfile.mktemp() + ".s2p"
     with open(path, "w") as f:
         f.write(buf)
