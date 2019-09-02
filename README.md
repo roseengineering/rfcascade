@@ -98,7 +98,7 @@ $ cascade -z < 2n5179_5ma.s2p
 1000      41.85   16.63     57.19  -73.51
 ```
 
-Shunt a 330 ohm resistor across the two-port output.  This makes the transistor unconditionally stable.
+Shunt a 330 ohm resistor across the output of the two-port network.  This makes the transistor unconditionally stable.
 
 ```
 $ cascade -oshunt 330 < 2n5179_5ma.s2p 
@@ -117,7 +117,7 @@ $ cascade -oshunt 330 < 2n5179_5ma.s2p
 1000     0.1638  121.96    0.9022   51.97   0.09769   73.97     0.632  -85.31 !   1.4     3.358    0.1351 
 ```
 
-Cascade a series a 20 ohm resistor on the two-port output.
+Cascade a series a 20 ohm resistor to the output of the two-port network.
 
 ```
 $ cascade -oseries 20 < 2n5179_5ma.s2p 
@@ -136,7 +136,7 @@ $ cascade -oseries 20 < 2n5179_5ma.s2p
 1000     0.1883  121.15    0.8238   41.83   0.08919   63.83    0.5533  -71.64 !   0.1     4.533   0.08788 
 ```
 
-Lift terminal 3, the port connect to ground, and add an 10nH inductor.  Then cascade the result
+Lift terminal 3, the port connected to ground, and add an 10nH inductor.  Then cascade the result
 with a shunt 100 ohm resistor to stabilize the result.
 
 ```
