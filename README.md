@@ -22,7 +22,7 @@ input transformations as command line options:
 ```
 
 By default the utlitilty outputs a touchstone file with 
-GUM and Rollets stability information as comments.  It can
+GUM and Rollet stability information as comments.  It can
 also output the following alternative formats:
 
 ```
