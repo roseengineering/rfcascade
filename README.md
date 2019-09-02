@@ -33,10 +33,12 @@ also output the following alternative formats:
 
 Installation
 ------------
+```
 $ sudo pip install -r requirements.txt
 $ sudo cp cascade.py /usr/local/bin/cascade
 $ sudo chmod 755 /usr/local/bin/cascade
 $ sh test.sh       # to run unit tests
+```
 
 Examples
 --------
