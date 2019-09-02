@@ -8,7 +8,7 @@ Features
 The utility takes a touchstone file as standard input
 and outputs a new touchstone file (or other formats)
 as standard output.  Cascade provides the following
-input transformations provided as command line options:
+input transformations as command line options:
 
 ```
 -cascade <filename>  : cascades the input with the given touchstone file.
