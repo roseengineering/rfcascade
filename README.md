@@ -26,9 +26,9 @@ GUM and Rollets stability information as comments.  It can
 also output the following alternative formats:
 
 ```
--n  : outputs the results of write_touchstone() from scikit-rf 
--a  : outputs the results as a ABCD matrix
--z  : outputs the impedance of S11 and S22 normalized to 50 ohms
+-n  : outputs the result of write_touchstone() from scikit-rf 
+-a  : outputs the result as ABCD matrices
+-z  : outputs the result as the impedances of S11 and S22 normalized to 50 ohms
 ```
 
 Installation
