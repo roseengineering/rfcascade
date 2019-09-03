@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import numpy as np
+import skrf as rf 
 import sys, tempfile, os
 
 def tothreeport(S):
@@ -86,7 +87,7 @@ def read_input():
 def write_output(nw, mode):
     polar = lambda x: "{:9.4g} {:7.2f}".format(np.abs(x), np.angle(x) * 180 / np.pi)
     power = lambda x: np.abs(x)**2
-    imped = lambda x: 50 * (1 + x) / (1 - x)
+    imped = lambda x, z0: z0 * (1 + x) / (1 - x)
     if mode == 'a':
         print('! MHZ          A                 B                 C                 D')
         for i in range(len(nw)):
@@ -95,7 +96,8 @@ def write_output(nw, mode):
         print('! MHZ         Z11               Z22')
         for i in range(len(nw)):
             S = nw.s[i]
-            print('{:<5g}'.format(nw.f[i] / 1e6), polar(imped(S[0,0])), polar(imped(S[1,1]))) 
+            z0 = nw.z0[i]
+            print('{:<5g}'.format(nw.f[i] / 1e6), polar(imped(S[0,0], z0[0])), polar(imped(S[1,1], z0[1]))) 
     elif mode == 'n':
         print(nw.write_touchstone(form='ma', return_string=True))
     else:
@@ -151,7 +153,6 @@ def main(*args):
     write_output(nw, mode=mode)
 
 
-import skrf as rf 
 if __name__ == "__main__":
     np.seterr(divide='ignore')
     sys.exit(main(*sys.argv[1:]))
