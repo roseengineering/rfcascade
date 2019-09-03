@@ -142,6 +142,9 @@ def main(*args):
         elif opt == "-oshunt":
             M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
             nw.a = np.array([ np.matrix(nw.a[i]) * M for i in range(len(nw)) ])
+        elif opt == "-ishunt":
+            M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
+            nw.a = np.array([ M * np.matrix(nw.a[i]) for i in range(len(nw)) ])
         elif opt == "-lift":
             z = args.pop(0)
             nw.s = np.array([ lift_ground(nw.s[i], 

@@ -15,6 +15,7 @@ input transformations as command line options:
 -cbg                 : transforms the network into a common-base arrangement.
 -ccd                 : transforms the network into a common-collector arrangement.
 -iseries <ohms>      : cascades a series resistor with the input of the network.
+-ishunt <ohms>       : cascades a shunt resistor with the input of the network.
 -oseries <ohms>      : cascades output of the network with a series resistor.
 -oshunt <ohms>       : cascades output of the network with a shunt resistor.
 -lift <complex>      : lifts the network from ground and inserts a complex impedance.
