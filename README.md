@@ -7,18 +7,18 @@ Features
 --------
 The utility takes a touchstone file as standard input
 and outputs a new touchstone file (or other formats)
-as standard output.  Cascade provides the following
+to standard output.  Cascade provides the following
 input transformations as command line options:
 
 ```
--cascade <filename>  : cascades the input with the given touchstone file.
--cbg                 : transforms the input into a common-base arrangement.
--ccd                 : transforms the input into a common-collector arrangement.
--iseries <ohms>      : cascades a series resistor with the input.
--oseries <ohms>      : cascades the input with a series resistor.
--oshunt <ohms>       : cascades the input with a shunt resistor.
--lift <complex>      : lifts ground from input and inserts a complex impedance
--lift <inductance>   : lifts ground from input and inserts an inductor
+-cascade <filename>  : cascades the network with the given touchstone file.
+-cbg                 : transforms the network into a common-base arrangement.
+-ccd                 : transforms the network into a common-collector arrangement.
+-iseries <ohms>      : cascades a series resistor with the input of the network.
+-oseries <ohms>      : cascades output of the network with a series resistor.
+-oshunt <ohms>       : cascades output of the network with a shunt resistor.
+-lift <complex>      : lifts the network from ground and inserts a complex impedance.
+-lift <inductance>   : lifts the network from ground and inserts an inductor.
 ```
 
 By default the utlitilty outputs a touchstone file with 
@@ -27,8 +27,8 @@ also output the following alternative formats:
 
 ```
 -n  : outputs the result of write_touchstone() from scikit-rf 
--a  : outputs the result as ABCD matrices
--z  : outputs the result as the impedances of S11 and S22 normalized to 50 ohms
+-a  : outputs the network as ABCD matrices
+-z  : outputs S11 and S22 as impedances
 ```
 
 Installation
@@ -80,7 +80,7 @@ $ cascade -a < 2n5179_5ma.s2p
 1000     0.5662    4.77     33.48  -76.44   0.01307  -21.60    0.6974  -89.08
 ```
 
-Display the result as the impedances of S11 and S22 normalized to 50 ohms.
+Display the result as the impedances of S11 and S22.
 
 ```
 $ cascade -z < 2n5179_5ma.s2p 
@@ -117,7 +117,7 @@ $ cascade -oshunt 330 < 2n5179_5ma.s2p
 1000     0.1638  121.96    0.9022   51.97   0.09769   73.97     0.632  -85.31 !   1.4     3.358    0.1351 
 ```
 
-Cascade a series a 20 ohm resistor to the output of the two-port network.
+Cascade a series 20 ohm resistor with the output of the two-port network.
 
 ```
 $ cascade -oseries 20 < 2n5179_5ma.s2p 
@@ -215,6 +215,26 @@ Insert a one ohm resistor at the emitter to provide shunt feedback.
 800      0.1235 -123.93     1.171   64.46   0.09085   72.14    0.7409    7.85 !   4.9     2.168    0.1596 
 900      0.1491 -169.65     1.126   58.22    0.1062   66.54    0.7445  -38.10 !   4.6     1.784   0.05541 
 1000     0.1609  123.17    0.9781   48.86    0.1141   66.76    0.7477  -81.82 !   3.5     1.947    0.1402 
+```
+
+Create a cascode amplifier.
+
+```
+$ cascade -cbg < 2n5179_5ma.s2p > cb.s2p
+$ cascade -cascade cb.s2p < 2n5179_5ma.s2p
+# MHZ S MA R 50
+! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
+0        0.6692  180.00      1.55   -0.00    0.0258    0.00    0.9649   -0.00 !  18.0     1.141    0.6858 
+100      0.7455  173.47     1.673  -11.49   0.08774   75.40     1.046  -10.87 !   inf   0.04985    0.8148 pu
+200      0.7834  166.09     1.623  -22.23    0.1673   79.26     1.115  -27.69 !   inf   -0.1685    0.8752 pu
+300       0.798  154.26      1.41  -32.60    0.3239   72.65     1.017  -53.92 !   inf   -0.1879    0.7071 pu
+400      0.7442  144.59     1.256  -34.55     0.464   48.66    0.6954  -75.56 !   8.4    0.1916    0.5108 pu
+500      0.7206  135.76     1.264  -36.70     0.528   27.09    0.3917  -83.59 !   5.9    0.5052    0.5892 pu
+600      0.6681  125.60     1.315  -44.49    0.5151    3.26    0.1657  -65.59 !   5.1    0.7577    0.7076 pu
+700      0.5996  116.64     1.338  -57.47    0.3734  -19.62    0.2935    7.81 !   4.9    0.9993    0.6664 pu
+800      0.5371  109.65     1.212  -74.72    0.1278  -28.04    0.7227   -6.39 !   6.4     1.523    0.5318 
+900      0.4694  105.01    0.9932  -93.71     0.209   81.20     1.083  -40.18 !   inf   -0.3312    0.5051 pu
+1000      0.414   89.52    0.5058 -123.81    0.5353   63.17     1.108  -80.94 !   inf   -0.3771    0.4424 pu
 ```
 
 
