@@ -135,16 +135,16 @@ def main(*args):
             nw.s = np.array([ ccd_transform(S) for S in nw.s ])
         elif opt == "-iseries":
             M = np.matrix([[1, float(args.pop(0))], [0, 1]]) 
-            nw.a = np.array([ M * np.matrix(nw.a[i]) for i in range(len(nw)) ])
+            nw.a = np.array([ M * np.matrix(A) for A in nw.a ])
         elif opt == "-oseries":
             M = np.matrix([[1, float(args.pop(0))], [0, 1]]) 
-            nw.a = np.array([ np.matrix(nw.a[i]) * M for i in range(len(nw)) ])
-        elif opt == "-oshunt":
-            M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
-            nw.a = np.array([ np.matrix(nw.a[i]) * M for i in range(len(nw)) ])
+            nw.a = np.array([ np.matrix(A) * M for A in nw.a ])
         elif opt == "-ishunt":
             M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
-            nw.a = np.array([ M * np.matrix(nw.a[i]) for i in range(len(nw)) ])
+            nw.a = np.array([ M * np.matrix(A) for A in nw.a ])
+        elif opt == "-oshunt":
+            M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
+            nw.a = np.array([ np.matrix(A) * M for A in nw.a ])
         elif opt == "-lift":
             z = args.pop(0)
             nw.s = np.array([ lift_ground(nw.s[i], 
