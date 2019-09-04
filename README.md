@@ -18,12 +18,13 @@ input transformations as command line options:
 -ccd                 : transform network on top of stack into a common-collector arrangement.
 -lift <complex>      : lift network on top of stack from ground and insert a complex impedance.
 -lift <inductance>   : lift network on top of stack from ground and insert an inductor.
+-p                   : print network on top of stack
 -series <ohms>       : push a series resistor onto stack
 -shunt <ohms>        : push a shunt resistor onto stack
 -f <filename.s2p>    : push a network onto stack
 ```
 
-By default the utlitilty outputs a touchstone file with 
+By default the utility writes out a touchstone file with 
 GUM and Rollet stability information as comments.  It can
 also output the following alternative formats:
 

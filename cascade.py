@@ -183,6 +183,8 @@ def main(*args):
             a = stack.pop()
             stack.append(a.inv ** b)
 
+        elif opt == "-p":
+            write_output(top, mode=mode)
         elif opt == "-f":
             stack.append(rf.Network(args.pop(0)))
         elif top and opt == "-series":
