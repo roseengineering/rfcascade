@@ -17,8 +17,8 @@ input transformations as command line options:
 -swap                : swap the top two networks on the stack
 -cbg                 : transform network on top of stack into a common-base arrangement.
 -ccd                 : transform network on top of stack into a common-collector arrangement.
--lift <complex>      : lift network on top of stack from ground and insert a complex impedance.
--lift <inductance>   : lift network on top of stack from ground and insert an inductor.
+-lift <a+bj>         : lift network on top of stack from ground and insert a complex impedance. (j required)
+-lift <henries>      : lift network on top of stack from ground and insert an inductor.
 -p                   : print network on top of stack
 -series <ohms>       : push a series resistor onto stack
 -shunt <ohms>        : push a shunt resistor onto stack
