@@ -5,6 +5,12 @@ import skrf as rf
 import sys, tempfile, os
 
 
+def z2g(Z, Z0=50):
+    return (Z - Z0) / (Z + Z0)
+
+def g2z(G, Z0=50):
+    return Z0 * (1 + G) / (1 - G)
+
 def s2abcd(S, Z0=50):
     S11 = S[0,0]
     S12 = S[0,1]
@@ -19,7 +25,6 @@ def s2abcd(S, Z0=50):
         [ A, B ],
         [ C, D ]
     ])
-
 
 def abcd2s(M, Z0=50):
     M = np.array(M)
@@ -56,7 +61,7 @@ def tothreeport(S):
 
 def lift_ground(S, Z, Z0=50):
     S = tothreeport(S)
-    G = (Z - Z0) / (Z + Z0)
+    G = z2g(Z, Z0)
     S11 = S[0,0]
     S21 = S[1,0]
     S31 = S[2,0]
@@ -124,17 +129,14 @@ def read_network(path=None):
 
 def write_network(nw, mode):
     polar = lambda x: "{:9.4g} {:7.2f}".format(np.abs(x), np.angle(x) * 180 / np.pi)
-    power = lambda x: np.abs(x)**2
-    imped = lambda x, Z0=50: Z0 * (1 + x) / (1 - x)
     if mode == 'a':
-        print('! MHZ          A                 B                 C                 D')
+        print('MHZ            A                 B                 C                 D')
         for i in range(len(nw)):
             print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in s2abcd(nw.s[i]).flatten() ]))
     elif mode == 'z':
-        print('! MHZ         Z11               Z22')
+        print('MHZ           Z11              Z22')
         for i in range(len(nw)):
-            S = nw.s[i]
-            print('{:<5g}'.format(nw.f[i] / 1e6), polar(imped(S[0,0])), polar(imped(S[1,1]))) 
+            print('{:<5g} {:16.4g} {:16.4g}'.format(nw.f[i] / 1e6, g2z(nw.s[i][0,0]), g2z(nw.s[i][1,1])))
     elif mode == 'n':
         nw.name = nw.name or 'stdout'
         print(nw.write_touchstone(form='ma', return_string=True))
@@ -144,7 +146,7 @@ def write_network(nw, mode):
               '! GUM[dB]       K         D')
         for i in range(len(nw)):
             S = nw.s[i]
-            P11, P22, P21 = power(S[0,0]), power(S[1,1]), power(S[1,0])
+            P11, P22, P21 = np.abs(S[0,0])**2, np.abs(S[1,1])**2, np.abs(S[1,0])**2
             GUM = 10 * np.log10(P21 / (1 - P11) / (1 - P22)) if P11 < 1 and P22 < 1 else np.inf
             K = nw.stability[i]
             D = np.abs(S[0,0] * S[1,1] - S[0,1] * S[1,0])
