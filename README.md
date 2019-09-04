@@ -15,10 +15,10 @@ input transformations as command line options:
 -deembed             : de-embed the output of the two networks on top of stack
 -ideembed            : de-embed the input of the two networks on top of stack
 -swap                : swap the top two networks on the stack
--cbg                 : transform network on top of stack into a common-base arrangement.
--ccd                 : transform network on top of stack into a common-collector arrangement.
--lift <a+bj>         : lift network on top of stack from ground and insert an impedance - j required
--lift <henries>      : lift network on top of stack from ground and insert an inductor.
+-cbg                 : transform network on top of stack into a common-base arrangement
+-ccd                 : transform network on top of stack into a common-collector arrangement
+-lift <a+bj>         : lift network on top of stack from ground and insert an impedance, j required
+-lift <henries>      : lift network on top of stack from ground and insert an inductor
 -p                   : print network on top of stack
 -series <ohms>       : push a series resistor onto stack
 -shunt <ohms>        : push a shunt resistor onto stack
