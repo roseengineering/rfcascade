@@ -11,15 +11,16 @@ to standard output.  Cascade provides the following
 input transformations as command line options:
 
 ```
--cascade <filename>  : cascades the network with the given touchstone file.
--cbg                 : transforms the network into a common-base arrangement.
--ccd                 : transforms the network into a common-collector arrangement.
--iseries <ohms>      : cascades a series resistor with the input of the network.
--ishunt <ohms>       : cascades a shunt resistor with the input of the network.
--oseries <ohms>      : cascades output of the network with a series resistor.
--oshunt <ohms>       : cascades output of the network with a shunt resistor.
--lift <complex>      : lifts the network from ground and inserts a complex impedance.
--lift <inductance>   : lifts the network from ground and inserts an inductor.
+-cascade             : cascade the top two networks on the stack together
+-deembed             : deembed the output of the top two networks on the stack
+-ideembed            : deembed the input of the top two networks on the stack
+-cbg                 : transform network on top of stack into a common-base arrangement.
+-ccd                 : transform network on top of stack into a common-collector arrangement.
+-series <ohms>       : push a series resistor onto the stack
+-shunt <ohms>        : push a shunt resistor onto the stack
+-lift <complex>      : lift top network from ground and inserts a complex impedance.
+-lift <inductance>   : lift top network from ground and inserts an inductor.
+-f <filename.s2p>    : push a network onto the stack
 ```
 
 By default the utlitilty outputs a touchstone file with 
@@ -102,7 +103,7 @@ $ cascade -z < 2n5179_5ma.s2p
 Shunt a 330 ohm resistor across the output of the two-port network.  This makes the transistor unconditionally stable.
 
 ```
-$ cascade -oshunt 330 < 2n5179_5ma.s2p 
+$ cascade -shunt 330 -cascade < 2n5179_5ma.s2p 
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
 0         0.471   -0.00     5.949  180.00 4.877e-18 -180.00     0.618   -0.00 !  18.7 8.289e+15    0.2911 
@@ -121,7 +122,7 @@ $ cascade -oshunt 330 < 2n5179_5ma.s2p
 Cascade a series 20 ohm resistor with the output of the two-port network.
 
 ```
-$ cascade -oseries 20 < 2n5179_5ma.s2p 
+$ cascade -series 20 -cascade < 2n5179_5ma.s2p 
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
 0         0.471   -0.00     6.575  180.00 2.695e-18 -180.00    0.8487   -0.00 !  23.0 6.141e+15    0.3997 
@@ -141,7 +142,7 @@ Lift terminal 3, the port connected to ground, and add a 10nH inductor.  Then ca
 with a shunt 100 ohm resistor to stabilize the result.
 
 ```
-$ cascade -lift 10e-9 -oshunt 100 < 2n5179_5ma.s2p 
+$ cascade -lift 10e-9 -shunt 100 -cascade < 2n5179_5ma.s2p 
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
 0         0.471    0.00     4.641  180.00  1.49e-33   90.00    0.2621   -0.00 !  14.7 5.241e+31    0.1235 
@@ -222,7 +223,7 @@ Create a cascode amplifier.
 
 ```
 $ cascade -cbg < 2n5179_5ma.s2p > cb.s2p
-$ cascade -cascade cb.s2p < 2n5179_5ma.s2p
+$ cascade -f cb.s2p -cascade < 2n5179_5ma.s2p
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
 0        0.6692  180.00      1.55   -0.00    0.0258    0.00    0.9649   -0.00 !  18.0     1.141    0.6858 
@@ -242,7 +243,7 @@ Stabilize the cascode amp with a 100 ohm resistor across the output.  S12 is now
 the unstabilized cascode as well as the CE amp.
 
 ```
- < 2n5179_5ma.s2p cascade -cascade cb.s2p -oshunt 100
+ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
 0         0.471   -0.00     4.487  180.00 9.627e-19    0.00    0.3273    0.00 !  14.6 8.041e+16    0.1542 

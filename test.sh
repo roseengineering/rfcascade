@@ -66,5 +66,5 @@ cat > /tmp/cascade_output <<EOF
 1        0.5361 -133.70     3.851   47.30  0.007624  172.83     1.119  -30.14 !   inf    -3.588    0.5731 pu
 EOF
 < /tmp/cascade_input python cascade.py -cbg > /tmp/cascade_cbg.s2p
-< /tmp/cascade_input python cascade.py -cascade /tmp/cascade_cbg.s2p | diff - /tmp/cascade_output
+< /tmp/cascade_input python cascade.py -f /tmp/cascade_cbg.s2p -cascade | diff - /tmp/cascade_output
 

@@ -4,7 +4,41 @@ import numpy as np
 import skrf as rf 
 import sys, tempfile, os
 
+
+def s2abcd(S, Z0=50):
+    S11 = S[0,1]
+    S12 = S[0,1]
+    S21 = S[1,0]
+    S22 = S[1,1]
+    den = 2 * S21
+    A = ((1 + S11) *(1 - S22) + S12 * S21) / den
+    B = Z0  * ((1 + S11) * (1 + S22) - S12 * S21) / den
+    C = 1 / Z0 * ((1 - S11) * (1 - S22) - S12 * S21) / den
+    D = ((1 - S11) * (1 + S22) + S12 * S21) / den
+    return np.array([
+        [ A, B ],
+        [ C, D ]
+    ])
+
+
+def abcd2s(M, Z0=50):
+    M = np.array(M)
+    A = M[0,0]
+    B = M[0,1]
+    C = M[1,0]
+    D = M[1,1]
+    den = A + B / Z0 + C * Z0 + D
+    S11 = (A + B / Z0 - C * Z0 - D) / den
+    S12 = 2 * (A * D - B * C) / den
+    S21 = 2 / den
+    S22 = (-A + B / Z0 - C * Z0 + D) / den
+    return np.array([
+        [S11, S12],
+        [S21, S22]
+    ])
+
 def tothreeport(S):
+    S = np.array(S)
     S11 = S[0,0]
     S21 = S[1,0]
     S12 = S[0,1]
@@ -73,7 +107,6 @@ def ccd_transform(S):
 
 ##########################
 
-
 def read_input():
     buf = sys.stdin.read()
     path = tempfile.mktemp() + ".s2p"
@@ -83,7 +116,6 @@ def read_input():
     os.unlink(path)
     return nw
 
-
 def write_output(nw, mode):
     polar = lambda x: "{:9.4g} {:7.2f}".format(np.abs(x), np.angle(x) * 180 / np.pi)
     power = lambda x: np.abs(x)**2
@@ -91,6 +123,7 @@ def write_output(nw, mode):
     if mode == 'a':
         print('! MHZ          A                 B                 C                 D')
         for i in range(len(nw)):
+            # print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in s2abcd(nw.s[i], nw.z0[i][0]).flatten() ]))
             print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in nw.a[i].flatten() ]))
     elif mode == 'z':
         print('! MHZ         Z11               Z22')
@@ -99,6 +132,7 @@ def write_output(nw, mode):
             z0 = nw.z0[i]
             print('{:<5g}'.format(nw.f[i] / 1e6), polar(imped(S[0,0], z0[0])), polar(imped(S[1,1], z0[1]))) 
     elif mode == 'n':
+        nw.name = nw.name or 'stdout'
         print(nw.write_touchstone(form='ma', return_string=True))
     else:
         print('# MHZ S MA R 50')
@@ -118,42 +152,63 @@ def write_output(nw, mode):
 def main(*args):
     args = list(args)
     mode = None
-    nw = read_input()
+    stack = []
+    stack.append(read_input())
+
     while args:
         opt = args.pop(0)
+        top = stack[-1] if stack else None
+
         if opt == '-n':
             mode = "n"
         elif opt == '-a':
             mode = "a"
         elif opt == '-z':
             mode = "z"
+        
+        elif opt == "-swap":
+            b = stack.pop()
+            a = stack.pop()
+            stack.append(b)
+            stack.append(a)
         elif opt == "-cascade":
-            nw **= rf.Network(args.pop(0))
-        elif opt == "-cbg":
-            nw.s = np.array([ cbg_transform(S) for S in nw.s ])
-        elif opt == "-ccd":
-            nw.s = np.array([ ccd_transform(S) for S in nw.s ])
-        elif opt == "-iseries":
-            M = np.matrix([[1, float(args.pop(0))], [0, 1]]) 
-            nw.a = np.array([ M * np.matrix(A) for A in nw.a ])
-        elif opt == "-oseries":
-            M = np.matrix([[1, float(args.pop(0))], [0, 1]]) 
-            nw.a = np.array([ np.matrix(A) * M for A in nw.a ])
-        elif opt == "-ishunt":
-            M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
-            nw.a = np.array([ M * np.matrix(A) for A in nw.a ])
-        elif opt == "-oshunt":
-            M = np.matrix([[1, 0], [1/float(args.pop(0)), 1]])
-            nw.a = np.array([ np.matrix(A) * M for A in nw.a ])
-        elif opt == "-lift":
-            z = args.pop(0)
-            nw.s = np.array([ lift_ground(nw.s[i], 
-                complex(z) if 'j' in z else 2 * np.pi * nw.f[i] * float(z) * 1j) 
-                for i in range(len(nw)) ])
+            b = stack.pop()
+            a = stack.pop()
+            stack.append(a ** b)
+        elif opt == "-deembed":
+            b = stack.pop()
+            a = stack.pop()
+            stack.append(a ** b.inv)
+        elif opt == "-ideembed":
+            b = stack.pop()
+            a = stack.pop()
+            stack.append(a.inv ** b)
+
+        elif opt == "-f":
+            stack.append(rf.Network(args.pop(0)))
+        elif top and opt == "-series":
+            S = abcd2s([[1, float(args.pop(0))], [0, 1]])
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+        elif top and opt == "-shunt":
+            S = abcd2s([[1, 0], [1/float(args.pop(0)), 1]])
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+
+        elif top and opt == "-cbg":
+            top.s = np.array([ cbg_transform(S) for S in top.s ])
+        elif top and opt == "-ccd":
+            top.s = np.array([ ccd_transform(S) for S in top.s ])
+        elif top and opt == "-lift":
+            x = args.pop(0)
+            top.s = np.array([ lift_ground(
+                top.s[i], 
+                complex(x) if 'j' in x else 2j * np.pi * top.f[i] * float(x)
+            ) for i in range(len(top)) ])
         else:
-            print('unrecognized command line options, exiting', file=sys.stderr)
+            print('Unrecognized command line option. Exiting.', file=sys.stderr)
             return 1
-    write_output(nw, mode=mode)
+
+    if stack: 
+        write_output(stack[-1], mode=mode)
 
 
 if __name__ == "__main__":
