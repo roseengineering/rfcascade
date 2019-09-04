@@ -6,7 +6,7 @@ import sys, tempfile, os
 
 
 def s2abcd(S, Z0=50):
-    S11 = S[0,1]
+    S11 = S[0,0]
     S12 = S[0,1]
     S21 = S[1,0]
     S22 = S[1,1]
@@ -119,12 +119,11 @@ def read_input():
 def write_output(nw, mode):
     polar = lambda x: "{:9.4g} {:7.2f}".format(np.abs(x), np.angle(x) * 180 / np.pi)
     power = lambda x: np.abs(x)**2
-    imped = lambda x, z0: z0 * (1 + x) / (1 - x)
+    imped = lambda x, z0=50: z0 * (1 + x) / (1 - x)
     if mode == 'a':
         print('! MHZ          A                 B                 C                 D')
         for i in range(len(nw)):
-            # print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in s2abcd(nw.s[i], nw.z0[i][0]).flatten() ]))
-            print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in nw.a[i].flatten() ]))
+            print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in s2abcd(nw.s[i]).flatten() ]))
     elif mode == 'z':
         print('! MHZ         Z11               Z22')
         for i in range(len(nw)):
