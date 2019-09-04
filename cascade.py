@@ -107,19 +107,25 @@ def ccd_transform(S):
 
 ##########################
 
-def read_input():
-    buf = sys.stdin.read()
-    path = tempfile.mktemp() + ".s2p"
-    with open(path, "w") as f:
-        f.write(buf)
-    nw = rf.Network(path)
-    os.unlink(path)
+def read_network(path=None):
+    if path is None:
+        buf = sys.stdin.read()
+        path = tempfile.mktemp() + ".s2p"
+        with open(path, "w") as f:
+            f.write(buf)
+        nw = rf.Network(path)
+        os.unlink(path)
+    else:
+        nw = rf.Network(path)
+    if nw.number_of_ports != 2 or not np.all(nw.z0 == 50):
+        print('Only two-port networks referenced to 50 ohms supported', file=sys.stderr)
+        sys.exit(1)
     return nw
 
-def write_output(nw, mode):
+def write_network(nw, mode):
     polar = lambda x: "{:9.4g} {:7.2f}".format(np.abs(x), np.angle(x) * 180 / np.pi)
     power = lambda x: np.abs(x)**2
-    imped = lambda x, z0=50: z0 * (1 + x) / (1 - x)
+    imped = lambda x, Z0=50: Z0 * (1 + x) / (1 - x)
     if mode == 'a':
         print('! MHZ          A                 B                 C                 D')
         for i in range(len(nw)):
@@ -128,8 +134,7 @@ def write_output(nw, mode):
         print('! MHZ         Z11               Z22')
         for i in range(len(nw)):
             S = nw.s[i]
-            z0 = nw.z0[i]
-            print('{:<5g}'.format(nw.f[i] / 1e6), polar(imped(S[0,0], z0[0])), polar(imped(S[1,1], z0[1]))) 
+            print('{:<5g}'.format(nw.f[i] / 1e6), polar(imped(S[0,0])), polar(imped(S[1,1]))) 
     elif mode == 'n':
         nw.name = nw.name or 'stdout'
         print(nw.write_touchstone(form='ma', return_string=True))
@@ -152,7 +157,7 @@ def main(*args):
     args = list(args)
     mode = None
     stack = []
-    stack.append(read_input())
+    stack.append(read_network())
 
     while args:
         opt = args.pop(0)
@@ -186,7 +191,7 @@ def main(*args):
         elif opt == "-p":
             write_output(top, mode=mode)
         elif opt == "-f":
-            stack.append(rf.Network(args.pop(0)))
+            stack.append(read_network(args.pop(0)))
         elif top and opt == "-series":
             S = abcd2s([[1, float(args.pop(0))], [0, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
@@ -206,14 +211,14 @@ def main(*args):
             ) for i in range(len(top)) ])
         else:
             print('Unrecognized command line option. Exiting.', file=sys.stderr)
-            return 1
+            sys.exit(1)
 
     if stack: 
-        write_output(stack[-1], mode=mode)
+        write_network(stack[-1], mode=mode)
 
 
 if __name__ == "__main__":
     np.seterr(divide='ignore')
-    sys.exit(main(*sys.argv[1:]))
+    main(*sys.argv[1:])
 
 

@@ -14,6 +14,7 @@ input transformations as command line options:
 -cascade             : cascade together the two networks on top of stack
 -deembed             : de-embed the output of the two networks on top of stack
 -ideembed            : de-embed the input of the two networks on top of stack
+-swap                : swap the top two networks on the stack
 -cbg                 : transform network on top of stack into a common-base arrangement.
 -ccd                 : transform network on top of stack into a common-collector arrangement.
 -lift <complex>      : lift network on top of stack from ground and insert a complex impedance.
