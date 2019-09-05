@@ -134,7 +134,7 @@ def write_network(nw, mode):
         for i in range(len(nw)):
             print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in s2abcd(nw.s[i]).flatten() ]))
     elif mode == 'z':
-        print('MHZ           Z11              Z22')
+        print('MHZ            ZS               ZL')
         for i in range(len(nw)):
             print('{:<5g} {:16.4g} {:16.4g}'.format(nw.f[i] / 1e6, g2z(nw.s[i][0,0]), g2z(nw.s[i][1,1])))
     elif mode == 'n':
