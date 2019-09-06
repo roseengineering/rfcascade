@@ -16,7 +16,7 @@ EOF
 cat > /tmp/cascade_output <<EOF
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
-1        0.9962   -3.97    0.1462   86.68   0.07046   90.57         1   -3.88 !   inf    0.9975     1.007 pu
+1        0.9962   -3.97    0.1462   86.68   0.07046   90.57         1   -3.88 !   nan    0.9975     1.007 pu
 EOF
 < /tmp/cascade_input python cascade.py -lift 1250j | diff - /tmp/cascade_output
 
@@ -30,7 +30,7 @@ EOF
 cat > /tmp/cascade_output <<EOF
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
-1         3.966   18.75     2.995 -163.94     2.043   28.93     1.203 -137.25 !   inf   -0.9763     2.055 pu
+1         3.966   18.75     2.995 -163.94     2.043   28.93     1.203 -137.25 !   1.3   -0.9763     2.055 pu
 EOF
 < /tmp/cascade_input python cascade.py -cbg -lift 600j | diff - /tmp/cascade_output
 
@@ -63,7 +63,7 @@ EOF
 cat > /tmp/cascade_output <<EOF
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       ! GUM[dB]       K         D
-1        0.5361 -133.70     3.851   47.30  0.007624  172.83     1.119  -30.14 !   inf    -3.588    0.5731 pu
+1        0.5361 -133.70     3.851   47.30  0.007624  172.83     1.119  -30.14 !   nan    -3.588    0.5731 pu
 EOF
 < /tmp/cascade_input python cascade.py -cbg > /tmp/cascade_cbg.s2p
 < /tmp/cascade_input python cascade.py -f /tmp/cascade_cbg.s2p -cascade | diff - /tmp/cascade_output

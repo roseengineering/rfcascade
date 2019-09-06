@@ -5,11 +5,25 @@ import skrf as rf
 import sys, tempfile, os
 
 
+def db(x):
+    return 10 * np.log10(x) if x > 0 else np.nan
+
 def z2g(Z, Z0=50):
     return (Z - Z0) / (Z + Z0)
 
 def g2z(G, Z0=50):
     return Z0 * (1 + G) / (1 - G)
+
+def gmsg(S):
+    S21 = S[1,0]
+    S12 = S[0,1]
+    return np.abs(S21 / S12) if np.abs(S12) > 0 else np.inf
+
+def gum(S):
+    S11 = S[0,0]
+    S22 = S[1,1]
+    S21 = S[1,0]
+    return np.abs(S21)**2 / ((1 - np.abs(S11)**2) * (1 - np.abs(S22)**2))
 
 def s2abcd(S, Z0=50):
     S11 = S[0,0]
@@ -92,7 +106,6 @@ def cbg_transform(S):
        [ S23-S21*S13/(1+S11), S22-S21*S12/(1+S11) ]
     ])
 
-
 def ccd_transform(S):
     S = tothreeport(S)
     S11 = S[0,0]
@@ -146,13 +159,12 @@ def write_network(nw, mode):
               '! GUM[dB]       K         D')
         for i in range(len(nw)):
             S = nw.s[i]
-            P11, P22, P21 = np.abs(S[0,0])**2, np.abs(S[1,1])**2, np.abs(S[1,0])**2
-            GUM = 10 * np.log10(P21 / (1 - P11) / (1 - P22)) if P11 < 1 and P22 < 1 else np.inf
             K = nw.stability[i]
             D = np.abs(S[0,0] * S[1,1] - S[0,1] * S[1,0])
             flag = '' if K > 1 and D < 1 else 'pu'
             data = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print("{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}".format(nw.f[i] / 1e6, data, GUM, K, D), flag)
+            print("{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}".format(
+                nw.f[i] / 1e6, data, db(gum(S)), K, D), flag)
 
 
 def main(*args):
