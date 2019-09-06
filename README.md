@@ -93,7 +93,7 @@ Display the result as the impedances of S11 and S22.
 
 ```
 $ cascade < 2n5179_5ma.s2p -z
-MHZ           Z11              Z22
+MHZ           ZIN             ZOUT
 0               139+0j           591+0j
 100       31.84-38.55j     22.13-100.9j
 200       27.94-11.17j     11.59-46.09j
