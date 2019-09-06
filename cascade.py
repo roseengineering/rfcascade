@@ -14,38 +14,45 @@ def z2g(Z, Z0=50):
 def g2z(G, Z0=50):
     return Z0 * (1 + G) / (1 - G)
 
-def gu(S):
-    S11 = S[0,0]
-    S22 = S[1,1]
-    S21 = S[1,0]
+def gum(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return np.abs(S21)**2 / ((1 - np.abs(S11)**2) * (1 - np.abs(S22)**2))
 
 def gui(S):
-    S11 = S[0,0]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return 1 / (1 - np.abs(S11)**2)
 
 def guo(S):
-    S22 = S[1,1]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return 1 / (1 - np.abs(S22)**2)
 
-def gmsg(S): # maximum stable gain, use with K<1
-    S21 = S[1,0]
-    S12 = S[0,1]
+def gmsg(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return np.abs(S21 / S12) if np.abs(S12) > 0 else np.inf
 
-def gufm(S):
-    S11 = S[0,0]
-    S12 = S[0,1]
-    S21 = S[1,0]
-    S22 = S[1,1]
+def gu(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     U = (S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)
     return 1 / np.abs(1 - U)**2
 
+def det(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    return S11 * S22 - S12 * S21
+
+def rollet(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    D = det(S)
+    K = (1 - np.abs(S11)**2 - np.abs(S22)**2 + np.abs(D)**2) / \
+        np.abs(2 * S12 * S21) if np.abs(S12 *S21) > 0 else np.inf
+    return K, np.abs(D)
+
+def mu(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    D = det(S)
+    return (1 - np.abs(S11)**2) / (np.abs(S22 - D * np.conj(S11)) + np.abs(S12 * S21))
+
 def s2abcd(S, Z0=50):
-    S11 = S[0,0]
-    S21 = S[1,0]
-    S12 = S[0,1]
-    S22 = S[1,1]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     den = 2 * S21
     A = ((1 + S11) *(1 - S22) + S12 * S21) / den
     B = Z0  * ((1 + S11) * (1 + S22) - S12 * S21) / den
@@ -74,10 +81,7 @@ def abcd2s(M, Z0=50):
 
 def tothreeport(S):
     S = np.array(S)
-    S11 = S[0,0]
-    S21 = S[1,0]
-    S12 = S[0,1]
-    S22 = S[1,1]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     D11 = 1 - S11 - S12
     D12 = 1 - S11 - S21
     D21 = 1 - S12 - S22
@@ -92,11 +96,8 @@ def tothreeport(S):
 def lift_ground(S, Z, Z0=50):
     S = tothreeport(S)
     G = z2g(Z, Z0)
-    S11 = S[0,0]
-    S21 = S[1,0]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     S31 = S[2,0]
-    S12 = S[0,1]
-    S22 = S[1,1]
     S32 = S[2,1]
     S13 = S[0,2]
     S23 = S[1,2]
@@ -108,11 +109,8 @@ def lift_ground(S, Z, Z0=50):
 
 def cbg_transform(S):    
     S = tothreeport(S)
-    S11 = S[0,0]
-    S21 = S[1,0]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     S31 = S[2,0]
-    S12 = S[0,1]
-    S22 = S[1,1]
     S32 = S[2,1]
     S13 = S[0,2]
     S23 = S[1,2]
@@ -124,11 +122,8 @@ def cbg_transform(S):
 
 def ccd_transform(S):
     S = tothreeport(S)
-    S11 = S[0,0]
-    S21 = S[1,0]
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     S31 = S[2,0]
-    S12 = S[0,1]
-    S22 = S[1,1]
     S32 = S[2,1]
     S13 = S[0,2]
     S23 = S[1,2]
@@ -144,8 +139,8 @@ def ccd_transform(S):
 def read_network(path=None):
     if path is None:
         buf = sys.stdin.read()
-        path = tempfile.mktemp() + ".s2p"
-        with open(path, "w") as f:
+        path = tempfile.mktemp() + '.s2p'
+        with open(path, 'w') as f:
             f.write(buf)
         nw = rf.Network(path)
         os.unlink(path)
@@ -157,7 +152,7 @@ def read_network(path=None):
     return nw
 
 def write_network(nw, mode):
-    polar = lambda x: "{:9.4g} {:7.2f}".format(np.abs(x), np.angle(x) * 180 / np.pi)
+    polar = lambda x: '{:9.4g} {:7.2f}'.format(np.abs(x), np.angle(x) * 180 / np.pi)
     if mode == 'a':
         print('MHZ            A                 B                 C                 D')
         for i in range(len(nw)):
@@ -166,14 +161,14 @@ def write_network(nw, mode):
             data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
             print('{:<5g}'.format(f), data)
     elif mode == 'g':
-        print('MHZ      GUM    GUI    GUO     gu   GMSG')
+        print('MHZ      GUM    GUI    GUO     gu   GMSG         K         D        mu')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
-            K = nw.stability[i]
-            # Gmsg = '{:6.2f}'.format(db(gmsg(S))) if K < 1 else '   -'
-            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}'.format(
-                  f, db(gu(S)), db(gui(S)), db(guo(S)), db(gufm(S)), db(gmsg(S))))
+            K, D = rollet(S)
+            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:9.4g} {:9.4g} {:9.4g}'.format(
+                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gu(S)), db(gmsg(S)), K, D, mu(S)
+            ))
     elif mode == 'z':
         print('MHZ           ZIN             ZOUT')
         for i in range(len(nw)):
@@ -189,11 +184,10 @@ def write_network(nw, mode):
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
-            K = nw.stability[i]
-            D = np.abs(S[0,0] * S[1,1] - S[0,1] * S[1,0])
+            K, D = rollet(S)
             flag = '' if K > 1 and D < 1 else 'pu'
             data = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print("{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}".format(f, data, db(gu(S)), K, D), flag)
+            print('{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}'.format(f, data, db(gum(S)), K, D), flag)
 
 
 def main(*args):
@@ -207,48 +201,48 @@ def main(*args):
         top = stack[-1] if stack else None
 
         if opt == '-n':
-            mode = "n"
+            mode = 'n'
         elif opt == '-a':
-            mode = "a"
+            mode = 'a'
         elif opt == '-z':
-            mode = "z"
+            mode = 'z'
         elif opt == '-g':
-            mode = "g"
+            mode = 'g'
         
-        elif opt == "-swap":
+        elif opt == '-swap':
             b = stack.pop()
             a = stack.pop()
             stack.append(b)
             stack.append(a)
-        elif opt == "-cascade":
+        elif opt == '-cascade':
             b = stack.pop()
             a = stack.pop()
             stack.append(a ** b)
-        elif opt == "-deembed":
+        elif opt == '-deembed':
             b = stack.pop()
             a = stack.pop()
             stack.append(a ** b.inv)
-        elif opt == "-ideembed":
+        elif opt == '-ideembed':
             b = stack.pop()
             a = stack.pop()
             stack.append(a.inv ** b)
 
-        elif opt == "-p":
+        elif opt == '-p':
             write_output(top, mode=mode)
-        elif opt == "-f":
+        elif opt == '-f':
             stack.append(read_network(args.pop(0)))
-        elif top and opt == "-series":
+        elif top and opt == '-series':
             S = abcd2s([[1, float(args.pop(0))], [0, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
-        elif top and opt == "-shunt":
+        elif top and opt == '-shunt':
             S = abcd2s([[1, 0], [1/float(args.pop(0)), 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
 
-        elif top and opt == "-cbg":
+        elif top and opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
-        elif top and opt == "-ccd":
+        elif top and opt == '-ccd':
             top.s = np.array([ ccd_transform(S) for S in top.s ])
-        elif top and opt == "-lift":
+        elif top and opt == '-lift':
             x = args.pop(0)
             top.s = np.array([ lift_ground(
                 top.s[i], 
@@ -262,7 +256,7 @@ def main(*args):
         write_network(stack[-1], mode=mode)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     np.seterr(divide='ignore')
     main(*sys.argv[1:])
 
