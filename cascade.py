@@ -14,16 +14,37 @@ def z2g(Z, Z0=50):
 def g2z(G, Z0=50):
     return Z0 * (1 + G) / (1 - G)
 
-def gum(S):
+def gu(S):
     S11 = S[0,0]
     S22 = S[1,1]
     S21 = S[1,0]
     return np.abs(S21)**2 / ((1 - np.abs(S11)**2) * (1 - np.abs(S22)**2))
 
-def s2abcd(S, Z0=50):
+def gui(S):
+    S11 = S[0,0]
+    return 1 / (1 - np.abs(S11)**2)
+
+def guo(S):
+    S22 = S[1,1]
+    return 1 / (1 - np.abs(S22)**2)
+
+def gmsg(S): # maximum stable gain, use with K<1
+    S21 = S[1,0]
+    S12 = S[0,1]
+    return np.abs(S21 / S12) if np.abs(S12) > 0 else np.inf
+
+def gufm(S):
     S11 = S[0,0]
     S12 = S[0,1]
     S21 = S[1,0]
+    S22 = S[1,1]
+    U = (S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)
+    return 1 / np.abs(1 - U)**2
+
+def s2abcd(S, Z0=50):
+    S11 = S[0,0]
+    S21 = S[1,0]
+    S12 = S[0,1]
     S22 = S[1,1]
     den = 2 * S21
     A = ((1 + S11) *(1 - S22) + S12 * S21) / den
@@ -130,8 +151,8 @@ def read_network(path=None):
         os.unlink(path)
     else:
         nw = rf.Network(path)
-    if nw.number_of_ports != 2 or not np.all(nw.z0 == 50):
-        print('Only two-port networks referenced to 50 ohms supported', file=sys.stderr)
+    if np.any(nw.z0 != 50):
+        print('Only networks referenced to 50 ohms supported', file=sys.stderr)
         sys.exit(1)
     return nw
 
@@ -140,26 +161,39 @@ def write_network(nw, mode):
     if mode == 'a':
         print('MHZ            A                 B                 C                 D')
         for i in range(len(nw)):
-            print('{:<5g}'.format(nw.f[i] / 1e6), ' '.join([ polar(x) for x in s2abcd(nw.s[i]).flatten() ]))
+            f = nw.f[i] / 1e6
+            S = nw.s[i]
+            data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
+            print('{:<5g}'.format(f), data)
+    elif mode == 'g':
+        print('MHZ      GUM    GUI    GUO     gu   GMSG')
+        for i in range(len(nw)):
+            f = nw.f[i] / 1e6
+            S = nw.s[i]
+            K = nw.stability[i]
+            # Gmsg = '{:6.2f}'.format(db(gmsg(S))) if K < 1 else '   -'
+            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}'.format(
+                  f, db(gu(S)), db(gui(S)), db(guo(S)), db(gufm(S)), db(gmsg(S))))
     elif mode == 'z':
         print('MHZ           ZIN             ZOUT')
         for i in range(len(nw)):
-            print('{:<5g} {:16.4g} {:16.4g}'.format(nw.f[i] / 1e6, g2z(nw.s[i][0,0]), g2z(nw.s[i][1,1])))
+            f = nw.f[i] / 1e6
+            S = nw.s[i]
+            print('{:<5g} {:16.4g} {:16.4g}'.format(f, g2z(S[0,0]), g2z(S[1,1])))
     elif mode == 'n':
-        nw.name = nw.name or 'stdout'
         print(nw.write_touchstone(form='ma', return_string=True))
     else:
         print('# MHZ S MA R 50')
         print('! MHZ         S11               S21               S12               S22       '
               '!   GUM         K         D')
         for i in range(len(nw)):
+            f = nw.f[i] / 1e6
             S = nw.s[i]
             K = nw.stability[i]
             D = np.abs(S[0,0] * S[1,1] - S[0,1] * S[1,0])
             flag = '' if K > 1 and D < 1 else 'pu'
             data = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print("{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}".format(
-                nw.f[i] / 1e6, data, db(gum(S)), K, D), flag)
+            print("{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}".format(f, data, db(gu(S)), K, D), flag)
 
 
 def main(*args):
@@ -178,6 +212,8 @@ def main(*args):
             mode = "a"
         elif opt == '-z':
             mode = "z"
+        elif opt == '-g':
+            mode = "g"
         
         elif opt == "-swap":
             b = stack.pop()
