@@ -51,7 +51,7 @@ The pu flag means potentially unstable.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p 
+$ < 2n5179_5ma.s2p cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.471    0.00      6.78  180.00         0    0.00     0.844    0.00 !  23.1       inf    0.3975 
@@ -72,7 +72,7 @@ Display the result as ABCD matrices.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -a
+$ < 2n5179_5ma.s2p cascade -a
 MHZ            A                 B                 C                 D
 0       0.01692 -180.00        10 -180.00 0.0001217 -180.00   0.07194 -180.00
 100     0.05534  -88.08     7.139 -166.65  0.001397  -51.43    0.1243 -120.34
@@ -92,7 +92,7 @@ Display the result as the impedances of S11 and S22.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -z
+$ < 2n5179_5ma.s2p cascade -z
 MHZ           ZIN             ZOUT
 0               139+0j           591+0j
 100       31.84-38.55j     22.13-100.9j
@@ -112,7 +112,7 @@ Shunt a 330 ohm resistor across the output of the two-port network.  This makes 
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -shunt 330 -cascade
+$ < 2n5179_5ma.s2p cascade -shunt 330 -cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.471    0.00     5.949  180.00         0    0.00     0.618    0.00 !  18.7       inf    0.2911 
@@ -133,7 +133,7 @@ Cascade a series 20 ohm resistor with the output of the two-port network.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -series 20 -cascade
+$ < 2n5179_5ma.s2p cascade -series 20 -cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.471    0.00     6.575  180.00         0    0.00    0.8487    0.00 !  23.0       inf    0.3997 
@@ -155,7 +155,7 @@ with a shunt 100 ohm resistor to stabilize the result.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -lift 10e-9 -shunt 100 -cascade
+$ < 2n5179_5ma.s2p cascade -lift 10e-9 -shunt 100 -cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.471    0.00     4.641  180.00 1.187e-18 -180.00    0.2621   -0.00 !  14.7 6.576e+16    0.1235 
@@ -176,7 +176,7 @@ Insert a one ohm resistor at the emitter to provide shunt feedback.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -lift 1+0j
+$ < 2n5179_5ma.s2p cascade -lift 1+0j
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.507   -0.00     6.308  180.00 0.0007679    0.00    0.8541   -0.00 !  23.0     21.18    0.4378 
@@ -197,7 +197,7 @@ Transform the common emitter s-parameter input into a common-base.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -cbg | tee cb.s2p
+$ < 2n5179_5ma.s2p cascade -cbg | tee cb.s2p
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0        0.6692  180.00      1.55   -0.00    0.0258    0.00    0.9649   -0.00 !  18.0     1.141    0.6858 
@@ -218,7 +218,7 @@ Create a cascode amplifier.  S12 is significantly reduced compared to a CE amp.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -f cb.s2p -cascade
+$ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.471    0.00     6.716  180.00         0    0.00    0.9865    0.00 !  33.3       inf    0.4646 
@@ -239,7 +239,7 @@ Stabilize the cascode amp with a 100 ohm resistor across the output.
 
 
 ```
-$ cascade < 2n5179_5ma.s2p -f cb.s2p -cascade -shunt 100 -cascade
+$ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade
 # MHZ S MA R 50
 ! MHZ         S11               S21               S12               S22       !   GUM         K         D
 0         0.471    0.00     4.487  180.00         0    0.00    0.3273    0.00 !  14.6       inf    0.1542 
