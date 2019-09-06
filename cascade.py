@@ -180,14 +180,14 @@ def write_network(nw, mode):
     else:
         print('# MHZ S MA R 50')
         print('! MHZ         S11               S21               S12               S22       '
-              '!   GUM         K         D')
+              '!   GUM         K        mu')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             K, D = rollet(S)
             flag = '' if K > 1 and D < 1 else 'pu'
             data = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print('{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}'.format(f, data, db(gum(S)), K, D), flag)
+            print('{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}'.format(f, data, db(gum(S)), K, mu(S)), flag)
 
 
 def main(*args):
