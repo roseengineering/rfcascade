@@ -14,11 +14,6 @@ def z2g(Z, Z0=50):
 def g2z(G, Z0=50):
     return Z0 * (1 + G) / (1 - G)
 
-def gmsg(S):
-    S21 = S[1,0]
-    S12 = S[0,1]
-    return np.abs(S21 / S12) if np.abs(S12) > 0 else np.inf
-
 def gum(S):
     S11 = S[0,0]
     S22 = S[1,1]
