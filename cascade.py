@@ -151,7 +151,7 @@ def write_network(nw, mode):
     else:
         print('# MHZ S MA R 50')
         print('! MHZ         S11               S21               S12               S22       '
-              '!     U         K         D')
+              '!   GUM         K         D')
         for i in range(len(nw)):
             S = nw.s[i]
             K = nw.stability[i]
