@@ -165,14 +165,14 @@ def write_network(nw, mode):
             data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
             print('{:<5g}'.format(f), data)
     elif mode == 'g':
-        print('MHZ      GUM    GUI    GUO     GU   GMSG   GMAG         K         D        MU')
+        print('MHZ      GUM    GUI    GUO   GMSG   GMAG     GU         K         D        MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             K, D = rollet(S)
             GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
-            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:s} {:9.4g} {:9.4g} {:9.4g}'.format(
-                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gu(S)), db(gmsg(S)), GMAG, K, D, mu(S)
+            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:s} {:6.2f} {:9.4g} {:9.4g} {:9.4g}'.format(
+                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gmsg(S)), GMAG, db(gu(S)), K, D, mu(S)
             ))
     elif mode == 'z':
         print('MHZ           ZIN             ZOUT')
