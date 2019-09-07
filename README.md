@@ -17,12 +17,12 @@ input transformations as command line options:
 -swap                : swap the top two networks on the stack
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
--lift <a+bj>         : lift network on top of stack from ground and insert an impedance; j required
+-lift <a+bj>         : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -p                   : print network on top of stack
--series <ohms>       : push a series resistor onto stack
--shunt <ohms>        : push a shunt resistor onto stack
--f <filename.s2p>    : push a network onto stack
+-series <ohms>       : push a series resistor onto the stack
+-shunt <ohms>        : push a shunt resistor onto the stack
+-f <filename>        : push a touchstone network onto the stack
 ```
 
 By default the utility writes out a touchstone file with 
@@ -35,6 +35,8 @@ also output the following alternative formats:
 -z  : output S11 and S22 as impedances
 -g  : output gain information
 ```
+
+Only 50 ohm networks are supported.
 
 Installation
 ------------
