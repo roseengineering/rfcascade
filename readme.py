@@ -71,7 +71,7 @@ Display the result as ABCD matrices.
 
 { run("< 2n5179_5ma.s2p cascade -a") }
 
-Summarize the network.
+Summarize the network.  GU is not in dB.
 
 { run("< 2n5179_5ma.s2p cascade -s") }
 
@@ -103,6 +103,10 @@ Create a cascode amplifier.  S12 is significantly reduced compared to a CE amp.
 Stabilize the cascode amp with a 100 ohm resistor across the output.
 
 { run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade") }
+
+Summarize the stabilized cascode amp.
+
+{ run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s") }
 """)
 
 os.unlink("cb.s2p")
