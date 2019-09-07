@@ -161,13 +161,13 @@ def write_network(nw, mode):
             data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
             print('{:<5g}'.format(f), data)
     elif mode == 'g':
-        print('MHZ      GUM    GUI    GUO     gu   GMSG         K         D        mu')
+        print('MHZ      GUM    GUI    GUO     gu   GMSG         K        MU         D')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             K, D = rollet(S)
             print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:9.4g} {:9.4g} {:9.4g}'.format(
-                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gu(S)), db(gmsg(S)), K, D, mu(S)
+                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gu(S)), db(gmsg(S)), K, mu(S), D
             ))
     elif mode == 'z':
         print('MHZ           ZIN             ZOUT')
@@ -180,14 +180,13 @@ def write_network(nw, mode):
     else:
         print('# MHZ S MA R 50')
         print('! MHZ         S11               S21               S12               S22       '
-              '!   GUM         K        mu')
+              '!   GUM         K        MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
-            K, D = rollet(S)
-            flag = '' if K > 1 and D < 1 else 'pu'
+            K, _ = rollet(S)
             data = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print('{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}'.format(f, data, db(gum(S)), K, mu(S)), flag)
+            print('{:<5g} {:s} ! {:5.1f} {:9.4g} {:9.4g}'.format(f, data, db(gum(S)), K, mu(S)))
 
 
 def main(*args):
