@@ -16,7 +16,7 @@ def g2z(G, Z0=50):
 
 def gmag(S):
     K, D = rollet(S)
-    return gmsg(S) * (K - np.sqrt(K**2 - 1)) if K < np.inf else gum(S)
+    return gmsg(S) * ((K - np.sqrt(K**2 - 1)) if K < np.inf else 0)
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
