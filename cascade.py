@@ -171,8 +171,9 @@ def write_network(nw, mode):
             S = nw.s[i]
             K, D = rollet(S)
             GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
-            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:s} {:6.2f} {:9.4g} {:9.4g} {:9.4g}'.format(
-                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gmsg(S)), GMAG, db(gu(S)), K, D, mu(S)
+            GU = '     -' if K < 1 else '{:6.2f}'.format(db(gu(S)))
+            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:s} {:s} {:9.4g} {:9.4g} {:9.4g}'.format(
+                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gmsg(S)), GMAG, GU, K, D, mu(S)
             ))
     elif mode == 'z':
         print('MHZ           ZIN             ZOUT')
