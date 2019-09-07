@@ -174,7 +174,7 @@ def write_network(nw, mode):
             S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
             K, D = rollet(S)
             GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
-            GU = '     -' if K < 1 else '{:6.2f}'.format(db(gu(S)))
+            GU = '     -' if K < 1 else '{:6.2f}'.format(gu(S))
             print('{:<5g} {:16.4g} {:16.4g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} '
                   '{:6.2f} {:s} {:s} {:9.4g} {:9.4g}'.format(
                   f, g2z(S11), g2z(S22), db(gum(S)), db(gui(S)), db(np.abs(S21)**2), 
