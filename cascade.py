@@ -165,7 +165,7 @@ def write_network(nw, mode):
             data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
             print('{:<5g}'.format(f), data)
     elif mode == 'g':
-        print('MHZ      GUM    GUI    GUO     gu   GMSG   GMAG         K         D        MU')
+        print('MHZ      GUM    GUI    GUO     GU   GMSG   GMAG         K         D        MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]

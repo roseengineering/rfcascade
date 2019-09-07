@@ -74,7 +74,7 @@ Show gain information about the transistor.
 
 ```
 $ < 2n5179_5ma.s2p cascade -g
-MHZ      GUM    GUI    GUO     gu   GMSG   GMAG         K         D        MU
+MHZ      GUM    GUI    GUO     GU   GMSG   GMAG         K         D        MU
 0      23.13   1.09   5.41   0.00    inf  23.13       inf    0.3975     1.185
 100    23.13   1.09   5.41   2.13  24.70      -    0.4623    0.2799    0.8889
 200    16.99   0.45   4.07   0.71  20.92  18.91     1.109    0.1542     1.021
