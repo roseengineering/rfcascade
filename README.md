@@ -33,6 +33,7 @@ also output the following alternative formats:
 -n  : output the result of write_touchstone() from scikit-rf 
 -a  : output the network as ABCD matrices
 -z  : output S11 and S22 as impedances
+-g  : output gain information
 ```
 
 Installation
@@ -47,7 +48,7 @@ $ sh test.sh       # to run unit tests
 Examples
 --------
 
-The pu flag means potentially unstable.
+Add GUM (dB), K and mu as comments to touchstone file.
 
 
 ```
