@@ -25,15 +25,14 @@ input transformations as command line options:
 -f <filename>        : push a touchstone network onto the stack
 ```
 
-By default the utility writes out a touchstone file with 
-GUM and Rollet stability information as comments.  It can
-also output the following alternative formats:
+By default the utility writes out the network on the top of
+the stack in touchstone format with GUM and Rollet stability information 
+as comments.  It can also output the network in following alternative formats:
 
 ```
--n  : output the result of write_touchstone() from scikit-rf 
--a  : output the network as ABCD matrices
--z  : output S11 and S22 as impedances
--g  : output gain information
+-n  : print the result of write_touchstone() from scikit-rf 
+-a  : display the network as ABCD matrices
+-s  : summarize the network in terms of impedances, stability and gain (dB) values
 ```
 
 Only 50 ohm networks are supported.
@@ -71,26 +70,6 @@ $ < 2n5179_5ma.s2p cascade
 ```
 
 
-Show gain information about the transistor.
-
-
-```
-$ < 2n5179_5ma.s2p cascade -g
-MHZ      GUM    GUI    GUO   GMSG   GMAG     GU         K         D        MU
-0      23.13   1.09   5.41    inf  23.13   0.00       inf    0.3975     1.185
-100    23.13   1.09   5.41  24.70      -      -    0.4623    0.2799    0.8889
-200    16.99   0.45   4.07  20.92  18.91   0.71     1.109    0.1542     1.021
-300    12.92   0.24   3.87  18.07  12.84  -0.33     1.819    0.2728     1.145
-400    10.54   0.13   3.68  15.88  10.49  -0.26     1.874    0.2371     1.157
-500     8.97   0.12   3.46  14.77   9.36   0.17     1.883    0.1073     1.147
-600     7.24   0.10   3.44  13.46   7.56   0.15     2.074   0.08789     1.164
-700     5.86   0.08   3.43  12.54   5.79  -0.17     2.469    0.1926     1.213
-800     5.00   0.06   3.50  11.08   5.12  -0.04     2.098    0.1526     1.174
-900     4.64   0.10   3.47  10.49   5.10   0.24     1.875   0.04344     1.142
-1000    3.52   0.13   3.58   9.65   3.73   0.04     2.083    0.1502     1.164
-```
-
-
 Display the result as ABCD matrices.
 
 
@@ -111,23 +90,23 @@ MHZ            A                 B                 C                 D
 ```
 
 
-Display the result as the impedances of S11 and S22.
+Summarize the network in terms of impedances and gain value.
 
 
 ```
-$ < 2n5179_5ma.s2p cascade -z
-MHZ           ZIN             ZOUT
-0               139+0j           591+0j
-100       31.84-38.55j     22.13-100.9j
-200       27.94-11.17j     11.59-46.09j
-300        32.15+6.35j     7.719-20.79j
-400       42.77+14.33j     6.952-1.284j
-500       58.49+16.36j     8.399+17.74j
-600       67.17-3.202j      12.9+41.79j
-700       52.52-13.95j      33.5+88.26j
-800       42.35-7.945j       279+129.4j
-900       36.78-1.205j     58.96-119.9j
-1000       40.1+11.98j     16.23-54.84j
+$ < 2n5179_5ma.s2p cascade -s
+MHZ           ZIN             ZOUT         GUM    GUI    GUO   GMSG   GMAG     GU         K         D        MU
+0               139+0j           591+0j  23.13   1.09   5.41    inf  23.13   0.00       inf    0.3975     1.185
+100       31.84-38.55j     22.13-100.9j  23.13   1.09   5.41  24.70      -      -    0.4623    0.2799    0.8889
+200       27.94-11.17j     11.59-46.09j  16.99   0.45   4.07  20.92  18.91   0.71     1.109    0.1542     1.021
+300        32.15+6.35j     7.719-20.79j  12.92   0.24   3.87  18.07  12.84  -0.33     1.819    0.2728     1.145
+400       42.77+14.33j     6.952-1.284j  10.54   0.13   3.68  15.88  10.49  -0.26     1.874    0.2371     1.157
+500       58.49+16.36j     8.399+17.74j   8.97   0.12   3.46  14.77   9.36   0.17     1.883    0.1073     1.147
+600       67.17-3.202j      12.9+41.79j   7.24   0.10   3.44  13.46   7.56   0.15     2.074   0.08789     1.164
+700       52.52-13.95j      33.5+88.26j   5.86   0.08   3.43  12.54   5.79  -0.17     2.469    0.1926     1.213
+800       42.35-7.945j       279+129.4j   5.00   0.06   3.50  11.08   5.12  -0.04     2.098    0.1526     1.174
+900       36.78-1.205j     58.96-119.9j   4.64   0.10   3.47  10.49   5.10   0.24     1.875   0.04344     1.142
+1000       40.1+11.98j     16.23-54.84j   3.52   0.13   3.58   9.65   3.73   0.04     2.083    0.1502     1.164
 ```
 
 

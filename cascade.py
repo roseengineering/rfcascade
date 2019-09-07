@@ -164,23 +164,21 @@ def write_network(nw, mode):
             S = nw.s[i]
             data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
             print('{:<5g}'.format(f), data)
-    elif mode == 'g':
-        print('MHZ      GUM    GUI    GUO   GMSG   GMAG     GU         K         D        MU')
+    elif mode == 's':
+        print('MHZ           ZIN             ZOUT'
+              '         GUM    GUI    GUO   GMSG   GMAG     GU'
+              '         K         D        MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             K, D = rollet(S)
             GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
             GU = '     -' if K < 1 else '{:6.2f}'.format(db(gu(S)))
-            print('{:<5g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:s} {:s} {:9.4g} {:9.4g} {:9.4g}'.format(
-                  f, db(gum(S)), db(gui(S)), db(guo(S)), db(gmsg(S)), GMAG, GU, K, D, mu(S)
+            print('{:<5g} {:16.4g} {:16.4g} {:6.2f} {:6.2f} {:6.2f} '
+                  '{:6.2f} {:s} {:s} {:9.4g} {:9.4g} {:9.4g}'.format(
+                  f, g2z(S[0,0]), g2z(S[1,1]), db(gum(S)), db(gui(S)), db(guo(S)), 
+                  db(gmsg(S)), GMAG, GU, K, D, mu(S)
             ))
-    elif mode == 'z':
-        print('MHZ           ZIN             ZOUT')
-        for i in range(len(nw)):
-            f = nw.f[i] / 1e6
-            S = nw.s[i]
-            print('{:<5g} {:16.4g} {:16.4g}'.format(f, g2z(S[0,0]), g2z(S[1,1])))
     elif mode == 'n':
         print(nw.write_touchstone(form='ma', return_string=True))
     else:
@@ -209,10 +207,8 @@ def main(*args):
             mode = 'n'
         elif opt == '-a':
             mode = 'a'
-        elif opt == '-z':
-            mode = 'z'
-        elif opt == '-g':
-            mode = 'g'
+        elif opt == '-s':
+            mode = 's'
         
         elif opt == '-swap':
             b = stack.pop()
