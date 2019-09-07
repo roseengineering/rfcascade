@@ -167,7 +167,7 @@ def write_network(nw, mode):
     elif mode == 's':
         print('MHZ           ZIN             ZOUT'
               '         GUM    GUI    GUO   GMSG   GMAG     GU'
-              '         K         D        MU')
+              '         K        MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
@@ -175,9 +175,9 @@ def write_network(nw, mode):
             GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
             GU = '     -' if K < 1 else '{:6.2f}'.format(db(gu(S)))
             print('{:<5g} {:16.4g} {:16.4g} {:6.2f} {:6.2f} {:6.2f} '
-                  '{:6.2f} {:s} {:s} {:9.4g} {:9.4g} {:9.4g}'.format(
+                  '{:6.2f} {:s} {:s} {:9.4g} {:9.4g}'.format(
                   f, g2z(S[0,0]), g2z(S[1,1]), db(gum(S)), db(gui(S)), db(guo(S)), 
-                  db(gmsg(S)), GMAG, GU, K, D, mu(S)
+                  db(gmsg(S)), GMAG, GU, K, mu(S)
             ))
     elif mode == 'n':
         print(nw.write_touchstone(form='ma', return_string=True))
