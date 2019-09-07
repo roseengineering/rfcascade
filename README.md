@@ -90,7 +90,7 @@ MHZ            A                 B                 C                 D
 ```
 
 
-Summarize the network in terms of impedances and gain value.
+Summarize the network.
 
 
 ```

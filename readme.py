@@ -71,7 +71,7 @@ Display the result as ABCD matrices.
 
 { run("< 2n5179_5ma.s2p cascade -a") }
 
-Summarize the network in terms of impedances and gain value.
+Summarize the network.
 
 { run("< 2n5179_5ma.s2p cascade -s") }
 
