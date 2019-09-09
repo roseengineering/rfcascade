@@ -241,7 +241,7 @@ def main(*args):
 
     while args:
         opt = args.pop(0)
-        top = stack[-1] if stack else None
+        top = stack[-1]
 
         if opt == '-n':
             mode = 'n'
