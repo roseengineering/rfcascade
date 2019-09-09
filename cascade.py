@@ -6,7 +6,7 @@ import sys, tempfile, os
 
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    if rollet(S)[0] < 1: raise ValueError('Simultaneous conjugate match does not exist')
+    if rollet(S)[0] < 1: return np.nan, np.nan
     D = det(S)
     B1 = 1 + np.abs(S11)**2 - np.abs(S22)**2 - np.abs(D)**2;
     B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
@@ -207,7 +207,7 @@ def write_network(nw, mode, match):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             K, D = rollet(S)
-            ZS, ZL = match.split(',')
+            ZS, ZL = (match + ',').split(',')[:2]
             if ZS and ZL:
                 ZS, ZL = complex(ZS), complex(ZL)
             elif ZS:
