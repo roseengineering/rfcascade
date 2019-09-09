@@ -4,9 +4,25 @@ import numpy as np
 import skrf as rf 
 import sys, tempfile, os
 
+def smatch(S):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    if rollet(S)[0] < 1: raise ValueError('Simultaneous conjugate match does not exist')
+    D = det(S)
+    B1 = 1 + np.abs(S11)**2 - np.abs(S22)**2 - np.abs(D)**2;
+    B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
+    C1 = S11 - D * np.conj(S22)
+    C2 = S22 - D * np.conj(S11)
+    GS = (B1 - np.sign(B1) * np.sqrt(B1**2 - 4 * np.abs(C1)**2)) / (2 * C1)
+    GL = (B2 - np.sign(B2) * np.sqrt(B2**2 - 4 * np.abs(C2)**2)) / (2 * C2)
+    return GS, GL
 
-def db(x):
-    return 10 * np.log10(x) if x > 0 else np.nan
+def gin(S, GL):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    return S11 + S12 * S21 * GL / (1 - S22 * GL)
+
+def gout(S, GS):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    return S22 + S12 * S21 * GS / (1 - S11 * GS)
 
 def z2g(Z, Z0=50):
     return (Z - Z0) / (Z + Z0)
@@ -140,6 +156,9 @@ def ccd_transform(S):
 
 ##########################
 
+def db(x):
+    return 10 * np.log10(x) if x > 0 else np.nan
+
 def read_network(path=None):
     if path is None:
         buf = sys.stdin.read()
@@ -155,15 +174,15 @@ def read_network(path=None):
         sys.exit(1)
     return nw
 
-def write_network(nw, mode):
+def write_network(nw, mode, match):
     polar = lambda x: '{:9.4g} {:7.2f}'.format(np.abs(x), np.angle(x) * 180 / np.pi)
     if mode == 'a':
         print('MHZ            A                 B                 C                 D')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
-            data = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
-            print('{:<5g}'.format(f), data)
+            buf = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
+            print('{:<5g}'.format(f), buf)
     elif mode == 's':
         print('MHZ          ZIN           ZOUT'
               '        GUM    GUI    S21    GUO   GMSG   GMAG     GU'
@@ -182,6 +201,25 @@ def write_network(nw, mode):
             ))
     elif mode == 'n':
         print(nw.write_touchstone(form='ma', return_string=True))
+    elif mode == 'm':
+        print('MHZ          ZS             ZL')
+        for i in range(len(nw)):
+            f = nw.f[i] / 1e6
+            S = nw.s[i]
+            K, D = rollet(S)
+            ZS, ZL = match.split(',')
+            if ZS and ZL:
+                ZS, ZL = complex(ZS), complex(ZL)
+            elif ZS:
+                ZS = complex(ZS)
+                ZL = g2z(gout(S, z2g(ZS)))
+            elif ZL:
+                ZL = complex(ZL)
+                ZS = g2z(gin(S, z2g(ZL)))
+            else:
+                GS, GL = smatch(S)
+                ZS, ZL = g2z(GS), g2z(GL)
+            print('{:<5g} {:14.4g} {:14.4g}'.format(f, ZS, ZL))
     else:
         print('# MHZ S MA R 50')
         print('! MHZ         S11               S21               S12               S22       '
@@ -190,13 +228,14 @@ def write_network(nw, mode):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             K, D = rollet(S)
-            data = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print('{:<5g} {:s} ! {:5.1f} {:8.4g} {:8.4g}'.format(f, data, db(gum(S)), K, mu(S)))
+            buf = ' '.join([ polar(x) for x in S.T.flatten() ])
+            print('{:<5g} {:s} ! {:5.1f} {:8.4g} {:8.4g}'.format(f, buf, db(gum(S)), K, mu(S)))
 
 
 def main(*args):
     args = list(args)
     mode = None
+    match = None
     stack = []
     stack.append(read_network())
 
@@ -210,7 +249,10 @@ def main(*args):
             mode = 'a'
         elif opt == '-s':
             mode = 's'
-        
+        elif opt == '-match':
+            match = args.pop(0).strip()
+            mode = 'm'
+
         elif opt == '-swap':
             b = stack.pop()
             a = stack.pop()
@@ -255,7 +297,7 @@ def main(*args):
             sys.exit(1)
 
     if stack: 
-        write_network(stack[-1], mode=mode)
+        write_network(stack[-1], mode=mode, match=match)
 
 
 if __name__ == '__main__':
