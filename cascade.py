@@ -175,17 +175,17 @@ def read_network(path=None):
     return nw
 
 def write_network(nw, mode, match):
-    polar = lambda x: '{:9.4g} {:7.2f}'.format(np.abs(x), np.angle(x) * 180 / np.pi)
+    polar = lambda x: '{:10.4g} {:7.2f}'.format(np.abs(x), np.angle(x) * 180 / np.pi)
     if mode == 'a':
-        print('MHZ            A                 B                 C                 D')
+        print('MHZ             A                  B                  C                  D')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
             S = nw.s[i]
             buf = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
             print('{:<5g}'.format(f), buf)
     elif mode == 's':
-        print('MHZ          ZIN           ZOUT'
-              '        GUM    GUI    S21    GUO   GMSG   GMAG     GU'
+        print('MHZ           ZIN             ZOUT '
+              '        GUI    S21    GUO    GUM   GMSG   GMAG     GU'
               '        K       MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
@@ -194,10 +194,11 @@ def write_network(nw, mode, match):
             K, D = rollet(S)
             GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
             GU = '     -' if K < 1 else '{:6.2f}'.format(gu(S))
-            print('{:<5g} {:14.4g} {:14.4g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} '
+            print('{:<5g} {:16.4g} {:16.4g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} '
                   '{:6.2f} {:s} {:s} {:8.4g} {:8.4g}'.format(
-                  f, g2z(S11), g2z(S22), db(gum(S)), db(gui(S)), db(np.abs(S21)**2), 
-                  db(guo(S)), db(gmsg(S)), GMAG, GU, K, mu(S)
+                  f, g2z(S11), g2z(S22), 
+                  db(gui(S)), db(np.abs(S21)**2), db(guo(S)), 
+                  db(gum(S)), db(gmsg(S)), GMAG, GU, K, mu(S)
             ))
     elif mode == 'n':
         print(nw.write_touchstone(form='ma', return_string=True))
@@ -222,7 +223,7 @@ def write_network(nw, mode, match):
             print('{:<5g} {:14.4g} {:14.4g}'.format(f, ZS, ZL))
     else:
         print('# MHZ S MA R 50')
-        print('! MHZ         S11               S21               S12               S22       '
+        print('! MHZ           S11                S21                S12                S22      '
               '!   GUM        K       MU')
         for i in range(len(nw)):
             f = nw.f[i] / 1e6
