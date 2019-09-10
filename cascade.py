@@ -153,8 +153,44 @@ def ccd_transform(S):
        [ S31-S32*S21/(1+S22), S33-S32*S23/(1+S22) ]
     ])
 
+############################
+
+def to_halfpi(rin, za):
+    """
+    RIN <---+---Z---< ZA
+            Y
+    RIN > ZA.real
+    """
+    ra, xa = za.real, za.imag
+    xd = np.sqrt(ra * (rin - ra))
+    if np.iscomplex(xd): raise ValueError
+    x2 = np.array([-xa - xd, -xa + xd])
+    x1 = -(ra**2 + (x2 + xa)**2) / (x2 + xa)
+    return np.transpose([x1 * 1j, x2 * 1j]).tolist()
+
+def to_halftee(rin, za):
+    """
+    RIN <---Z---+---<  ZA
+                Y
+    RIN < ZA.real
+    """
+    ra, xa = za.real, za.imag
+    xd = np.sqrt(rin * ra * (ra**2 + xa**2 - rin * ra))
+    if np.iscomplex(xd): raise ValueError
+    x2 = np.array([(-rin * xa + xd) / (rin - ra),
+                   (-rin * xa - xd) / (rin - ra)])
+    x1 = -x2 * (ra**2 + xa * (x2 + xa)) / (ra**2 + (x2 + xa)**2)
+    return np.transpose([x1 * 1j, x2 * 1j]).tolist()
+
+def component(impedance, fd):
+    w = 2 * np.pi * fd
+    x = impedance.imag
+    return 1 / (w * x) if x < 0 else x / w
 
 ##########################
+
+def polar(x): 
+    return '{:10.4g} {:7.2f}'.format(np.abs(x), np.angle(x) * 180 / np.pi)
 
 def db(x):
     return 10 * np.log10(x) if x > 0 else np.nan
@@ -174,63 +210,91 @@ def read_network(path=None):
         sys.exit(1)
     return nw
 
+def write_abcd(nw):
+    print('MHZ             A                  B                  C                  D')
+    for i in range(len(nw)):
+        f = nw.f[i] / 1e6
+        S = nw.s[i]
+        buf = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
+        print('{:<5g}'.format(f), buf)
+
+def write_summary(nw):
+    print('MHZ           ZIN             ZOUT '
+          '        GUI    S21    GUO    GUM   GMSG   GMAG     GU'
+          '        K       MU')
+    for i in range(len(nw)):
+        f = nw.f[i] / 1e6
+        S = nw.s[i]
+        S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+        K, D = rollet(S)
+        GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
+        GU = '     -' if K < 1 else '{:6.2f}'.format(gu(S))
+        print('{:<5g} {:16.4g} {:16.4g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} '
+            '{:6.2f} {:s} {:s} {:8.4g} {:8.4g}'.format(
+            f, g2z(S11), g2z(S22), 
+            db(gui(S)), db(np.abs(S21)**2), db(guo(S)), 
+            db(gum(S)), db(gmsg(S)), GMAG, GU, K, mu(S)))
+
+def write_sparam(nw):
+    print('# MHZ S MA R 50')
+    print('! MHZ           S11                S21                S12                S22      '
+          '!   GUM        K       MU')
+    for i in range(len(nw)):
+        f = nw.f[i] / 1e6
+        S = nw.s[i]
+        K, D = rollet(S)
+        buf = ' '.join([ polar(x) for x in S.T.flatten() ])
+        print('{:<5g} {:s} ! {:5.1f} {:8.4g} {:8.4g}'.format(f, buf, db(gum(S)), K, mu(S)))
+
+def write_match(nw, match, Z0=50):
+    print('MHZ          ZS             ZL')
+    for i in range(len(nw)):
+        f = nw.f[i] / 1e6
+        S = nw.s[i]
+        K, D = rollet(S)
+        ZS, ZL = (match + ',').split(',')[:2]
+        if ZS and ZL:
+            ZS, ZL = complex(ZS), complex(ZL)
+        elif ZS:
+            ZS = complex(ZS)
+            ZL = g2z(gout(S, z2g(ZS)))
+        elif ZL:
+            ZL = complex(ZL)
+            ZS = g2z(gin(S, z2g(ZL)))
+        else:
+            GS, GL = smatch(S)
+            ZS, ZL = g2z(GS), g2z(GL)
+       
+        ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
+        if Z0 < np.abs(ZIN):
+            res = to_halftee(Z0, ZIN)
+            print('ht ', end='') 
+        else:
+            res = to_halfpi(Z0, ZIN)
+            print('hp ', end='') 
+        print(component(res[0][0], 2e9), component(res[0][1], 2e9))
+        print(component(res[1][0], 2e9), component(res[1][1], 2e9))
+        if Z0 < np.abs(ZOUT):
+            res = to_halftee(Z0, ZOUT) 
+            print('ht ', end='') 
+        else:
+            res = to_halfpi(Z0, ZOUT)
+            print('hp ', end='') 
+        print(component(res[0][0], 2e9), component(res[0][1], 2e9))
+        print(component(res[1][0], 2e9), component(res[1][1], 2e9))
+        print('{:<5g} {:14.4g} {:14.4g}'.format(f, ZS, ZL))
+
 def write_network(nw, mode, match):
-    polar = lambda x: '{:10.4g} {:7.2f}'.format(np.abs(x), np.angle(x) * 180 / np.pi)
-    if mode == 'a':
-        print('MHZ             A                  B                  C                  D')
-        for i in range(len(nw)):
-            f = nw.f[i] / 1e6
-            S = nw.s[i]
-            buf = ' '.join([ polar(x) for x in s2abcd(S).flatten() ])
-            print('{:<5g}'.format(f), buf)
+    if mode == 'a': 
+        write_abcd(nw)
     elif mode == 's':
-        print('MHZ           ZIN             ZOUT '
-              '        GUI    S21    GUO    GUM   GMSG   GMAG     GU'
-              '        K       MU')
-        for i in range(len(nw)):
-            f = nw.f[i] / 1e6
-            S = nw.s[i]
-            S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-            K, D = rollet(S)
-            GMAG = '     -' if K < 1 else '{:6.2f}'.format(db(gmag(S)))
-            GU = '     -' if K < 1 else '{:6.2f}'.format(gu(S))
-            print('{:<5g} {:16.4g} {:16.4g} {:6.2f} {:6.2f} {:6.2f} {:6.2f} '
-                  '{:6.2f} {:s} {:s} {:8.4g} {:8.4g}'.format(
-                  f, g2z(S11), g2z(S22), 
-                  db(gui(S)), db(np.abs(S21)**2), db(guo(S)), 
-                  db(gum(S)), db(gmsg(S)), GMAG, GU, K, mu(S)
-            ))
+        write_summary(nw)
     elif mode == 'n':
         print(nw.write_touchstone(form='ma', return_string=True))
     elif mode == 'm':
-        print('MHZ          ZS             ZL')
-        for i in range(len(nw)):
-            f = nw.f[i] / 1e6
-            S = nw.s[i]
-            K, D = rollet(S)
-            ZS, ZL = (match + ',').split(',')[:2]
-            if ZS and ZL:
-                ZS, ZL = complex(ZS), complex(ZL)
-            elif ZS:
-                ZS = complex(ZS)
-                ZL = g2z(gout(S, z2g(ZS)))
-            elif ZL:
-                ZL = complex(ZL)
-                ZS = g2z(gin(S, z2g(ZL)))
-            else:
-                GS, GL = smatch(S)
-                ZS, ZL = g2z(GS), g2z(GL)
-            print('{:<5g} {:14.4g} {:14.4g}'.format(f, ZS, ZL))
+        write_match(nw, match)
     else:
-        print('# MHZ S MA R 50')
-        print('! MHZ           S11                S21                S12                S22      '
-              '!   GUM        K       MU')
-        for i in range(len(nw)):
-            f = nw.f[i] / 1e6
-            S = nw.s[i]
-            K, D = rollet(S)
-            buf = ' '.join([ polar(x) for x in S.T.flatten() ])
-            print('{:<5g} {:s} ! {:5.1f} {:8.4g} {:8.4g}'.format(f, buf, db(gum(S)), K, mu(S)))
+        write_sparam(nw)
 
 
 def main(*args):

@@ -1,2 +1,3 @@
 makefile
-example*
+example*.s2p
+notes.txt
