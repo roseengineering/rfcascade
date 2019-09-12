@@ -20,9 +20,9 @@ def to_stub1(za, zo=50, shorted=True): # match with a stub-series input
     else:
         bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
     d = np.mod([ bd, bl ], np.pi)
-    d = np.rad2deg(d)
-    # d = d / (2 * np.pi)
-    return np.transpose(d)
+    # d = np.rad2deg(d)
+    d = d / (2 * np.pi)
+    return d.T
 
 
 def to_qwt2(za, zo=50, shorted=True):
@@ -38,8 +38,10 @@ def to_qwt2(za, zo=50, shorted=True):
     """
     ya = 1 / za
     gl, bl = ya.real, ya.imag
-    z1 = np.sqrt(zo / gl)
-    z2 = 1 / bl
+    l2 = np.array([ 45, 135 ]) / 360
+    z1 = np.sqrt(zo / gl) * np.array([1, 1])
+    z2 = 1 / bl * np.array([1, -1]) * (1 if shorted else -1)
+    return np.array([ l2, z1, z2 ]).T
     if shorted:
         return [[ 45, z1, z2 ],
                 [ 135, z1, -z2 ]]
@@ -60,7 +62,7 @@ def lmatch(ZS, ZL, reverse=False):
     Q = np.sqrt(QS)
     X1 = (XS + np.array([1, -1]) * Q * RS) / (RS / RL - 1)
     X2 = -(XL + np.array([1, -1]) * Q * RL)
-    return np.transpose([X1, X2])
+    return np.array([X1, X2]).T
 
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
