@@ -302,40 +302,48 @@ def write_summary(nw):
         print(fm('F', f / 1e6), fm('ccddddddfgg', g2z(S11), g2z(S22), gui(S), 
               np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, mu(S)))
 
+def matching(S, GS, GL):
+    if not GS and not GL:
+        GS, GL = smatch(S)
+    elif GS:
+        GL = np.conj(gout(S, GS))
+    elif GL:
+        GS = np.conj(gin(S, GL))
+    ZS, ZL = g2z(GS), g2z(GL)
+    ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
+    return ZS, ZL, ZIN, ZOUT
+
 def write_match(nw, data):
-    print('MHZ          50 |--            50 --|             ZS              ZIN              ZOUT              ZL              |--- 50           ---| 50')
+    print('MHZ          50 |--            50 --|             ZS            ZL              |--- 50           ---| 50')
     for i in range(len(nw)):
         f = nw.f[i]
-        S = nw.s[i]
-
-        GS, GL = data.get('gs'), data.get('gl')
-        if not GS and not GL:
-            GS, GL = smatch(S)
-        elif GS:
-            GL = np.conj(gout(S, GS))
-        elif GL:
-            GS = np.conj(gin(S, GL))
-        ZS, ZL = g2z(GS), g2z(GL)
-        ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
-
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6), 
                 fm('xx', *lmatch(50, ZIN)[i], f=f), 
                 fm('xx', *lmatch(50, ZIN, 'r')[i], f=f), 
-                fm('cccc', ZS, ZIN, ZOUT, ZL),
+                fm('cc', ZS, ZL),
                 fm('xx', *lmatch(ZOUT, 50)[i], f=f),
                 fm('xx', *lmatch(ZOUT, 50, 'r')[i], f=f))
 
+    print('MHZ          50 |--        ZS            ZL          ---| 50')
+    for i in range(len(nw)):
+        f = nw.f[i]
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6),
-                fm('gg', *to_stub1(ZIN, shorted=False)[i]), '                 ',
-                fm('cccc', ZS, ZIN, ZOUT, ZL), '                 ',
+                fm('gg', *to_stub1(ZIN, shorted=False)[i]),
+                fm('cc', ZS, ZL),
                 fm('gg', *to_stub1(ZOUT, shorted=False)[i][::-1]))
 
+    print('MHZ          50 --|             ZS               ZL              |--- 50')
+    for i in range(len(nw)):
+        f = nw.f[i]
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
-            print(fm('F', f / 1e6), '        ',
+            print(fm('F', f / 1e6),
                 fm('ggg', *to_qwt2(ZIN, shorted=False)[i]),
-                fm('cccc', ZS, ZIN, ZOUT, ZL),
+                fm('cc', ZS, ZL),
                 fm('ggg', *to_qwt2(ZOUT, shorted=False)[i][::-1]))
 
 
