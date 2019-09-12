@@ -48,11 +48,12 @@ the stack in touchstone format with GUM and Rollet stability information
 as comments.  It can also output the network in following alternative formats:
 
 ```
--a      : display the network as ABCD matrices
--s      : summarize the network in terms of impedances, stability and gain (dB) values
--lmatch : match using l-section networks
--stub   : match using single-stub networks with open shunt stubs
--qwt2   : match using quarter wavelength networks with open shunt stubs
+-a           : display the network as ABCD matrices
+-s           : summarize the network in terms of impedances, stability and gain (dB) values
+-lmatch      : match with l-section networks
+-stub        : match with single open shunt stub network
+-qwt         : match with quarter wavelength and open shunt stub
+-qwtz <ohms> : match with quarter wavelength and open shunt stub of given impedance
 ```
 
 Only 50 ohm networks are supported.
