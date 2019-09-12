@@ -33,21 +33,14 @@ def to_qwt2(za, zo=50, shorted=True):
                      L1=1/4   |  |
                               |z2| L2=1/8 shorted or
                               |__|    3/8 opened
-    Z2 > 0, use 1/8 shorted, or, 3/8 opened (Ystub = -jY2)
-    Z2 < 0, use 3/8 shorted, or, 1/8 opened (Ystub =  jY2)
     """
     ya = 1 / za
     gl, bl = ya.real, ya.imag
     l2 = np.array([ 45, 135 ]) / 360
     z1 = np.sqrt(zo / gl) * np.array([1, 1])
     z2 = 1 / bl * np.array([1, -1]) * (1 if shorted else -1)
-    return np.array([ l2, z1, z2 ]).T
-    if shorted:
-        return [[ 45, z1, z2 ],
-                [ 135, z1, -z2 ]]
-    else:
-        return [[ 45, z1, -z2 ],
-                [ 135, z1, z2 ]]
+    d = np.array([ z1, z2, l2 ]).T
+    return d[1] if z2[0] < 0 else d[0]
 
 def lmatch(ZS, ZL, reverse=False):
     """
@@ -255,8 +248,12 @@ def write_network(nw, data):
         write_abcd(nw)
     elif mode == 's':
         write_summary(nw)
-    elif mode == 'm':
-        write_match(nw, data)
+    elif mode == 'stub':
+        write_stub(nw, data)
+    elif mode == 'lmatch':
+        write_lmatch(nw, data)
+    elif mode == 'qwt2':
+        write_qwt2(nw, data)
     else:
         write_sparam(nw)
 
@@ -311,42 +308,42 @@ def matching(S, GS, GL):
         GL = np.conj(gout(S, GS))
     elif GL:
         GS = np.conj(gin(S, GL))
-    ZS, ZL = g2z(GS), g2z(GL)
-    ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
-    return ZS, ZL, ZIN, ZOUT
+    return g2z(GS), g2z(GL)
 
-def write_match(nw, data):
-    print('MHZ          50 |--            50 --|             ZS            ZL              |--- 50           ---| 50')
+def write_lmatch(nw, data):
+    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT         ZS               ZL          SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6), 
-                fm('xx', *lmatch(50, ZIN)[i], f=f), 
-                fm('xx', *lmatch(50, ZIN, 'r')[i], f=f), 
-                fm('cc', ZS, ZL),
-                fm('xx', *lmatch(ZOUT, 50)[i], f=f),
-                fm('xx', *lmatch(ZOUT, 50, 'r')[i], f=f))
+                  fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
+                  fm('xx', *lmatch(50, np.conj(ZS), 'r')[i], f=f), 
+                  fm('cc', ZS, ZL),
+                  fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
+                  fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
-    print('MHZ          50 |--        ZS            ZL          ---| 50')
+def write_stub(nw, data):
+    print('MHZ     LSHUNT  LSERIES         ZS               ZL        LSERIES   LSHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6),
-                fm('gg', *to_stub1(ZIN, shorted=False)[i]),
-                fm('cc', ZS, ZL),
-                fm('gg', *to_stub1(ZOUT, shorted=False)[i][::-1]))
+                  fm('gg', *to_stub1(np.conj(ZS), shorted=False)[i]),
+                  fm('cc', ZS, ZL),
+                  fm('gg', *to_stub1(np.conj(ZL), shorted=False)[i][::-1]))
 
-    print('MHZ          50 --|             ZS               ZL              |--- 50')
+def write_qwt2(nw, data):
+    GS, GL = data.get('gs'), data.get('gl')
+    print('MHZ    ZSERIES   ZSHUNT   LSHUNT         ZS               ZL         LSHUNT   ZSHUNT  ZSERIES')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        for i in range(2):
-            print(fm('F', f / 1e6),
-                fm('ggg', *to_qwt2(ZIN, shorted=False)[i]),
-                fm('cc', ZS, ZL),
-                fm('ggg', *to_qwt2(ZOUT, shorted=False)[i][::-1]))
+        ZS, ZL = matching(nw.s[i], GS, GL)
+        print(fm('F', f / 1e6),
+              fm('ggg', *to_qwt2(np.conj(ZS), shorted=False)),
+              fm('cc', ZS, ZL),
+              fm('ggg', *to_qwt2(np.conj(ZL), shorted=False)[::-1]))
 
 
 def main(*args):
@@ -363,8 +360,12 @@ def main(*args):
             data['mode'] = 'a'
         elif opt == '-s':
             data['mode'] = 's'
-        elif opt == '-m':
-            data['mode'] = 'm'
+        elif opt == '-stub':
+            data['mode'] = 'stub'
+        elif opt == '-lmatch':
+            data['mode'] = 'lmatch'
+        elif opt == '-qwt2':
+            data['mode'] = 'qwt2'
 
         elif opt == '-swap':
             b = stack.pop()
