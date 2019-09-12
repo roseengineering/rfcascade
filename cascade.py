@@ -170,20 +170,7 @@ def ccd_transform(S):
        [ S31-S32*S21/(1+S22), S33-S32*S23/(1+S22) ]
     ])
 
-############################
-# ZS, ZL = (match + ',').split(',')[:2]
-# if ZS and ZL:
-#     ZS, ZL = complex(ZS), complex(ZL)
-# elif ZS:
-#     ZS = complex(ZS)
-#     ZL = g2z(gout(S, z2g(ZS)))
-# elif ZL:
-#     ZL = complex(ZL)
-#     ZS = g2z(gin(S, z2g(ZL)))
-# else:
-# ZS <---+---X2--< ZL
-#       X1   
-
+###
 
 def notation(x, precision=5):
     UNITS = 'FH'
@@ -223,7 +210,13 @@ def write_match(nw, data):
         f = nw.f[i]
         S = nw.s[i]
 
-        GS, GL = smatch(S)
+        GS, GL = data.get('gs'), data.get('gl')
+        if not GS and not GL:
+            GS, GL = smatch(S)
+        elif GS:
+            GL = np.conj(gout(S, GS))
+        elif GL:
+            GS = np.conj(gin(S, GL))
         ZS, ZL = g2z(GS), g2z(GL)
         ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
 
@@ -329,6 +322,15 @@ def main(*args):
             b = stack.pop()
             a = stack.pop()
             stack.append(a.inv ** b)
+
+        elif opt == '-zs':
+            data['gs'] = z2g(complex(args.pop(0)))
+        elif opt == '-zl':
+            data['gl'] = z2g(complex(args.pop(0)))
+        elif opt == '-gs':
+            data['gs'] = complex(args.pop(0))
+        elif opt == '-gl':
+            data['gl'] = complex(args.pop(0))
 
         elif opt == '-p':
             write_output(top, mode=mode)
