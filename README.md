@@ -17,12 +17,16 @@ input transformations as command line options:
 -swap                : swap the top two networks on the stack
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
--lift <a+bj>         : lift network on top of stack from ground and insert an impedance, j required
+-lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -p                   : print network on top of stack
 -series <ohms>       : push a series resistor onto the stack
 -shunt <ohms>        : push a shunt resistor onto the stack
 -f <filename>        : push a touchstone network onto the stack
+-gs <complex>        : set the source gamma for matching
+-zs <complex>        : set the source impedance for matching
+-gl <complex>        : set the load gamma for matching
+-zl <complex>        : set the load impedance for matching
 ```
 
 By default the utility writes out the network on the top of
@@ -30,9 +34,11 @@ the stack in touchstone format with GUM and Rollet stability information
 as comments.  It can also output the network in following alternative formats:
 
 ```
--n  : print the result of write_touchstone() from scikit-rf 
--a  : display the network as ABCD matrices
--s  : summarize the network in terms of impedances, stability and gain (dB) values
+-a      : display the network as ABCD matrices
+-s      : summarize the network in terms of impedances, stability and gain (dB) values
+-lmatch : match using l-section networks
+-stub   : match using single-stub networks with open shunt stubs
+-qwt2   : match using quarter wavelength networks with open shunt stubs
 ```
 
 Only 50 ohm networks are supported.
