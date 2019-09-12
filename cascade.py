@@ -4,6 +4,49 @@ import numpy as np
 import skrf as rf 
 import sys, tempfile, os
 
+def to_stub1(za, zo=50, shorted=True): # match with a stub-series input 
+    """
+    -----------------/-----------|
+    main line zo    /            za
+    ---------------/---/----l----|
+                  /   d
+                 /___/
+    """
+    GL = z2g(za, zo)
+    thL = np.angle(GL)
+    bl = thL / 2 + np.array([1, -1]) * np.arccos(-abs(GL)) / 2
+    if shorted:
+        bd = np.arctan(-np.tan(2 * bl - thL) / 2)
+    else:
+        bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
+    d = np.mod([ bd, bl ], np.pi)
+    d = np.rad2deg(d)
+    # d = d / (2 * np.pi)
+    return np.transpose(d)
+
+
+def to_qwt2(za, zo=50, shorted=True):
+    """
+    ---------------==========----|--|
+    main line zo       z1        |  za
+    ---------------==========-|--|--|
+                     L1=1/4   |  |
+                              |z2| L2=1/8 shorted or
+                              |__|    3/8 opened
+    Z2 > 0, use 1/8 shorted, or, 3/8 opened (Ystub = -jY2)
+    Z2 < 0, use 3/8 shorted, or, 1/8 opened (Ystub =  jY2)
+    """
+    ya = 1 / za
+    gl, bl = ya.real, ya.imag
+    z1 = np.sqrt(zo / gl)
+    z2 = 1 / bl
+    if shorted:
+        return [[ 45, z1, z2 ],
+                [ 135, z1, -z2 ]]
+    else:
+        return [[ 45, z1, -z2 ],
+                [ 135, z1, z2 ]]
+
 def lmatch(ZS, ZL, reverse=False):
     """
     ZS <---+---X2--< ZL
@@ -17,7 +60,7 @@ def lmatch(ZS, ZL, reverse=False):
     Q = np.sqrt(QS)
     X1 = (XS + np.array([1, -1]) * Q * RS) / (RS / RL - 1)
     X2 = -(XL + np.array([1, -1]) * Q * RL)
-    return np.transpose([X1, X2]).tolist()
+    return np.transpose([X1, X2])
 
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -204,38 +247,12 @@ def fm(mode, *d, f=None):
             res.append('{:<5g}'.format(x))
     return ' '.join(res)
 
-def write_match(nw, data):
-    print('MHZ          50 |--            50 --|             ZS              ZIN              ZOUT              ZL              |--- 50           ---| 50')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
-
-        GS, GL = data.get('gs'), data.get('gl')
-        if not GS and not GL:
-            GS, GL = smatch(S)
-        elif GS:
-            GL = np.conj(gout(S, GS))
-        elif GL:
-            GS = np.conj(gin(S, GL))
-        ZS, ZL = g2z(GS), g2z(GL)
-        ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
-
-        for i in range(2):
-            print(fm('F', f / 1e6), 
-                fm('xx', *lmatch(50, ZIN)[i], f=f), 
-                fm('xx', *lmatch(50, ZIN, 'r')[i], f=f), 
-                fm('cccc', ZS, ZIN, ZOUT, ZL),
-                fm('xx', *lmatch(ZOUT, 50)[i], f=f),
-                fm('xx', *lmatch(ZOUT, 50, 'r')[i], f=f))
-
 def write_network(nw, data):
     mode = data.get('mode')
     if mode == 'a': 
         write_abcd(nw)
     elif mode == 's':
         write_summary(nw)
-    elif mode == 'n':
-        print(nw.write_touchstone(form='ma', return_string=True))
     elif mode == 'm':
         write_match(nw, data)
     else:
@@ -285,6 +302,42 @@ def write_summary(nw):
         print(fm('F', f / 1e6), fm('ccddddddfgg', g2z(S11), g2z(S22), gui(S), 
               np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, mu(S)))
 
+def write_match(nw, data):
+    print('MHZ          50 |--            50 --|             ZS              ZIN              ZOUT              ZL              |--- 50           ---| 50')
+    for i in range(len(nw)):
+        f = nw.f[i]
+        S = nw.s[i]
+
+        GS, GL = data.get('gs'), data.get('gl')
+        if not GS and not GL:
+            GS, GL = smatch(S)
+        elif GS:
+            GL = np.conj(gout(S, GS))
+        elif GL:
+            GS = np.conj(gin(S, GL))
+        ZS, ZL = g2z(GS), g2z(GL)
+        ZIN, ZOUT = np.conj(ZS), np.conj(ZL)
+
+        for i in range(2):
+            print(fm('F', f / 1e6), 
+                fm('xx', *lmatch(50, ZIN)[i], f=f), 
+                fm('xx', *lmatch(50, ZIN, 'r')[i], f=f), 
+                fm('cccc', ZS, ZIN, ZOUT, ZL),
+                fm('xx', *lmatch(ZOUT, 50)[i], f=f),
+                fm('xx', *lmatch(ZOUT, 50, 'r')[i], f=f))
+
+        for i in range(2):
+            print(fm('F', f / 1e6),
+                fm('gg', *to_stub1(ZIN, shorted=False)[i]), '                 ',
+                fm('cccc', ZS, ZIN, ZOUT, ZL), '                 ',
+                fm('gg', *to_stub1(ZOUT, shorted=False)[i][::-1]))
+
+        for i in range(2):
+            print(fm('F', f / 1e6), '        ',
+                fm('ggg', *to_qwt2(ZIN, shorted=False)[i]),
+                fm('cccc', ZS, ZIN, ZOUT, ZL),
+                fm('ggg', *to_qwt2(ZOUT, shorted=False)[i][::-1]))
+
 
 def main(*args):
     args = list(args)
@@ -296,9 +349,7 @@ def main(*args):
         opt = args.pop(0)
         top = stack[-1]
 
-        if opt == '-n':
-            data['mode'] = 'n'
-        elif opt == '-a':
+        if opt == '-a':
             data['mode'] = 'a'
         elif opt == '-s':
             data['mode'] = 's'
