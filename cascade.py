@@ -393,7 +393,7 @@ def write_network(nw, data):
         write_abcd(nw)
     elif mode == 's':
         write_summary(nw)
-    elif mode == 'm':
+    elif mode == 'z':
         write_match(nw, data)
     elif mode == 'g':
         write_gamma(nw, data)
@@ -422,8 +422,8 @@ def main(*args):
             data['mode'] = 'a'
         elif opt == '-s':
             data['mode'] = 's'
-        elif opt == '-m':
-            data['mode'] = 'm'
+        elif opt == '-z':
+            data['mode'] = 'z'
         elif opt == '-g':
             data['mode'] = 'g'
         elif opt == '-stub':

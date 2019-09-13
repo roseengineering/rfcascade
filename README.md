@@ -39,7 +39,7 @@ as comments.  It can also output the network in following alternative formats:
 ```
 -a           : display the network as ABCD matrices
 -s           : summarize the network in terms of impedances, stability and gain (dB) values
--m           : show matching solutions in impedance
+-z           : show matching solutions in impedance
 -g           : show matching solutions in gamma
 -lmatch      : match with l-section networks
 -stub        : match with single open shunt stub network
@@ -294,7 +294,7 @@ Show impedance matching information.
 
 
 ```
-$ < example3.s2p cascade -m
+$ < example3.s2p cascade -z
 MHZ            ZS              ZIN             ZOUT               ZL
 2000      5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j
 ```
