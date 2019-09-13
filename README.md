@@ -290,13 +290,23 @@ MHZ           ZIN             ZOUT         GUI    S21    GUO    GUM   GMSG   GMA
 ```
 
 
-Show matching information.
+Show impedance matching information.
 
 
 ```
 $ < example3.s2p cascade -m
 MHZ            ZS              ZIN             ZOUT               ZL
 2000      5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j
+```
+
+
+Show gamma matching information.
+
+
+```
+$ < example3.s2p cascade -g
+MHZ             GS                GIN                GOUT                GL
+2000      0.8179 -162.67     0.8179  162.67     0.7495  -52.57     0.7495   52.57
 ```
 
 

@@ -120,9 +120,13 @@ Summarize the stabilized cascode amp.
 
 { run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s") }
 
-Show matching information.
+Show impedance matching information.
 
 { run("< example3.s2p cascade -m") }
+
+Show gamma matching information.
+
+{ run("< example3.s2p cascade -g") }
 
 A stub match example.  Stub lengths are in wavelengths.
 
