@@ -231,6 +231,23 @@ def ccd_transform(S):
 
 ###
 
+def to_complex(s):
+    if '/' in s:
+        r, theta = s.split('/')
+        return float(r) * np.exp(1j * float(theta) * np.pi / 180)
+    else:
+        return complex(s)
+
+def matching(S, GS, GL):
+    if not GS and not GL:
+        GS, GL = smatch(S)
+    elif GS:
+        GL = np.conj(gout(S, GS))
+    elif GL:
+        GS = np.conj(gin(S, GL))
+    GIN, GOUT = gin(S, GL), gout(S, GS)
+    return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
+
 def notation(x, precision=5):
     UNITS = 'FH'
     SUFFIX = ["f", "p", "n", "u", "m", "", "k", "M", "G"]
@@ -264,23 +281,6 @@ def fm(mode, *d, f=None):
         if m == 'F': 
             res.append('{:<5g}'.format(x))
     return ' '.join(res)
-
-def write_network(nw, data):
-    mode = data.get('mode')
-    if mode == 'a': 
-        write_abcd(nw)
-    elif mode == 's':
-        write_summary(nw)
-    elif mode == 'stub':
-        write_stub(nw, data)
-    elif mode == 'lmatch':
-        write_lmatch(nw, data)
-    elif mode == 'qwt2':
-        write_qwt2(nw, data)
-    elif mode == 'qwt3':
-        write_qwt3(nw, data)
-    else:
-        write_sparam(nw)
 
 def read_network(path=None):
     if path is None:
@@ -317,24 +317,16 @@ def write_sparam(nw):
 def write_summary(nw):
     print('MHZ           ZIN             ZOUT '
           '        GUI    S21    GUO    GUM   GMSG   GMAG     GU'
-          '        K       MU')
+          '        K        D       MU')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
-        print(fm('F', f / 1e6), fm('ccddddddfgg', g2z(S11), g2z(S22), gui(S), 
-              np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, mu(S)))
+        print(fm('F', f / 1e6), fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), 
+              np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, 
+              np.abs(det(S)), mu(S)))
 
-def matching(S, GS, GL):
-    if not GS and not GL:
-        GS, GL = smatch(S)
-    elif GS:
-        GL = np.conj(gout(S, GS))
-    elif GL:
-        GS = np.conj(gin(S, GL))
-    GIN, GOUT = gin(S, GL), gout(S, GS)
-    return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
 
 def write_lmatch(nw, data):
     print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS              ZIN             ZOUT               ZL         SHUNT   SERIES !   SERIES    SHUNT')
@@ -381,13 +373,34 @@ def write_qwt3(nw, data):
               fm('cccc', ZS, ZIN, ZOUT, ZL),
               fm('hg', *to_qwt3(np.conj(ZL), z2, shorted=False, degree=False)[::-1]))
 
-def to_complex(s):
-    if '/' in s:
-        r, theta = s.split('/')
-        return float(r) * np.exp(1j * float(theta) * np.pi / 180)
-    else:
-        return complex(s)
+def write_match(nw, data):
+    print('MHZ             GS                ZS              ZIN             ZOUT               ZL                GL')
+    for i in range(len(nw)):
+        f = nw.f[i]
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        print(fm('F', f / 1e6),
+              fm('p', z2g(ZS)), 
+              fm('cccc', ZS, ZIN, ZOUT, ZL),
+              fm('p', z2g(ZL)))
 
+def write_network(nw, data):
+    mode = data.get('mode')
+    if mode == 'a': 
+        write_abcd(nw)
+    elif mode == 's':
+        write_summary(nw)
+    elif mode == 'm':
+        write_match(nw, data)
+    elif mode == 'stub':
+        write_stub(nw, data)
+    elif mode == 'lmatch':
+        write_lmatch(nw, data)
+    elif mode == 'qwt2':
+        write_qwt2(nw, data)
+    elif mode == 'qwt3':
+        write_qwt3(nw, data)
+    else:
+        write_sparam(nw)
 
 def main(*args):
     args = list(args)
@@ -403,6 +416,8 @@ def main(*args):
             data['mode'] = 'a'
         elif opt == '-s':
             data['mode'] = 's'
+        elif opt == '-m':
+            data['mode'] = 'm'
         elif opt == '-stub':
             data['mode'] = 'stub'
         elif opt == '-lmatch':
