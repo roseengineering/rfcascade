@@ -43,6 +43,8 @@ input transformations as command line options:
 -zl <complex>        : set the load impedance for matching
 ```
 
+The gs, zs, gl, and zl option support complex numbers in 'polar' notation: 
+that is use a / to separate the magnitude and angle, for example, 10/90.
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and Rollet stability information 
 as comments.  It can also output the network in following alternative formats:
@@ -115,19 +117,19 @@ Summarize the stabilized cascode amp.
 
 { run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s") }
 
-Stub match example.
+A stub match example.  Stub lengths are in wavelengths.
 
 { run("< example3.s2p cascade -stub") }
 
-L-section match example.
+A L-section match example.
 
 { run("< example3.s2p cascade -lmatch") }
 
-Quarter wave transformer and open stub match example.
+A quarter wave transformer and open stub match example.
 
 { run("< example3.s2p cascade -qwt") }
 
-Quarter wave transformer and 72 ohm open stub match example.
+A quarter wave transformer and 72 ohm open stub match example.
 
 { run("< example3.s2p cascade -qwtz 72") }
 

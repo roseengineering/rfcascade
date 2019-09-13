@@ -361,7 +361,6 @@ def write_stub(nw, data):
                   fm('hg', *to_stub1(np.conj(ZL), shorted=False, degree=False)[i][::-1]))
 
 def write_qwt2(nw, data):
-    GS, GL = data.get('gs'), data.get('gl')
     print('MHZ       ZQWT   ZSHUNT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
@@ -372,7 +371,6 @@ def write_qwt2(nw, data):
               fm('hgg', *to_qwt2(np.conj(ZL), shorted=False, degree=False)[::-1]))
 
 def write_qwt3(nw, data):
-    GS, GL = data.get('gs'), data.get('gl')
     z2 = data.get('z2')
     print('MHZ       ZQWT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT     ZQWT')
     for i in range(len(nw)):
