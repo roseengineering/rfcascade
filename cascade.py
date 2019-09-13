@@ -261,8 +261,8 @@ def fm(mode, *d, f=None):
     res = []
     for m, x in zip(list(mode), d):
         if m == 'p':
-            res.append('{:10.4g}'.format(np.abs(x)))
-            res.append('{:7.2f}'.format(np.angle(x) * 180 / np.pi))
+            res.append('{:>10s}'.format('-') if np.isnan(x) else '{:10.4g}'.format(np.abs(x)))
+            res.append('{:>7s}'.format('-') if np.isnan(x) else '{:7.2f}'.format(np.angle(x) * 180 / np.pi))
         if m == 'c':
             res.append('{:>16s}'.format('-') if np.isnan(x) else '{:16.4g}'.format(x))
         if m == 'd':
