@@ -285,3 +285,46 @@ MHZ           ZIN             ZOUT         GUI    S21    GUO    GUM   GMSG   GMA
 ```
 
 
+Stub match example.
+
+
+```
+$ < example3.s2p cascade -stub
+MHZ     LSHUNT  LSERIES          ZS              ZIN             ZOUT               ZL       LSERIES   LSHUNT
+2000    0.3038   0.4271     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.1194   0.3162
+2000    0.1962   0.0247     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.2346   0.1838
+```
+
+
+L-section match example.
+
+
+```
+$ < example3.s2p cascade -lmatch
+MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS              ZIN             ZOUT               ZL         SHUNT   SERIES !   SERIES    SHUNT
+2000   1.345nH  3.505pF !        -        -     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   4.61nH  738.6fF !  5.715nH  5.414nH
+2000    4.71pF  606.6pH !        -        -     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j  39.99nH  8.574nH !  1.108pF  9.146nH
+```
+
+
+Quarter wave transformer and open stub match example.
+
+
+```
+$ < example3.s2p cascade -qwt
+MHZ       ZQWT   ZSHUNT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT   ZSHUNT     ZQWT
+2000     28.48    11.02   0.1250     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.3750    103.9    118.8
+```
+
+
+Quarter wave transformer and 72 ohm open stub match example.
+
+
+```
+$ < example3.s2p cascade -qwtz 72
+MHZ       ZQWT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT     ZQWT
+2000     28.48   0.2258     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.4035    118.8
+```
+
+
+

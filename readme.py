@@ -114,6 +114,23 @@ Stabilize the cascode amp with a 100 ohm resistor across the output.
 Summarize the stabilized cascode amp.
 
 { run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s") }
+
+Stub match example.
+
+{ run("< example3.s2p cascade -stub") }
+
+L-section match example.
+
+{ run("< example3.s2p cascade -lmatch") }
+
+Quarter wave transformer and open stub match example.
+
+{ run("< example3.s2p cascade -qwt") }
+
+Quarter wave transformer and 72 ohm open stub match example.
+
+{ run("< example3.s2p cascade -qwtz 72") }
+
 """)
 
 os.unlink("cb.s2p")
