@@ -329,7 +329,7 @@ def write_summary(nw):
 
 
 def write_lmatch(nw, data):
-    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS              ZIN             ZOUT               ZL         SHUNT   SERIES !   SERIES    SHUNT')
+    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
@@ -337,51 +337,55 @@ def write_lmatch(nw, data):
             print(fm('F', f / 1e6), 
                   fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
                   fm('xx', *lmatch(50, np.conj(ZS), 'r')[i], f=f), 
-                  fm('cccc', ZS, ZIN, ZOUT, ZL),
+                  fm('cc', ZS, ZL),
                   fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
                   fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
 def write_stub(nw, data):
-    print('MHZ     LSHUNT  LSERIES          ZS              ZIN             ZOUT               ZL       LSERIES   LSHUNT')
+    print('MHZ     LSHUNT  LSERIES          ZS               ZL       LSERIES   LSHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6),
                   fm('gh', *to_stub1(np.conj(ZS), shorted=False, degree=False)[i]),
-                  fm('cccc', ZS, ZIN, ZOUT, ZL),
+                  fm('cc', ZS, ZL),
                   fm('hg', *to_stub1(np.conj(ZL), shorted=False, degree=False)[i][::-1]))
 
 def write_qwt2(nw, data):
-    print('MHZ       ZQWT   ZSHUNT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT   ZSHUNT     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT   LSHUNT          ZS               ZL        LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         print(fm('F', f / 1e6),
               fm('ggh', *to_qwt2(np.conj(ZS), shorted=False, degree=False)),
-              fm('cccc', ZS, ZIN, ZOUT, ZL),
+              fm('cc', ZS, ZL),
               fm('hgg', *to_qwt2(np.conj(ZL), shorted=False, degree=False)[::-1]))
 
 def write_qwt3(nw, data):
     z2 = data.get('z2')
-    print('MHZ       ZQWT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT     ZQWT')
+    print('MHZ       ZQWT   LSHUNT          ZS               ZL        LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         print(fm('F', f / 1e6), 
               fm('gh', *to_qwt3(np.conj(ZS), z2, shorted=False, degree=False)),
-              fm('cccc', ZS, ZIN, ZOUT, ZL),
+              fm('cc', ZS, ZIN, ZOUT, ZL),
               fm('hg', *to_qwt3(np.conj(ZL), z2, shorted=False, degree=False)[::-1]))
 
 def write_match(nw, data):
-    print('MHZ             GS                ZS              ZIN             ZOUT               ZL                GL')
+    print('MHZ            ZS              ZIN             ZOUT               ZL')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        print(fm('F', f / 1e6),
-              fm('p', z2g(ZS)), 
-              fm('cccc', ZS, ZIN, ZOUT, ZL),
-              fm('p', z2g(ZL)))
+        print(fm('Fcccc', f / 1e6, ZS, ZIN, ZOUT, ZL))
+
+def write_gamma(nw, data):
+    print('MHZ             GS                GIN                GOUT                GL')
+    for i in range(len(nw)):
+        f = nw.f[i]
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        print(fm('Fpppp', f / 1e6, z2g(ZS), z2g(ZIN), z2g(ZOUT), z2g(ZL)))
 
 def write_network(nw, data):
     mode = data.get('mode')
@@ -391,6 +395,8 @@ def write_network(nw, data):
         write_summary(nw)
     elif mode == 'm':
         write_match(nw, data)
+    elif mode == 'g':
+        write_gamma(nw, data)
     elif mode == 'stub':
         write_stub(nw, data)
     elif mode == 'lmatch':
@@ -418,6 +424,8 @@ def main(*args):
             data['mode'] = 's'
         elif opt == '-m':
             data['mode'] = 'm'
+        elif opt == '-g':
+            data['mode'] = 'g'
         elif opt == '-stub':
             data['mode'] = 'stub'
         elif opt == '-lmatch':

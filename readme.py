@@ -53,7 +53,8 @@ as comments.  It can also output the network in following alternative formats:
 ```
 -a           : display the network as ABCD matrices
 -s           : summarize the network in terms of impedances, stability and gain (dB) values
--m           : show matching solutions
+-m           : show matching solutions in impedance
+-g           : show matching solutions in gamma
 -lmatch      : match with l-section networks
 -stub        : match with single open shunt stub network
 -qwt         : match with quarter wavelength and open shunt stub

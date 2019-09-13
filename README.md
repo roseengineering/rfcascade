@@ -39,7 +39,8 @@ as comments.  It can also output the network in following alternative formats:
 ```
 -a           : display the network as ABCD matrices
 -s           : summarize the network in terms of impedances, stability and gain (dB) values
--m           : show matching solutions
+-m           : show matching solutions in impedance
+-g           : show matching solutions in gamma
 -lmatch      : match with l-section networks
 -stub        : match with single open shunt stub network
 -qwt         : match with quarter wavelength and open shunt stub
@@ -294,8 +295,8 @@ Show matching information.
 
 ```
 $ < example3.s2p cascade -m
-MHZ             GS                ZS              ZIN             ZOUT               ZL                GL
-2000      0.8179 -162.67     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j     0.7495   52.57
+MHZ            ZS              ZIN             ZOUT               ZL
+2000      5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j
 ```
 
 
@@ -304,9 +305,9 @@ A stub match example.  Stub lengths are in wavelengths.
 
 ```
 $ < example3.s2p cascade -stub
-MHZ     LSHUNT  LSERIES          ZS              ZIN             ZOUT               ZL       LSERIES   LSHUNT
-2000    0.3038   0.4271     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.1194   0.3162
-2000    0.1962   0.0247     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.2346   0.1838
+MHZ     LSHUNT  LSERIES          ZS               ZL       LSERIES   LSHUNT
+2000    0.3038   0.4271     5.124-7.542j     33.68+91.48j   0.1194   0.3162
+2000    0.1962   0.0247     5.124-7.542j     33.68+91.48j   0.2346   0.1838
 ```
 
 
@@ -315,9 +316,9 @@ A L-section match example.
 
 ```
 $ < example3.s2p cascade -lmatch
-MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS              ZIN             ZOUT               ZL         SHUNT   SERIES !   SERIES    SHUNT
-2000   1.345nH  3.505pF !        -        -     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   4.61nH  738.6fF !  5.715nH  5.414nH
-2000    4.71pF  606.6pH !        -        -     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j  39.99nH  8.574nH !  1.108pF  9.146nH
+MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT
+2000   1.345nH  3.505pF !        -        -     5.124-7.542j     33.68+91.48j   4.61nH  738.6fF !  5.715nH  5.414nH
+2000    4.71pF  606.6pH !        -        -     5.124-7.542j     33.68+91.48j  39.99nH  8.574nH !  1.108pF  9.146nH
 ```
 
 
@@ -326,8 +327,8 @@ A quarter wave transformer and open stub match example.
 
 ```
 $ < example3.s2p cascade -qwt
-MHZ       ZQWT   ZSHUNT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT   ZSHUNT     ZQWT
-2000     28.48    11.02   0.1250     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.3750    103.9    118.8
+MHZ       ZQWT   ZSHUNT   LSHUNT          ZS               ZL        LSHUNT   ZSHUNT     ZQWT
+2000     28.48    11.02   0.1250     5.124-7.542j     33.68+91.48j   0.3750    103.9    118.8
 ```
 
 
@@ -336,8 +337,8 @@ A quarter wave transformer and 72 ohm open stub match example.
 
 ```
 $ < example3.s2p cascade -qwtz 72
-MHZ       ZQWT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT     ZQWT
-2000     28.48   0.2258     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   0.4035    118.8
+MHZ       ZQWT   LSHUNT          ZS               ZL        LSHUNT     ZQWT
+2000     28.48   0.2258     5.124-7.542j     5.124+7.542j   0.4035    118.8
 ```
 
 
