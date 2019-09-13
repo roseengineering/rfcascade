@@ -4,7 +4,7 @@ import numpy as np
 import skrf as rf 
 import sys, tempfile, os
 
-def to_stub1(za, zo=50, shorted=True): # match with a stub-series input 
+def to_stub1(za, zo=50, shorted=True, degree=True): # match with a stub-series input 
     """
     -----------------/-----------|
     main line zo    /            za
@@ -20,10 +20,11 @@ def to_stub1(za, zo=50, shorted=True): # match with a stub-series input
     else:
         bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
     d = np.mod([ bd, bl ], np.pi)
-    d = d / (2 * np.pi) # d = np.rad2deg(d)
+    d = np.rad2deg(d)
+    if not degree: d = d / 360
     return d.T
 
-def to_qwt2(za, zo=50, shorted=True):
+def to_qwt2(za, zo=50, shorted=True, degree=True):
     """
     ---------------==========----|--|
     main line zo       z1        |  za
@@ -34,13 +35,14 @@ def to_qwt2(za, zo=50, shorted=True):
     """
     ya = 1 / za
     gl, bl = ya.real, ya.imag
-    l2 = np.array([ 45, 135 ]) / 360
     z1 = np.sqrt(zo / gl) * np.array([1, 1])
     z2 = 1 / bl * np.array([1, -1]) * (1 if shorted else -1)
-    d = np.array([ z1, z2, l2 ]).T
-    return d[1] if z2[0] < 0 else d[0]
+    d = np.array([ 45, 135 ])
+    if not degree: d = d / 360
+    res = np.array([ z1, z2, d ]).T
+    return res[1] if z2[0] < 0 else res[0]
 
-def to_qwt3(za, z2, zo=50, shorted=True):
+def to_qwt3(za, z2, zo=50, shorted=True, degree=True):
     """
     ---------------==========----|--|
     main line zo       z1        |  za
@@ -54,7 +56,8 @@ def to_qwt3(za, z2, zo=50, shorted=True):
     z1 = np.nan if zo / gl < 0 else np.sqrt(zo / gl) 
     d = np.arctan([ 1 / (bl * z2), -bl * z2 ])
     d = np.mod(d, np.pi)
-    d = d / (2 * np.pi) # d = np.rad2deg(d)
+    d = np.rad2deg(d)
+    if not degree: d = d / 360
     return np.array([
         [ z1, d[0] ],
         [ z1, d[1] ]
@@ -330,54 +333,55 @@ def matching(S, GS, GL):
         GL = np.conj(gout(S, GS))
     elif GL:
         GS = np.conj(gin(S, GL))
-    return g2z(GS), g2z(GL)
+    GIN, GOUT = gin(S, GL), gout(S, GS)
+    return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
 
 def write_lmatch(nw, data):
-    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
+    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS              ZIN             ZOUT               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6), 
                   fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
                   fm('xx', *lmatch(50, np.conj(ZS), 'r')[i], f=f), 
-                  fm('cc', ZS, ZL),
+                  fm('cccc', ZS, ZIN, ZOUT, ZL),
                   fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
                   fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
 def write_stub(nw, data):
-    print('MHZ     LSHUNT  LSERIES          ZS               ZL       LSERIES   LSHUNT')
+    print('MHZ     LSHUNT  LSERIES          ZS              ZIN             ZOUT               ZL       LSERIES   LSHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6),
-                  fm('gh', *to_stub1(np.conj(ZS), shorted=False)[i]),
-                  fm('cc', ZS, ZL),
-                  fm('hg', *to_stub1(np.conj(ZL), shorted=False)[i][::-1]))
+                  fm('gh', *to_stub1(np.conj(ZS), shorted=False, degree=False)[i]),
+                  fm('cccc', ZS, ZIN, ZOUT, ZL),
+                  fm('hg', *to_stub1(np.conj(ZL), shorted=False, degree=False)[i][::-1]))
 
 def write_qwt2(nw, data):
     GS, GL = data.get('gs'), data.get('gl')
-    print('MHZ       ZQWT   ZSHUNT   LSHUNT          ZS               ZL        LSHUNT   ZSHUNT     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL = matching(nw.s[i], GS, GL)
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         print(fm('F', f / 1e6),
-              fm('ggh', *to_qwt2(np.conj(ZS), shorted=False)),
-              fm('cc', ZS, ZL),
-              fm('hgg', *to_qwt2(np.conj(ZL), shorted=False)[::-1]))
+              fm('ggh', *to_qwt2(np.conj(ZS), shorted=False, degree=False)),
+              fm('cccc', ZS, ZIN, ZOUT, ZL),
+              fm('hgg', *to_qwt2(np.conj(ZL), shorted=False, degree=False)[::-1]))
 
 def write_qwt3(nw, data):
     GS, GL = data.get('gs'), data.get('gl')
     z2 = data.get('z2')
-    print('MHZ       ZQWT   LSHUNT          ZS               ZL        LSHUNT     ZQWT')
+    print('MHZ       ZQWT   LSHUNT          ZS              ZIN             ZOUT               ZL        LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL = matching(nw.s[i], GS, GL)
+        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         print(fm('F', f / 1e6), 
-              fm('gh', *to_qwt3(np.conj(ZS), z2, shorted=False)),
-              fm('cc', ZS, ZL),
-              fm('hg', *to_qwt3(np.conj(ZL), z2, shorted=False)[::-1]))
+              fm('gh', *to_qwt3(np.conj(ZS), z2, shorted=False, degree=False)),
+              fm('cccc', ZS, ZIN, ZOUT, ZL),
+              fm('hg', *to_qwt3(np.conj(ZL), z2, shorted=False, degree=False)[::-1]))
 
 def to_complex(s):
     if '/' in s:
