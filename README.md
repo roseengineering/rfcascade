@@ -39,6 +39,7 @@ as comments.  It can also output the network in following alternative formats:
 ```
 -a           : display the network as ABCD matrices
 -s           : summarize the network in terms of impedances, stability and gain (dB) values
+-m           : show matching solutions
 -lmatch      : match with l-section networks
 -stub        : match with single open shunt stub network
 -qwt         : match with quarter wavelength and open shunt stub
@@ -285,6 +286,16 @@ MHZ           ZIN             ZOUT         GUI    S21    GUO    GUM   GMSG   GMA
 800        41.02-11.9j     75.77-13.33j   0.12  -1.88   0.23  -1.53  20.85  -1.53   1.00    86.48  0.04184    4.271
 900       35.41-5.312j     71.67-66.25j   0.15  -1.84   1.27  -0.43  17.26  -0.42   1.00    29.27  0.07917     1.93
 1000      36.71+7.588j        11.46-47j   0.14  -5.07   4.17  -0.76   9.41  -0.65   1.02    5.114    0.114    1.209
+```
+
+
+Show matching information.
+
+
+```
+$ < example3.s2p cascade -m
+MHZ             GS                ZS              ZIN             ZOUT               ZL                GL
+2000      0.8179 -162.67     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j     0.7495   52.57
 ```
 
 

@@ -53,6 +53,7 @@ as comments.  It can also output the network in following alternative formats:
 ```
 -a           : display the network as ABCD matrices
 -s           : summarize the network in terms of impedances, stability and gain (dB) values
+-m           : show matching solutions
 -lmatch      : match with l-section networks
 -stub        : match with single open shunt stub network
 -qwt         : match with quarter wavelength and open shunt stub
@@ -117,6 +118,10 @@ Stabilize the cascode amp with a 100 ohm resistor across the output.
 Summarize the stabilized cascode amp.
 
 { run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s") }
+
+Show matching information.
+
+{ run("< example3.s2p cascade -m") }
 
 A stub match example.  Stub lengths are in wavelengths.
 
