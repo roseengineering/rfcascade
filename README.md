@@ -29,8 +29,8 @@ input transformations as command line options:
 -zl <complex>        : set the load impedance for matching
 ```
 
-The gs, zs, gl, and zl options support complex numbers in 'polar' notation: 
-that is use a / to separate the magnitude and angle, for example, 10/90.
+The gs, zs, gl, and zl options support complex numbers in 'polar' notation,
+that is use a / to separate the magnitude and angle: for example, 10/90.
 
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and Rollet stability information 
