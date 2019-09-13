@@ -315,9 +315,9 @@ A stub match example.  Stub lengths are in wavelengths.
 
 ```
 $ < example3.s2p cascade -stub
-MHZ     LSHUNT  LSERIES          ZS               ZL       LSERIES   LSHUNT
-2000    0.3038   0.4271     5.124-7.542j     33.68+91.48j   0.1194   0.3162
-2000    0.1962   0.0247     5.124-7.542j     33.68+91.48j   0.2346   0.1838
+MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT
+2000   109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83
+2000    70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17
 ```
 
 
@@ -337,8 +337,8 @@ A quarter wave transformer and open stub match example.
 
 ```
 $ < example3.s2p cascade -qwt
-MHZ       ZQWT   ZSHUNT   LSHUNT          ZS               ZL        LSHUNT   ZSHUNT     ZQWT
-2000     28.48    11.02   0.1250     5.124-7.542j     33.68+91.48j   0.3750    103.9    118.8
+MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT
+2000     28.48    11.02   45.00     5.124-7.542j     33.68+91.48j  135.00    103.9    118.8
 ```
 
 
@@ -347,8 +347,8 @@ A quarter wave transformer and 72 ohm open stub match example.
 
 ```
 $ < example3.s2p cascade -qwtz 72
-MHZ       ZQWT   LSHUNT          ZS               ZL        LSHUNT     ZQWT
-2000     28.48   0.2258     5.124-7.542j     5.124+7.542j   0.4035    118.8
+MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT
+2000     28.48   81.30     5.124-7.542j     5.124+7.542j  145.27    118.8
 ```
 
 
