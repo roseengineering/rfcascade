@@ -310,7 +310,7 @@ MHZ             GS                GIN                GOUT                GL
 ```
 
 
-A stub match example.  Stub lengths are in wavelengths.
+A stub match example.  Stub lengths are in degrees.
 
 
 ```

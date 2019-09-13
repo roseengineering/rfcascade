@@ -128,7 +128,7 @@ Show gamma matching information.
 
 { run("< example3.s2p cascade -g") }
 
-A stub match example.  Stub lengths are in wavelengths.
+A stub match example.  Stub lengths are in degrees.
 
 { run("< example3.s2p cascade -stub") }
 
