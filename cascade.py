@@ -207,7 +207,7 @@ def ccd_transform(S):
 
 def tline(deg, zo=50):
     theta = np.deg2rad(deg)
-    return np.matrix([
+    return np.array([
         [ np.cos(theta), 1j * zo * np.sin(theta) ],
         [ 1j * np.sin(theta) / zo, np.cos(theta) ]
     ])
