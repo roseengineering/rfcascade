@@ -15,14 +15,18 @@ input transformations as command line options:
 -deembed             : de-embed the output of the top two networks on the stack
 -ideembed            : de-embed the input of the top two networks on the stack
 -swap                : swap the top two networks on the stack
+
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -p                   : print network on top of stack
--series <ohms>       : push a series resistor onto the stack
--shunt <ohms>        : push a shunt resistor onto the stack
--f <filename>        : push a touchstone network onto the stack
+
+-tline <complex>     : push a transmission line onto stack of |x| impedance and angle(x) length
+-series <ohms>       : push a series resistor onto stack
+-shunt <ohms>        : push a shunt resistor onto stack
+-f <filename>        : push a touchstone network onto stack
+
 -gs <complex>        : set the source gamma for matching
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching

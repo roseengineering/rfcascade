@@ -4,6 +4,15 @@ import numpy as np
 import skrf as rf 
 import sys, tempfile, os
 
+def z2g(Z, Z0=50):
+    return (Z - Z0) / (Z + Z0)
+
+def g2z(G, Z0=50):
+    return Z0 * (1 + G) / (1 - G)
+
+
+### matching
+
 def to_stub1(za, zo=50, shorted=True): # match with a stub-series input 
     """
     -----------------/-----------|
@@ -75,6 +84,8 @@ def lmatch(ZS, ZL, reverse=False):
     X2 = -(XL + np.array([1, -1]) * Q * RL)
     return np.array([X1, X2]).T
 
+### S-Parameters
+
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     K = rollet(S)
@@ -95,12 +106,6 @@ def gin(S, GL):
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return S22 + S12 * S21 * GS / (1 - S11 * GS)
-
-def z2g(Z, Z0=50):
-    return (Z - Z0) / (Z + Z0)
-
-def g2z(G, Z0=50):
-    return Z0 * (1 + G) / (1 - G)
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -143,34 +148,6 @@ def mu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     D = det(S)
     return (1 - np.abs(S11)**2) / (np.abs(S22 - D * np.conj(S11)) + np.abs(S12 * S21))
-
-def s2abcd(S, Z0=50):
-    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    den = 2 * S21
-    A = ((1 + S11) *(1 - S22) + S12 * S21) / den
-    B = Z0  * ((1 + S11) * (1 + S22) - S12 * S21) / den
-    C = 1 / Z0 * ((1 - S11) * (1 - S22) - S12 * S21) / den
-    D = ((1 - S11) * (1 + S22) + S12 * S21) / den
-    return np.array([
-        [ A, B ],
-        [ C, D ]
-    ])
-
-def abcd2s(M, Z0=50):
-    M = np.array(M)
-    A = M[0,0]
-    B = M[0,1]
-    C = M[1,0]
-    D = M[1,1]
-    den = A + B / Z0 + C * Z0 + D
-    S11 = (A + B / Z0 - C * Z0 - D) / den
-    S12 = 2 * (A * D - B * C) / den
-    S21 = 2 / den
-    S22 = (-A + B / Z0 - C * Z0 + D) / den
-    return np.array([
-        [S11, S12],
-        [S21, S22]
-    ])
 
 def tothreeport(S):
     S = np.array(S)
@@ -226,7 +203,44 @@ def ccd_transform(S):
        [ S31-S32*S21/(1+S22), S33-S32*S23/(1+S22) ]
     ])
 
-###
+### abcd
+
+def tline(deg, zo=50):
+    theta = np.deg2rad(deg)
+    return np.matrix([
+        [ np.cos(theta), 1j * zo * np.sin(theta) ],
+        [ 1j * np.sin(theta) / zo, np.cos(theta) ]
+    ])
+
+def s2abcd(S, Z0=50):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    den = 2 * S21
+    A = ((1 + S11) *(1 - S22) + S12 * S21) / den
+    B = Z0  * ((1 + S11) * (1 + S22) - S12 * S21) / den
+    C = 1 / Z0 * ((1 - S11) * (1 - S22) - S12 * S21) / den
+    D = ((1 - S11) * (1 + S22) + S12 * S21) / den
+    return np.array([
+        [ A, B ],
+        [ C, D ]
+    ])
+
+def abcd2s(M, Z0=50):
+    M = np.array(M)
+    A = M[0,0]
+    B = M[0,1]
+    C = M[1,0]
+    D = M[1,1]
+    den = A + B / Z0 + C * Z0 + D
+    S11 = (A + B / Z0 - C * Z0 - D) / den
+    S12 = 2 * (A * D - B * C) / den
+    S21 = 2 / den
+    S22 = (-A + B / Z0 - C * Z0 + D) / den
+    return np.array([
+        [S11, S12],
+        [S21, S22]
+    ])
+
+### input/output
 
 def to_complex(s):
     if '/' in s:
@@ -324,7 +338,6 @@ def write_summary(nw):
               np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, 
               np.abs(det(S)), mu(S)))
 
-
 def write_lmatch(nw, data):
     print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
@@ -415,6 +428,8 @@ def main(*args):
         opt = args.pop(0)
         top = stack[-1]
 
+        # diplay options
+
         if opt == '-a':
             data['mode'] = 'a'
         elif opt == '-s':
@@ -432,6 +447,19 @@ def main(*args):
         elif opt == '-qwtz':
             data['z2'] = float(args.pop(0))
             data['mode'] = 'qwt3'
+
+        # matching options
+
+        elif opt == '-zs':
+            data['gs'] = z2g(to_complex(args.pop(0)))
+        elif opt == '-zl':
+            data['gl'] = z2g(to_complex(args.pop(0)))
+        elif opt == '-gs':
+            data['gs'] = to_complex(args.pop(0))
+        elif opt == '-gl':
+            data['gl'] = to_complex(args.pop(0))
+
+        # binary operations
 
         elif opt == '-swap':
             b = stack.pop()
@@ -451,36 +479,36 @@ def main(*args):
             a = stack.pop()
             stack.append(a.inv ** b)
 
-        elif opt == '-zs':
-            data['gs'] = z2g(to_complex(args.pop(0)))
-        elif opt == '-zl':
-            data['gl'] = z2g(to_complex(args.pop(0)))
-        elif opt == '-gs':
-            data['gs'] = to_complex(args.pop(0))
-        elif opt == '-gl':
-            data['gl'] = to_complex(args.pop(0))
+        # unary operations
 
         elif opt == '-p':
             write_output(top, mode=mode)
-        elif opt == '-f':
-            stack.append(read_network(args.pop(0)))
-        elif top and opt == '-series':
-            S = abcd2s([[1, float(args.pop(0))], [0, 1]])
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
-        elif top and opt == '-shunt':
-            S = abcd2s([[1, 0], [1/float(args.pop(0)), 1]])
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
-
-        elif top and opt == '-cbg':
+        elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
-        elif top and opt == '-ccd':
+        elif opt == '-ccd':
             top.s = np.array([ ccd_transform(S) for S in top.s ])
-        elif top and opt == '-lift':
+        elif opt == '-lift':
             x = args.pop(0)
             top.s = np.array([ lift_ground(
                 top.s[i], 
                 complex(x) if 'j' in x else 2j * np.pi * top.f[i] * float(x)
             ) for i in range(len(top)) ])
+
+        # push operations
+
+        elif opt == '-f':
+            stack.append(read_network(args.pop(0)))
+        elif opt == '-tline':
+            x = to_complex(args.pop(0))
+            S = abcd2s(tline(np.angle(x) * 180 / np.pi, zo=np.abs(x)))
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+        elif opt == '-series':
+            S = abcd2s([[1, float(args.pop(0))], [0, 1]])
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+        elif opt == '-shunt':
+            S = abcd2s([[1, 0], [1/float(args.pop(0)), 1]])
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+
         else:
             print('Unrecognized command line option. Exiting.', file=sys.stderr)
             sys.exit(1)
