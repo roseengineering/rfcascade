@@ -10,7 +10,6 @@ def z2g(Z, Z0=50):
 def g2z(G, Z0=50):
     return Z0 * (1 + G) / (1 - G)
 
-
 ### matching
 
 def to_stub1(za, zo=50, shorted=True): # match with a stub-series input 
@@ -84,7 +83,7 @@ def lmatch(ZS, ZL, reverse=False):
     X2 = -(XL + np.array([1, -1]) * Q * RL)
     return np.array([X1, X2]).T
 
-### S-Parameters
+### scattering parameters
 
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -242,10 +241,24 @@ def abcd2s(M, Z0=50):
 
 ### input/output
 
+def open_stub(deg, zo=50):
+    theta = np.deg2rad(deg)
+    return -1j * zo / np.tan(theta)
+
+def shorted_stub(deg, zo=50):
+    theta = np.deg2rad(deg)
+    return 1j * zo * np.tan(theta)
+
 def to_complex(s):
     if '/' in s:
         r, theta = s.split('/')
         return float(r) * np.exp(1j * float(theta) * np.pi / 180)
+    elif 'o' in s:
+        zo, theta = s.split('o')
+        return open_stub(float(theta), float(zo))
+    elif 's' in s:
+        zo, theta = s.split('s')
+        return shorted_stub(float(theta), float(zo))
     else:
         return complex(s)
 
