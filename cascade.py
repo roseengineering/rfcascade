@@ -326,8 +326,8 @@ def write_abcd(nw):
 
 def write_sparam(nw):
     print('# MHZ S MA R 50')
-    print('! MHZ           S11                S21                S12                S22      '
-          '!    GUM        K       MU')
+    print('! MHZ           S11                S21                '
+          'S12                S22      !    GUM        K       MU')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
@@ -335,30 +335,30 @@ def write_sparam(nw):
         print(fm('F', f / 1e6), fm('pppp', *S.T.flatten()), '!', fm('dgg', gum(S), K, mu(S)))
 
 def write_summary(nw):
-    print('MHZ           Z11              Z22 '
-          '        GUI    S21    GUO    GUM   GMSG   GMAG     GU'
-          '        K        D       MU')
+    print('MHZ           Z11              Z22         GUI    S21    GUO    '
+          'GUM   GMSG   GMAG     GU        K        D       MU')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
         print(fm('F', f / 1e6), fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), 
-              np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, 
-              np.abs(det(S)), mu(S)))
+            np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, 
+            np.abs(det(S)), mu(S)))
 
 def write_lmatch(nw, data):
-    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
+    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          '
+          'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6), 
-                  fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
-                  fm('xx', *lmatch(50, np.conj(ZS), 'r')[i], f=f), 
-                  fm('cc', ZS, ZL),
-                  fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
-                  fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
+                fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
+                fm('xx', *lmatch(50, np.conj(ZS), 'r')[i], f=f), 
+                fm('cc', ZS, ZL),
+                fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
+                fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
 def write_stub1(nw, data):
     print('MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT')
@@ -366,33 +366,25 @@ def write_stub1(nw, data):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
-            print(fm('F', f / 1e6),
-                  fm('aa', *to_stub1(np.conj(ZS), shorted=False)[i]),
-                  fm('cc', ZS, ZL),
-                  fm('aa', *to_stub1(np.conj(ZL), shorted=False)[i][::-1]),
-                  'open')
-        for i in range(2):
-            print(fm('F', f / 1e6),
-                  fm('aa', *to_stub1(np.conj(ZS), shorted=True)[i]),
-                  fm('cc', ZS, ZL),
-                  fm('aa', *to_stub1(np.conj(ZL), shorted=True)[i][::-1]),
-                  'shorted')
+            for shorted in [ False, True ]:
+                print(fm('F', f / 1e6),
+                    fm('aa', *to_stub1(np.conj(ZS), shorted=shorted)[i]),
+                    fm('cc', ZS, ZL),
+                    fm('aa', *to_stub1(np.conj(ZL), shorted=shorted)[i][::-1]),
+                    'shorted' if shorted else 'open')
 
 def write_qwt2(nw, data):
-    print('MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               '
+          'ZL       LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        print(fm('F', f / 1e6),
-              fm('gga', *to_qwt2(np.conj(ZS), shorted=False)),
-              fm('cc', ZS, ZL),
-              fm('agg', *to_qwt2(np.conj(ZL), shorted=False)[::-1]),
-              'open')
-        print(fm('F', f / 1e6),
-              fm('gga', *to_qwt2(np.conj(ZS), shorted=True)),
-              fm('cc', ZS, ZL),
-              fm('agg', *to_qwt2(np.conj(ZL), shorted=True)[::-1]),
-              'shorted')
+        for shorted in [ False, True ]:
+            print(fm('F', f / 1e6),
+                fm('gga', *to_qwt2(np.conj(ZS), shorted=shorted)),
+                fm('cc', ZS, ZL),
+                fm('agg', *to_qwt2(np.conj(ZL), shorted=shorted)[::-1]),
+                'shorted' if shorted else 'open')
 
 def write_qwt3(nw, data):
     print('MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT')
@@ -400,16 +392,12 @@ def write_qwt3(nw, data):
         f = nw.f[i]
         z2 = data.get('z2')
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        print(fm('F', f / 1e6), 
-              fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=False)),
-              fm('cc', ZS, ZIN, ZOUT, ZL),
-              fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=False)[::-1]),
-              'open')
-        print(fm('F', f / 1e6), 
-              fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=True)),
-              fm('cc', ZS, ZIN, ZOUT, ZL),
-              fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=True)[::-1]),
-              'shorted')
+        for shorted in [ False, True ]:
+            print(fm('F', f / 1e6), 
+                fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=shorted)),
+                fm('cc', ZS, ZIN, ZOUT, ZL),
+                fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]),
+                'shorted' if shorted else 'open')
 
 def write_match(nw, data):
     print('MHZ            ZS              ZIN             ZOUT               ZL')
