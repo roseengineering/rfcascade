@@ -333,7 +333,7 @@ def write_sparam(nw):
         print(fm('F', f / 1e6), fm('pppp', *S.T.flatten()), '!', fm('dgg', gum(S), K, mu(S)))
 
 def write_summary(nw):
-    print('MHZ           ZIN             ZOUT '
+    print('MHZ           Z11              Z22 '
           '        GUI    S21    GUO    GUM   GMSG   GMAG     GU'
           '        K        D       MU')
     for i in range(len(nw)):

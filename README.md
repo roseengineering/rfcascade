@@ -114,7 +114,7 @@ Summarize the network.  GU is not in dB.
 
 ```
 $ < 2n5179_5ma.s2p cascade -s
-MHZ           ZIN             ZOUT         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
+MHZ           Z11              Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
 0               139+0j           591+0j   1.09  16.62   5.41  23.13    inf  23.13   1.00      inf   0.3975    1.185
 100       31.84-38.55j     22.13-100.9j   1.09  16.62   5.41  23.13  24.70      -      -   0.4623   0.2799   0.8889
 200       27.94-11.17j     11.59-46.09j   0.45  12.46   4.07  16.99  20.92  18.91   1.18    1.109   0.1542    1.021
@@ -282,7 +282,7 @@ Summarize the stabilized cascode amp.
 
 ```
 $ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s
-MHZ           ZIN             ZOUT         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
+MHZ           Z11              Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
 0               139+0j 98.66+9.406e-17j   1.09  13.04   0.49  14.62    inf  14.62   1.00      inf   0.1542    3.055
 100       38.12-41.92j       109-16.32j   0.97  14.27   0.69  15.92  37.50  15.93   1.00    71.73   0.1668    2.554
 200       35.09-12.99j      104.8-59.1j   0.24  12.76   1.17  14.17  30.79  14.17   1.00    22.95   0.1134    1.988
