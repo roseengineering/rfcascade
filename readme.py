@@ -64,9 +64,9 @@ as comments.  It can also output the network in following alternative formats:
 -z           : show matching solutions in impedance
 -g           : show matching solutions in gamma
 -lmatch      : match with l-section networks
--stub        : match with single open shunt stub network
--qwt         : match with quarter wavelength and open shunt stub
--qwtz <ohms> : match with quarter wavelength and open shunt stub of given impedance
+-stub        : match with single shunt stub network
+-qwt         : match with quarter wavelength and shunt stub
+-qwtz <ohms> : match with quarter wavelength and shunt stub of given impedance
 ```
 
 Only 50 ohm networks are supported.
@@ -144,11 +144,11 @@ A L-section match example.
 
 { run("< example3.s2p cascade -lmatch") }
 
-A quarter wave transformer and open stub match example.
+A quarter wave transformer and stub match example.
 
 { run("< example3.s2p cascade -qwt") }
 
-A quarter wave transformer and 72 ohm open stub match example.
+A quarter wave transformer and 72 ohm stub match example.
 
 { run("< example3.s2p cascade -qwtz 72") }
 

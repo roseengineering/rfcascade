@@ -360,37 +360,40 @@ def write_lmatch(nw, data):
                   fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
                   fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
-def write_stub(nw, data):
+def write_stub1(nw, data, shorted):
+    print('--', 'shorted' if shorted else 'open', 'stub solutions --')
     print('MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6),
-                  fm('aa', *to_stub1(np.conj(ZS), shorted=False)[i]),
+                  fm('aa', *to_stub1(np.conj(ZS), shorted=shorted)[i]),
                   fm('cc', ZS, ZL),
-                  fm('aa', *to_stub1(np.conj(ZL), shorted=False)[i][::-1]))
+                  fm('aa', *to_stub1(np.conj(ZL), shorted=shorted)[i][::-1]))
 
-def write_qwt2(nw, data):
+def write_qwt2(nw, data, shorted):
+    print('--', 'shorted' if shorted else 'open', 'stub solutions --')
     print('MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         print(fm('F', f / 1e6),
-              fm('gga', *to_qwt2(np.conj(ZS), shorted=False)),
+              fm('gga', *to_qwt2(np.conj(ZS), shorted=shorted)),
               fm('cc', ZS, ZL),
-              fm('agg', *to_qwt2(np.conj(ZL), shorted=False)[::-1]))
+              fm('agg', *to_qwt2(np.conj(ZL), shorted=shorted)[::-1]))
 
-def write_qwt3(nw, data):
-    z2 = data.get('z2')
+def write_qwt3(nw, data, shorted):
+    print('--', 'shorted' if shorted else 'open', 'stub solutions --')
     print('MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
+        z2 = data.get('z2')
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         print(fm('F', f / 1e6), 
-              fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=False)),
+              fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=shorted)),
               fm('cc', ZS, ZIN, ZOUT, ZL),
-              fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=False)[::-1]))
+              fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]))
 
 def write_match(nw, data):
     print('MHZ            ZS              ZIN             ZOUT               ZL')
@@ -416,14 +419,17 @@ def write_network(nw, data):
         write_match(nw, data)
     elif mode == 'g':
         write_gamma(nw, data)
-    elif mode == 'stub':
-        write_stub(nw, data)
     elif mode == 'lmatch':
         write_lmatch(nw, data)
+    elif mode == 'stub':
+        write_stub1(nw, data, shorted=False)
+        write_stub1(nw, data, shorted=True)
     elif mode == 'qwt2':
-        write_qwt2(nw, data)
+        write_qwt2(nw, data, shorted=False)
+        write_qwt2(nw, data, shorted=True)
     elif mode == 'qwt3':
-        write_qwt3(nw, data)
+        write_qwt3(nw, data, shorted=False)
+        write_qwt3(nw, data, shorted=True)
     else:
         write_sparam(nw)
 
@@ -512,7 +518,7 @@ def main(*args):
             x = args.pop(0)
             top.s = np.array([ lift_ground(
                 top.s[i], 
-                complex(x) if 'j' in x else 2j * np.pi * top.f[i] * float(x)
+                complex(x) if 'j' in x or '/' in x else 2j * np.pi * top.f[i] * float(x)
             ) for i in range(len(top)) ])
 
         # push operations

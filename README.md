@@ -50,9 +50,9 @@ as comments.  It can also output the network in following alternative formats:
 -z           : show matching solutions in impedance
 -g           : show matching solutions in gamma
 -lmatch      : match with l-section networks
--stub        : match with single open shunt stub network
--qwt         : match with quarter wavelength and open shunt stub
--qwtz <ohms> : match with quarter wavelength and open shunt stub of given impedance
+-stub        : match with single shunt stub network
+-qwt         : match with quarter wavelength and shunt stub
+-qwtz <ohms> : match with quarter wavelength and shunt stub of given impedance
 ```
 
 Only 50 ohm networks are supported.
@@ -323,9 +323,14 @@ A stub match example.  Stub lengths are in degrees.
 
 ```
 $ < example3.s2p cascade -stub
+-- open stub solutions --
 MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT
 2000   109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83
 2000    70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17
+-- shorted stub solutions --
+MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT
+2000    19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83
+2000   160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17
 ```
 
 
@@ -340,23 +345,31 @@ MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL        
 ```
 
 
-A quarter wave transformer and open stub match example.
+A quarter wave transformer and stub match example.
 
 
 ```
 $ < example3.s2p cascade -qwt
+-- open stub solutions --
 MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT
 2000     28.48    11.02   45.00     5.124-7.542j     33.68+91.48j  135.00    103.9    118.8
+-- shorted stub solutions --
+MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT
+2000     28.48    11.02  135.00     5.124-7.542j     33.68+91.48j   45.00    103.9    118.8
 ```
 
 
-A quarter wave transformer and 72 ohm open stub match example.
+A quarter wave transformer and 72 ohm stub match example.
 
 
 ```
 $ < example3.s2p cascade -qwtz 72
+-- open stub solutions --
 MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT
 2000     28.48   81.30     5.124-7.542j     5.124+7.542j  145.27    118.8
+-- shorted stub solutions --
+MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT
+2000     28.48  171.30     5.124-7.542j     5.124+7.542j   55.27    118.8
 ```
 
 
