@@ -36,9 +36,9 @@ input transformations as command line options:
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -p                   : print network on top of stack
 
--tline <complex>     : push a transmission line onto stack of |x| impedance and angle(x) length
--series <ohms>       : push a series resistor onto stack
--shunt <ohms>        : push a shunt resistor onto stack
+-tline <complex>     : push a transmission line onto stack of |x| z and angle(x) length
+-series <complex>    : push a series resistor onto stack
+-shunt <complex>     : push a shunt resistor onto stack
 -f <filename>        : push a touchstone network onto stack
 
 -gs <complex>        : set the source gamma for matching
@@ -47,8 +47,15 @@ input transformations as command line options:
 -zl <complex>        : set the load impedance for matching
 ```
 
-The gs, zs, gl, and zl options support complex numbers in 'polar' notation,
-that is use a / to separate the magnitude and angle: for example, 10/90.
+Complex numbers can be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
+angle, for example '10/90'.  A list of notations supported follow:
+
+```
+<a>+<b>j           : python complex notation
+<mag>/<degrees>    : polar notation
+<zo>s<degrees>     : shorted stub notation 
+<zo>o<degrees>     : open stub notation 
+```
 
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and Rollet stability information 
