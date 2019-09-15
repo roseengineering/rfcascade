@@ -253,21 +253,15 @@ def to_complex(s):
     if '/' in s:
         r, theta = s.split('/')
         return float(r) * np.exp(1j * float(theta) * np.pi / 180)
-    elif 'o' in s:
-        zo, theta = s.split('o')
-        return open_stub(float(theta), float(zo))
-    elif 's' in s:
-        zo, theta = s.split('s')
-        return shorted_stub(float(theta), float(zo))
     else:
         return complex(s)
 
 def matching(S, GS, GL):
-    if not GS and not GL:
+    if GS is None and GL is None:
         GS, GL = smatch(S)
-    elif GS:
+    elif GL is None:
         GL = np.conj(gout(S, GS))
-    elif GL:
+    elif GS is None:
         GS = np.conj(gin(S, GL))
     GIN, GOUT = gin(S, GL), gout(S, GS)
     return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
@@ -516,11 +510,25 @@ def main(*args):
             S = abcd2s(tline(np.angle(x) * 180 / np.pi, zo=np.abs(x)))
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
         elif opt == '-series':
-            S = abcd2s([[1, float(args.pop(0))], [0, 1]])
+            x = to_complex(args.pop(0))
+            S = abcd2s([[1, x], [0, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
         elif opt == '-shunt':
-            S = abcd2s([[1, 0], [1/float(args.pop(0)), 1]])
+            x = to_complex(args.pop(0))
+            S = abcd2s([[1, 0], [1/x, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+        elif opt == '-open':
+            x = to_complex(args.pop(0))
+            x = open_stub(np.angle(x) * 180 / np.pi, zo=np.abs(x))
+            S = abcd2s([[1, 0], [1/x, 1]])
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+        elif opt == '-shorted':
+            x = to_complex(args.pop(0))
+            x = shorted_stub(np.angle(x) * 180 / np.pi, zo=np.abs(x))
+            S = abcd2s([[1, 0], [1/x, 1]])
+            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+
+        # unrecognized
 
         else:
             print('Unrecognized command line option. Exiting.', file=sys.stderr)
