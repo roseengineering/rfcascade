@@ -35,6 +35,7 @@ input transformations as command line options:
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -p                   : print network on top of stack
+-isolate             : match network on top of stack and then isolate its input and output
 
 -shorted <complex>   : push an shorted stub onto stack.
 -open <complex>      : push an open stub onto stack.

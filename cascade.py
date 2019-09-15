@@ -94,8 +94,10 @@ def smatch(S):
     B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
     C1 = S11 - D * np.conj(S22)
     C2 = S22 - D * np.conj(S11)
-    GS = (B1 - np.sign(B1) * np.sqrt(B1**2 - 4 * np.abs(C1)**2)) / (2 * C1)
-    GL = (B2 - np.sign(B2) * np.sqrt(B2**2 - 4 * np.abs(C2)**2)) / (2 * C2)
+    den = B1**2 - 4 * np.abs(C1)**2
+    GS = np.nan if den < 0 or C1 == 0 else (B1 - np.sign(B1) * np.sqrt(den)) / (2 * C1)
+    den = B2**2 - 4 * np.abs(C2)**2
+    GL = np.nan if den < 0 or C2 == 0 else (B2 - np.sign(B2) * np.sqrt(den)) / (2 * C2)
     return GS, GL
 
 def gin(S, GL):
@@ -120,7 +122,7 @@ def guo(S):
 
 def gmsg(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return np.abs(S21) / np.abs(S12)
+    return np.nan if S12 == 0 else np.abs(S21) / np.abs(S12)
 
 def gmag(S):
     K = rollet(S)
@@ -429,7 +431,15 @@ def main(*args):
     args = list(args)
     data = {}
     stack = []
-    stack.append(read_network())
+    a = read_network()
+
+    # make the first network on the stack a zero network
+
+    b = a.copy()
+    for S in b.s:
+        S[0,0], S[0,1], S[1,0], S[1,1] = 0, 0, 0, 0
+    stack.append(b)
+    stack.append(a)
 
     while args:
         opt = args.pop(0)
@@ -490,6 +500,10 @@ def main(*args):
 
         elif opt == '-p':
             write_output(top, mode=mode)
+        elif opt == '-isolate':
+            for S in top.s:
+                ZS, ZL, ZIN, ZOUT = matching(S, data.get('gs'), data.get('gl'))
+                S[0,0], S[0,1], S[1,0], S[1,1] = z2g(ZIN), 0, 0, z2g(ZOUT)
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
         elif opt == '-ccd':
