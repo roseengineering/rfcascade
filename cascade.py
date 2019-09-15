@@ -500,10 +500,10 @@ def main(*args):
 
         elif opt == '-p':
             write_output(top, mode=mode)
-        elif opt == '-isolate':
+        elif opt == '-unitary':
             for S in top.s:
                 ZS, ZL, ZIN, ZOUT = matching(S, data.get('gs'), data.get('gl'))
-                S[0,0], S[0,1], S[1,0], S[1,1] = z2g(ZIN), 0, 0, z2g(ZOUT)
+                S[0,0], S[0,1], S[1,1] = z2g(ZIN), 0, z2g(ZOUT)
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
         elif opt == '-ccd':

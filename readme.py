@@ -30,12 +30,12 @@ input transformations as command line options:
 -ideembed            : de-embed the input of the top two networks on the stack
 -swap                : swap the top two networks on the stack
 
+-p                   : print network on top of stack
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
--p                   : print network on top of stack
--isolate             : match network on top of stack and then isolate its input and output
+-unitary             : match network on top of stack and then isolate its input and output
 
 -shorted <complex>   : push an shorted stub onto stack.
 -open <complex>      : push an open stub onto stack.
