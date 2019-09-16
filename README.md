@@ -392,7 +392,7 @@ $ < example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade 
 ```
 
 
-Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 970 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN970 
+Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN967 
 calculates the load reflection coefficient incorrectly.  Gonzalez has a corrected value. 
 
 
