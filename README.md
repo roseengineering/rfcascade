@@ -22,8 +22,8 @@ input transformations as command line options:
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -unilateral          : match network on top of stack and then isolate its input and output
 
--shorted <complex>   : push an shorted stub onto stack.
--open <complex>      : push an open stub onto stack.
+-shorted <complex>   : push an shorted shunt stub onto stack.
+-open <complex>      : push an open shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
 -series <complex>    : push a series resistor onto stack
 -shunt <complex>     : push a shunt resistor onto stack
