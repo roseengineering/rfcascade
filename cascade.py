@@ -482,6 +482,14 @@ def main(*args):
             data['gs'] = to_complex(args.pop(0))
         elif opt == '-gl':
             data['gl'] = to_complex(args.pop(0))
+        elif opt == '-zin':
+            data['gin'] = z2g(to_complex(args.pop(0)))
+        elif opt == '-zout':
+            data['gout'] = z2g(to_complex(args.pop(0)))
+        elif opt == '-gin':
+            data['gin'] = to_complex(args.pop(0))
+        elif opt == '-gout':
+            data['gout'] = to_complex(args.pop(0))
 
         # binary operations
 
@@ -505,11 +513,14 @@ def main(*args):
 
         # unary operations
 
-        elif opt == '-unitary':
+        elif opt == '-unilateral':
             GS, GL = data.pop('gs', None), data.pop('gl', None)
+            GIN, GOUT = data.pop('gin', None), data.pop('gout', None)
             for S in top.s:
                 ZS, ZL, ZIN, ZOUT = matching(S, GS, GL)
-                S[0,0], S[0,1], S[1,1] = z2g(ZIN), 0, z2g(ZOUT)
+                S[0,0] = z2g(ZIN)if GIN is None else GIN 
+                S[0,1] = 0
+                S[1,1] = z2g(ZOUT)if GOUT is None else GOUT
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
         elif opt == '-ccd':

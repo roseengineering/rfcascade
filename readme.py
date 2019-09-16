@@ -34,7 +34,7 @@ input transformations as command line options:
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
--unitary             : match network on top of stack and then isolate its input and output
+-unilateral          : match network on top of stack and then isolate its input and output
 
 -shorted <complex>   : push an shorted stub onto stack.
 -open <complex>      : push an open stub onto stack.
@@ -47,6 +47,10 @@ input transformations as command line options:
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
+-gin <complex>       : set the input gamma for matching
+-zin <complex>       : set the input impedance for matching
+-gout <complex>      : set the output gamma for matching
+-zout <complex>      : set the output impedance for matching
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
@@ -162,7 +166,7 @@ Create a network of the match.
 Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 970 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN970 
 calculates the load reflection coefficient incorrectly.  Gonzalez has a corrected value. 
 
-{ run("< example4.s2p cascade -gs .475/166 -unitary -tline 50/29.3 -cascade") }
+{ run("< example4.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade") }
 
 """)
 
