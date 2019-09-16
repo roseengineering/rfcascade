@@ -431,7 +431,7 @@ def write_network(nw, data):
         write_gamma(nw, data)
     elif mode == 'lmatch':
         write_lmatch(nw, data)
-    elif mode == 'stub':
+    elif mode == 'stub1':
         write_stub1(nw, data)
     elif mode == 'qwt2':
         write_qwt2(nw, data)
@@ -450,7 +450,7 @@ def main(*args):
 
     b = a.copy()
     for S in b.s:
-        S[0,0], S[0,1], S[1,0], S[1,1] = 0, 0, 0, 0
+        S[0,0], S[0,1], S[1,0], S[1,1] = -1, 0, 0, -1 
     stack.append(b)
     stack.append(a)
 
@@ -470,14 +470,14 @@ def main(*args):
             data['mode'] = 'g'
         elif opt == '-lmatch':
             data['mode'] = 'lmatch'
-        elif opt == '-qwt':
+        elif opt == '-qwt2':
             data['mode'] = 'qwt2'
-        elif opt == '-qwtz':
+        elif opt == '-qwt3':
             data['z2'] = float(args.pop(0))
             data['mode'] = 'qwt3'
-        elif opt == '-stub':
+        elif opt == '-stub1':
             data['z2'] = float(args.pop(0))
-            data['mode'] = 'stub'
+            data['mode'] = 'stub1'
 
         # matching options
 

@@ -65,14 +65,14 @@ the stack in touchstone format with GUM and Rollet stability information
 as comments.  It can also output the network in following alternative formats:
 
 ```
--a           : display the network as ABCD matrices
--s           : summarize the network in terms of impedances, stability and gain (dB) values
--z           : show matching solutions in impedance
--g           : show matching solutions in gamma
--lmatch      : match with l-section networks
--stub <ohms> : match with single shunt stub network using given line impedance
--qwt         : match with quarter wavelength and shunt stub
--qwtz <ohms> : match with quarter wavelength and shunt stub of given impedance
+-a            : display the network as ABCD matrices
+-s            : summarize the network in terms of impedances, stability and gain (dB) values
+-z            : show matching solutions in impedance
+-g            : show matching solutions in gamma
+-lmatch       : match with l-section networks
+-stub1 <ohms> : match with single shunt stub network using given line impedance
+-qwt2         : match with quarter wavelength and shunt stub
+-qwt3 <ohms>  : match with quarter wavelength and shunt stub of given impedance
 ```
 
 Only 50 ohm networks are supported.
@@ -144,7 +144,7 @@ Show gamma matching information.
 
 A stub match example.  Stub lengths are in degrees.
 
-{ run("< example3.s2p cascade -stub 50") }
+{ run("< example3.s2p cascade -stub1 50") }
 
 A L-section match example.
 
@@ -152,22 +152,22 @@ A L-section match example.
 
 A quarter wave transformer and stub match example.
 
-{ run("< example3.s2p cascade -qwt") }
+{ run("< example3.s2p cascade -qwt2") }
 
 A quarter wave transformer and 72 ohm stub match example.
 
-{ run("< example3.s2p cascade -qwtz 72") }
+{ run("< example3.s2p cascade -qwt3 72") }
 
-Solve for maximum gain.
+Match a network for maximum gain.
 
-{ run("< example4.s2p cascade -qwt") }
+{ run("< example4.s2p cascade -qwt2") }
 
-Create a network of the match.
+Create a network of this match.
 
 { run("< example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade") }
 
-Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN967 
-calculates the load reflection coefficient incorrectly.  Gonzalez has a corrected value. 
+Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers.  Gonzalez has a corrected value 
+for the load reflection coefficient in AN967.
 
 { run("< example4.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade") }
 
