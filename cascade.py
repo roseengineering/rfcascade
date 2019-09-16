@@ -505,8 +505,6 @@ def main(*args):
 
         # unary operations
 
-        elif opt == '-p':
-            write_output(top, mode=mode)
         elif opt == '-unitary':
             for S in top.s:
                 ZS, ZL, ZIN, ZOUT = matching(S, data.get('gs'), data.get('gl'))

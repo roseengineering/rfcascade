@@ -30,7 +30,6 @@ input transformations as command line options:
 -ideembed            : de-embed the input of the top two networks on the stack
 -swap                : swap the top two networks on the stack
 
--p                   : print network on top of stack
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
@@ -151,6 +150,19 @@ A quarter wave transformer and stub match example.
 A quarter wave transformer and 72 ohm stub match example.
 
 { run("< example3.s2p cascade -qwtz 72") }
+
+Solve for maximum gain.
+
+{ run("< example4.s2p cascade -qwt") }
+
+Create a network of the match.
+
+{ run("< example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade") }
+
+Add 29.5 degrees of 50 ohm transmission line to the amplifier in HP Application Note 970 and page on 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN970 
+calculates the load reflection coefficient incorrectly.  Gonzalez has a corrected value. 
+
+{ run("< example4.s2p cascade -gs .475/166 -unitary -tline 50/29.5 -cascade") }
 
 """)
 

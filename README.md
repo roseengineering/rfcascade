@@ -16,7 +16,6 @@ input transformations as command line options:
 -ideembed            : de-embed the input of the top two networks on the stack
 -swap                : swap the top two networks on the stack
 
--p                   : print network on top of stack
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
@@ -361,6 +360,40 @@ $ < example3.s2p cascade -qwtz 72
 MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT
 2000     28.48   81.30     5.124-7.542j     5.124+7.542j  145.27    118.8 open
 2000     28.48  171.30     5.124-7.542j     5.124+7.542j   55.27    118.8 shorted
+```
+
+
+Solve for maximum gain.
+
+
+```
+$ < example4.s2p cascade -qwt
+MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT
+4000     65.39    11.78   45.00     1.593-11.56j      1.58+70.85j  135.00    70.89    398.7 open
+4000     65.39    11.78  135.00     1.593-11.56j      1.58+70.85j   45.00    70.89    398.7 shorted
+```
+
+
+Create a network of the match.
+
+
+```
+$ < example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade
+# MHZ S MA R 50
+! MHZ           S11                S21                S12                S22      !    GUM        K       MU
+4000    0.001336   99.41      5.419 -173.66      0.158 -176.66   0.001339   88.91 !  14.68    1.012    1.168
+```
+
+
+Add 29.5 degrees of 50 ohm transmission line to the amplifier in HP Application Note 970 and page on 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN970 
+calculates the load reflection coefficient incorrectly.  Gonzalez has a corrected value. 
+
+
+```
+$ < example4.s2p cascade -gs .475/166 -unitary -tline 50/29.5 -cascade
+# MHZ S MA R 50
+! MHZ           S11                S21                S12                S22      !    GUM        K       MU
+4000      0.7444  157.00      1.681   -3.50          0    0.00     0.8438 -129.44 !  13.43      inf    1.185
 ```
 
 
