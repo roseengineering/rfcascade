@@ -33,15 +33,18 @@ input transformations as command line options:
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
--gin <complex>       : set the input gamma for matching
--zin <complex>       : set the input impedance for matching
--gout <complex>      : set the output gamma for matching
--zout <complex>      : set the output impedance for matching
+
+-gin <complex>       : set the input gamma for unilateral operator
+-zin <complex>       : set the input impedance for unilateral operator
+-gout <complex>      : set the output gamma for unilateral operator
+-zout <complex>      : set the output impedance for unilateral operator
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
 angle in degrees, for example '10/90'.  Transmission lines are given in complex form, with
 the magnitude setting the impedance and the angle setting the length.
+
+After the unilateral operator is used, it resets gs, gl, gin, and gout.
 
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and Rollet stability information 
@@ -350,9 +353,9 @@ A quarter wave transformer and stub match example.
 
 ```
 $ < example3.s2p cascade -qwt
-MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT
-2000     28.48    11.02   45.00     5.124-7.542j     33.68+91.48j  135.00    103.9    118.8 open
-2000     28.48    11.02  135.00     5.124-7.542j     33.68+91.48j   45.00    103.9    118.8 shorted
+MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
+2000     28.48   45.00    11.02     5.124-7.542j     33.68+91.48j    103.9  135.00    118.8 open
+2000     28.48  135.00    11.02     5.124-7.542j     33.68+91.48j    103.9   45.00    118.8 shorted
 ```
 
 
@@ -361,9 +364,9 @@ A quarter wave transformer and 72 ohm stub match example.
 
 ```
 $ < example3.s2p cascade -qwtz 72
-MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT
-2000     28.48   81.30     5.124-7.542j     5.124+7.542j  145.27    118.8 open
-2000     28.48  171.30     5.124-7.542j     5.124+7.542j   55.27    118.8 shorted
+MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
+2000     28.48   81.30       72     5.124-7.542j     5.124+7.542j       72  145.27    118.8 open
+2000     28.48  171.30       72     5.124-7.542j     5.124+7.542j       72   55.27    118.8 shorted
 ```
 
 
@@ -372,9 +375,9 @@ Solve for maximum gain.
 
 ```
 $ < example4.s2p cascade -qwt
-MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               ZL       LSHUNT   ZSHUNT     ZQWT
-4000     65.39    11.78   45.00     1.593-11.56j      1.58+70.85j  135.00    70.89    398.7 open
-4000     65.39    11.78  135.00     1.593-11.56j      1.58+70.85j   45.00    70.89    398.7 shorted
+MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
+4000     65.39   45.00    11.78     1.593-11.56j      1.58+70.85j    70.89  135.00    398.7 open
+4000     65.39  135.00    11.78     1.593-11.56j      1.58+70.85j    70.89   45.00    398.7 shorted
 ```
 
 

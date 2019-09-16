@@ -45,7 +45,7 @@ def to_qwt2(za, zo=50, shorted=True):
     z1 = np.sqrt(zo / gl) * np.array([1, 1])
     z2 = 1 / bl * np.array([1, -1]) * (1 if shorted else -1)
     d = np.array([ 45, 135 ])
-    res = np.array([ z1, z2, d ]).T
+    res = np.array([ z1, d, z2 ]).T
     return res[1] if z2[0] < 0 else res[0]
 
 def to_qwt3(za, z2, zo=50, shorted=True):
@@ -376,20 +376,19 @@ def write_stub1(nw, data):
                     'shorted' if shorted else 'open')
 
 def write_qwt2(nw, data):
-    print('MHZ       ZQWT   ZSHUNT  LSHUNT          ZS               '
-          'ZL       LSHUNT   ZSHUNT     ZQWT')
+    print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6),
-                fm('gga', *to_qwt2(np.conj(ZS), shorted=shorted)),
+                fm('gag', *to_qwt2(np.conj(ZS), shorted=shorted)),
                 fm('cc', ZS, ZL),
-                fm('agg', *to_qwt2(np.conj(ZL), shorted=shorted)[::-1]),
+                fm('gag', *to_qwt2(np.conj(ZL), shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
 def write_qwt3(nw, data):
-    print('MHZ       ZQWT  LSHUNT          ZS               ZL       LSHUNT     ZQWT')
+    print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         z2 = data.get('z2')
@@ -397,7 +396,9 @@ def write_qwt3(nw, data):
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6), 
                 fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=shorted)),
+                fm('g', z2),
                 fm('cc', ZS, ZIN, ZOUT, ZL),
+                fm('g', z2),
                 fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
