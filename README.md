@@ -365,8 +365,8 @@ A quarter wave transformer and 72 ohm stub match example.
 ```
 $ < example3.s2p cascade -qwtz 72
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
-2000     28.48   81.30       72     5.124-7.542j     5.124+7.542j       72  145.27    118.8 open
-2000     28.48  171.30       72     5.124-7.542j     5.124+7.542j       72   55.27    118.8 shorted
+2000     28.48   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27    118.8 open
+2000     28.48  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27    118.8 shorted
 ```
 
 

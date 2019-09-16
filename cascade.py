@@ -353,7 +353,7 @@ def write_lmatch(nw, data):
           'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6), 
                 fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
@@ -367,7 +367,7 @@ def write_stub1(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         z2 = data.get('z2')
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             for shorted in [ False, True ]:
                 print(fm('F', f / 1e6),
@@ -382,7 +382,7 @@ def write_qwt2(nw, data):
     print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6),
                 fm('gag', *to_qwt2(np.conj(ZS), shorted=shorted)),
@@ -395,12 +395,12 @@ def write_qwt3(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         z2 = data.get('z2')
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6), 
                 fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=shorted)),
                 fm('g', z2),
-                fm('cc', ZS, ZIN, ZOUT, ZL),
+                fm('cc', ZS, ZL),
                 fm('g', z2),
                 fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
