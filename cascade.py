@@ -102,11 +102,13 @@ def smatch(S):
 
 def gin(S, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return S11 + S12 * S21 * GL / (1 - S22 * GL)
+    num = S12 * S21 * GL
+    return S11 + (0 if num == 0 else num / (1 - S22 * GL))
 
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return S22 + S12 * S21 * GS / (1 - S11 * GS)
+    num = S12 * S21 * GS
+    return S22 + (0 if num == 0 else num / (1 - S11 * GS))
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
