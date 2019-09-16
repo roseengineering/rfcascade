@@ -363,16 +363,19 @@ def write_lmatch(nw, data):
                 fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
 def write_stub1(nw, data):
-    print('MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT')
+    print('MHZ     ZLINES  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT   ZLINES')
     for i in range(len(nw)):
         f = nw.f[i]
+        z2 = data.get('z2')
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             for shorted in [ False, True ]:
                 print(fm('F', f / 1e6),
-                    fm('aa', *to_stub1(np.conj(ZS), shorted=shorted)[i]),
+                    fm('g', z2),
+                    fm('aa', *to_stub1(np.conj(ZS), z2, shorted=shorted)[i]),
                     fm('cc', ZS, ZL),
-                    fm('aa', *to_stub1(np.conj(ZL), shorted=shorted)[i][::-1]),
+                    fm('aa', *to_stub1(np.conj(ZL), z2, shorted=shorted)[i][::-1]),
+                    fm('g', z2),
                     'shorted' if shorted else 'open')
 
 def write_qwt2(nw, data):
@@ -465,8 +468,6 @@ def main(*args):
             data['mode'] = 'z'
         elif opt == '-g':
             data['mode'] = 'g'
-        elif opt == '-stub':
-            data['mode'] = 'stub'
         elif opt == '-lmatch':
             data['mode'] = 'lmatch'
         elif opt == '-qwt':
@@ -474,6 +475,9 @@ def main(*args):
         elif opt == '-qwtz':
             data['z2'] = float(args.pop(0))
             data['mode'] = 'qwt3'
+        elif opt == '-stub':
+            data['z2'] = float(args.pop(0))
+            data['mode'] = 'stub'
 
         # matching options
 

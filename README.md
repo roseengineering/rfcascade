@@ -56,7 +56,7 @@ as comments.  It can also output the network in following alternative formats:
 -z           : show matching solutions in impedance
 -g           : show matching solutions in gamma
 -lmatch      : match with l-section networks
--stub        : match with single shunt stub network
+-stub <ohms> : match with single shunt stub network using given line impedance
 -qwt         : match with quarter wavelength and shunt stub
 -qwtz <ohms> : match with quarter wavelength and shunt stub of given impedance
 ```
@@ -328,12 +328,12 @@ A stub match example.  Stub lengths are in degrees.
 
 
 ```
-$ < example3.s2p cascade -stub
-MHZ    LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT
-2000   109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83 open
-2000    19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83 shorted
-2000    70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17 open
-2000   160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17 shorted
+$ < example3.s2p cascade -stub 50
+MHZ     ZLINES  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT   ZLINES
+2000        50  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83       50 open
+2000        50   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83       50 shorted
+2000        50   70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17       50 open
+2000        50  160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17       50 shorted
 ```
 
 
