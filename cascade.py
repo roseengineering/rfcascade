@@ -337,7 +337,7 @@ def write_sparam(nw):
         print(fm('F', f / 1e6), fm('pppp', *S.T.flatten()), '!', fm('dgg', gum(S), K, mu(S)))
 
 def write_summary(nw):
-    print('MHZ           Z11              Z22         GUI    S21    GUO    '
+    print('MHZ            Z11             Z22         GUI    S21    GUO    '
           'GUM   GMSG   GMAG     GU        K        D       MU')
     for i in range(len(nw)):
         f = nw.f[i]
@@ -406,18 +406,20 @@ def write_qwt3(nw, data):
                 'shorted' if shorted else 'open')
 
 def write_match(nw, data):
-    print('MHZ            ZS              ZIN             ZOUT               ZL')
+    print('MHZ      QIN          ZS              ZIN             ZOUT               ZL        QOUT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        print(fm('Fcccc', f / 1e6, ZS, ZIN, ZOUT, ZL))
+        QIN, QOUT = np.abs(ZIN.imag / ZIN.real), np.abs(ZOUT.imag / ZOUT.real)
+        print(fm('Ffccccf', f / 1e6, QIN, ZS, ZIN, ZOUT, ZL, QOUT))
 
 def write_gamma(nw, data):
-    print('MHZ             GS                GIN                GOUT                GL')
+    print('MHZ      QIN           GS                GIN                GOUT                GL         QOUT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        print(fm('Fpppp', f / 1e6, z2g(ZS), z2g(ZIN), z2g(ZOUT), z2g(ZL)))
+        QIN, QOUT = np.abs(ZIN.imag / ZIN.real), np.abs(ZOUT.imag / ZOUT.real)
+        print(fm('Ffppppf', f / 1e6, QIN, z2g(ZS), z2g(ZIN), z2g(ZOUT), z2g(ZL), QOUT))
 
 def write_network(nw, data):
     mode = data.get('mode')
