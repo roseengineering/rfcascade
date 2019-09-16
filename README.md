@@ -51,14 +51,14 @@ the stack in touchstone format with GUM and Rollet stability information
 as comments.  It can also output the network in following alternative formats:
 
 ```
--a           : display the network as ABCD matrices
--s           : summarize the network in terms of impedances, stability and gain (dB) values
--z           : show matching solutions in impedance
--g           : show matching solutions in gamma
--lmatch      : match with l-section networks
--stub <ohms> : match with single shunt stub network using given line impedance
--qwt         : match with quarter wavelength and shunt stub
--qwtz <ohms> : match with quarter wavelength and shunt stub of given impedance
+-a            : display the network as ABCD matrices
+-s            : summarize the network in terms of impedances, stability and gain (dB) values
+-z            : show matching solutions in impedance
+-g            : show matching solutions in gamma
+-lmatch       : match with l-section networks
+-stub1 <ohms> : match with single shunt stub network using given line impedance
+-qwt2         : match with quarter wavelength and shunt stub
+-qwt3 <ohms>  : match with quarter wavelength and shunt stub of given impedance
 ```
 
 Only 50 ohm networks are supported.
@@ -121,7 +121,7 @@ Summarize the network.  GU is not in dB.
 
 ```
 $ < 2n5179_5ma.s2p cascade -s
-MHZ           Z11              Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
+MHZ            Z11             Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
 0               139+0j           591+0j   1.09  16.62   5.41  23.13      -  23.13   1.00      inf   0.3975    1.185
 100       31.84-38.55j     22.13-100.9j   1.09  16.62   5.41  23.13  24.70      -      -   0.4623   0.2799   0.8889
 200       27.94-11.17j     11.59-46.09j   0.45  12.46   4.07  16.99  20.92  18.91   1.18    1.109   0.1542    1.021
@@ -289,7 +289,7 @@ Summarize the stabilized cascode amp.
 
 ```
 $ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s
-MHZ           Z11              Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
+MHZ            Z11             Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
 0               139+0j 98.66+9.406e-17j   1.09  13.04   0.49  14.62      -  14.62   1.00      inf   0.1542    3.055
 100       38.12-41.92j       109-16.32j   0.97  14.27   0.69  15.92  37.50  15.93   1.00    71.73   0.1668    2.554
 200       35.09-12.99j      104.8-59.1j   0.24  12.76   1.17  14.17  30.79  14.17   1.00    22.95   0.1134    1.988
@@ -309,8 +309,8 @@ Show impedance matching information.
 
 ```
 $ < example3.s2p cascade -z
-MHZ            ZS              ZIN             ZOUT               ZL
-2000      5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j
+MHZ      QIN          ZS              ZIN             ZOUT               ZL        QOUT
+2000    1.47     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   2.72
 ```
 
 
@@ -319,8 +319,8 @@ Show gamma matching information.
 
 ```
 $ < example3.s2p cascade -g
-MHZ             GS                GIN                GOUT                GL
-2000      0.8179 -162.67     0.8179  162.67     0.7495  -52.57     0.7495   52.57
+MHZ      QIN           GS                GIN                GOUT                GL         QOUT
+2000    1.47     0.8179 -162.67     0.8179  162.67     0.7495  -52.57     0.7495   52.57   2.72
 ```
 
 
@@ -328,7 +328,7 @@ A stub match example.  Stub lengths are in degrees.
 
 
 ```
-$ < example3.s2p cascade -stub 50
+$ < example3.s2p cascade -stub1 50
 MHZ     ZLINES  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT   ZLINES
 2000        50  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83       50 open
 2000        50   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83       50 shorted
@@ -352,7 +352,7 @@ A quarter wave transformer and stub match example.
 
 
 ```
-$ < example3.s2p cascade -qwt
+$ < example3.s2p cascade -qwt2
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 2000     28.48   45.00    11.02     5.124-7.542j     33.68+91.48j    103.9  135.00    118.8 open
 2000     28.48  135.00    11.02     5.124-7.542j     33.68+91.48j    103.9   45.00    118.8 shorted
@@ -363,25 +363,25 @@ A quarter wave transformer and 72 ohm stub match example.
 
 
 ```
-$ < example3.s2p cascade -qwtz 72
+$ < example3.s2p cascade -qwt3 72
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 2000     28.48   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27    118.8 open
 2000     28.48  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27    118.8 shorted
 ```
 
 
-Solve for maximum gain.
+Match a network for maximum gain.
 
 
 ```
-$ < example4.s2p cascade -qwt
+$ < example4.s2p cascade -qwt2
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 4000     65.39   45.00    11.78     1.593-11.56j      1.58+70.85j    70.89  135.00    398.7 open
 4000     65.39  135.00    11.78     1.593-11.56j      1.58+70.85j    70.89   45.00    398.7 shorted
 ```
 
 
-Create a network of the match.
+Create a network of this match.
 
 
 ```
@@ -392,8 +392,8 @@ $ < example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade 
 ```
 
 
-Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers. Note, AN967 
-calculates the load reflection coefficient incorrectly.  Gonzalez has a corrected value. 
+Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers.  Gonzalez has a corrected value 
+for the load reflection coefficient in AN967.
 
 
 ```
