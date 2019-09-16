@@ -506,8 +506,9 @@ def main(*args):
         # unary operations
 
         elif opt == '-unitary':
+            GS, GL = data.pop('gs', None), data.pop('gl', None)
             for S in top.s:
-                ZS, ZL, ZIN, ZOUT = matching(S, data.get('gs'), data.get('gl'))
+                ZS, ZL, ZIN, ZOUT = matching(S, GS, GL)
                 S[0,0], S[0,1], S[1,1] = z2g(ZIN), 0, z2g(ZOUT)
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
