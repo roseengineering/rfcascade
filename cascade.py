@@ -406,20 +406,20 @@ def write_qwt3(nw, data):
                 'shorted' if shorted else 'open')
 
 def write_match(nw, data):
-    print('MHZ      QIN          ZS              ZIN             ZOUT               ZL        QOUT')
+    print('MHZ       QS          ZS              ZIN             ZOUT               ZL          QL')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        QIN, QOUT = np.abs(ZIN.imag / ZIN.real), np.abs(ZOUT.imag / ZOUT.real)
-        print(fm('Ffccccf', f / 1e6, QIN, ZS, ZIN, ZOUT, ZL, QOUT))
+        QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
+        print(fm('Ffccccf', f / 1e6, QS, ZS, ZIN, ZOUT, ZL, QL))
 
 def write_gamma(nw, data):
-    print('MHZ      QIN           GS                GIN                GOUT                GL         QOUT')
+    print('MHZ       QS           GS                GIN                GOUT                GL           QL')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        QIN, QOUT = np.abs(ZIN.imag / ZIN.real), np.abs(ZOUT.imag / ZOUT.real)
-        print(fm('Ffppppf', f / 1e6, QIN, z2g(ZS), z2g(ZIN), z2g(ZOUT), z2g(ZL), QOUT))
+        QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
+        print(fm('Ffppppf', f / 1e6, QS, z2g(ZS), z2g(ZIN), z2g(ZOUT), z2g(ZL), QL))
 
 def write_network(nw, data):
     mode = data.get('mode')
