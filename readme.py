@@ -71,6 +71,7 @@ as comments.  It can also output the network in following alternative formats:
 -g            : show matching solutions in gamma
 -lmatch       : match with l-section networks
 -stub1        : match with single shunt stub network
+-qwt1         : match with quarter wavelength with series section
 -qwt2         : match with quarter wavelength and shunt stub
 -qwt3 <ohms>  : match with quarter wavelength and shunt stub of given impedance
 ```

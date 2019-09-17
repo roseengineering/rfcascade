@@ -26,6 +26,7 @@ def lmin(za, zo=50, minimum=True):
        th = th + 2 * np.pi if th < 0 else th
        lm = th / 4 / np.pi
        zm = s * zo
+   lm = np.rad2deg(lm)
    return lm, zm
 
 def stub1(za, zo=50, shorted=True): # match with a stub-series input 
@@ -54,7 +55,7 @@ def qwt1(za, zo=50, minimum=True):
     ---------------==========---------|
                      L1=1/4     Lm
     """
-    lm, zm = lmin(za, zo=zo, minimum=True)
+    lm, zm = lmin(za, zo=zo, minimum=minimum)
     z1 = np.sqrt(zo * zm)
     return z1, lm
 
@@ -86,7 +87,7 @@ def qwt3(za, z2, zo=50, shorted=True):
     """
     ya = 1 / za
     gl, bl = ya.real, ya.imag
-    z1 = np.nan if zo / gl < 0 else np.sqrt(zo / gl) 
+    z1 = np.sqrt(zo / gl) 
     d = np.arctan([ 1 / (bl * z2), -bl * z2 ])
     d = np.mod(d, np.pi)
     d = np.rad2deg(d)
@@ -104,7 +105,6 @@ def lmatch(ZS, ZL, reverse=False):
     RS, XS = ZS.real, ZS.imag
     RL, XL = ZL.real, ZL.imag
     QS = RS / RL - 1 + XS**2 / (RS * RL)
-    if QS < 0: return [[ np.nan, np.nan], [ np.nan, np.nan ]]
     Q = np.sqrt(QS)
     X1 = (XS + np.array([1, -1]) * Q * RS) / (RS / RL - 1)
     X2 = -(XL + np.array([1, -1]) * Q * RL)
@@ -121,21 +121,17 @@ def smatch(S):
     B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
     C1 = S11 - D * np.conj(S22)
     C2 = S22 - D * np.conj(S11)
-    den = B1**2 - 4 * np.abs(C1)**2
-    GS = np.nan if den < 0 or C1 == 0 else (B1 - np.sign(B1) * np.sqrt(den)) / (2 * C1)
-    den = B2**2 - 4 * np.abs(C2)**2
-    GL = np.nan if den < 0 or C2 == 0 else (B2 - np.sign(B2) * np.sqrt(den)) / (2 * C2)
+    GS = (B1 - np.sign(B1) * np.sqrt(B1**2 - 4 * np.abs(C1)**2)) / (2 * C1)
+    GL = (B2 - np.sign(B2) * np.sqrt(B2**2 - 4 * np.abs(C2)**2)) / (2 * C2)
     return GS, GL
 
 def gin(S, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    num = S12 * S21 * GL
-    return S11 + (0 if num == 0 else num / (1 - S22 * GL))
+    return S11 + S12 * S21 * GL / (1 - S22 * GL)
 
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    num = S12 * S21 * GS
-    return S22 + (0 if num == 0 else num / (1 - S11 * GS))
+    return S22 + S12 * S21 * GS / (1 - S11 * GS)
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -151,18 +147,18 @@ def guo(S):
 
 def gmsg(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return np.nan if S12 == 0 else np.abs(S21) / np.abs(S12)
+    return np.abs(S21) / np.abs(S12)
 
 def gmag(S):
     K = rollet(S)
-    if np.isinf(K): return gum(S)
-    return np.nan if K < 1 else gmsg(S) * (K - np.sqrt(K**2 - 1))
+    return gum(S) if np.isinf(K) else gmsg(S) * (K - np.sqrt(K**2 - 1))
 
 def gu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     U = (S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)
     K = rollet(S)
-    return np.nan if K < 1 else 1 / np.abs(1 - U)**2
+    if K < 1: return np.nan
+    return 1 / np.abs(1 - U)**2
 
 def det(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -315,7 +311,7 @@ def fm(mode, *d, f=None):
         if m == 'c':
             res.append('{:>16s}'.format('-') if np.isnan(x) else '{:16.4g}'.format(x))
         if m == 'd':
-            x = 10 * np.log10(x) if x > 0 else np.nan
+            x = 10 * np.log10(x)
             res.append('{:>6s}'.format('-') if np.isnan(x) else '{:6.2f}'.format(x))
         if m == 'f':
             res.append('{:>6s}'.format('-') if np.isnan(x) else '{:6.2f}'.format(x))
@@ -391,7 +387,7 @@ def write_lmatch(nw, data):
 
 def write_stub1(nw, data):
     zo = 50
-    print('MHZ         Z0  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT       Z0')
+    print('MHZ      ZLINE  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT    ZLINE')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
@@ -404,6 +400,20 @@ def write_stub1(nw, data):
                     fm('aa', *stub1(np.conj(ZL), shorted=shorted)[i][::-1]),
                     fm('g', zo),
                     'shorted' if shorted else 'open')
+
+def write_qwt1(nw, data):
+    zo = 50
+    print('MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT')
+    for i in range(len(nw)):
+        f = nw.f[i]
+        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        for minimum in [ False, True ]:
+            print(fm('F', f / 1e6),
+                fm('ga', *qwt1(np.conj(ZS), minimum=minimum)),
+                fm('g', zo),
+                fm('cc', ZS, ZL),
+                fm('g', zo),
+                fm('ag', *qwt1(np.conj(ZL), minimum=minimum)[::-1]))
 
 def write_qwt2(nw, data):
     print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
@@ -462,6 +472,8 @@ def write_network(nw, data):
         write_lmatch(nw, data)
     elif mode == 'stub1':
         write_stub1(nw, data)
+    elif mode == 'qwt1':
+        write_qwt1(nw, data)
     elif mode == 'qwt2':
         write_qwt2(nw, data)
     elif mode == 'qwt3':
@@ -499,6 +511,8 @@ def main(*args):
             data['mode'] = 'g'
         elif opt == '-lmatch':
             data['mode'] = 'lmatch'
+        elif opt == '-qwt1':
+            data['mode'] = 'qwt1'
         elif opt == '-qwt2':
             data['mode'] = 'qwt2'
         elif opt == '-qwt3':
@@ -605,7 +619,7 @@ def main(*args):
 
 
 if __name__ == '__main__':
-    np.seterr(divide='ignore')
+    np.seterr(divide='ignore', invalid='ignore')
     main(*sys.argv[1:])
 
 
