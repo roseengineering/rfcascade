@@ -155,6 +155,7 @@ def gmsg(S):
 def gmag(S):
     K = rollet(S)
     if K < 1: return np.nan
+    if np.isinf(K): return gum(S)
     return gmsg(S) * (K - np.sqrt(K**2 - 1))
 
 def gu(S):
@@ -170,9 +171,7 @@ def det(S):
 
 def rollet(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    D = det(S)
-    K = (1 - np.abs(S11)**2 - np.abs(S22)**2 + np.abs(D)**2) / np.abs(2 * S12 * S21) 
-    return K
+    return (1 - np.abs(S11)**2 - np.abs(S22)**2 + np.abs(det(S))**2) / np.abs(2 * S12 * S21)
 
 def mu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
