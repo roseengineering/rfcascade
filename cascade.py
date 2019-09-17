@@ -374,7 +374,10 @@ def write_summary(nw):
             np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, 
             np.abs(det(S)), mu(S)))
 
+###
+
 def write_lmatch(nw, data):
+    ZLINE = data.get('line', 50)
     print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          '
           'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
@@ -382,14 +385,14 @@ def write_lmatch(nw, data):
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             print(fm('F', f / 1e6), 
-                fm('xx', *lmatch(50, np.conj(ZS))[i], f=f), '!',
-                fm('xx', *lmatch(50, np.conj(ZS), 'r')[i], f=f), 
+                fm('xx', *lmatch(ZLINE, np.conj(ZS))[i], f=f), '!',
+                fm('xx', *lmatch(ZLINE, np.conj(ZS), 'r')[i], f=f), 
                 fm('cc', ZS, ZL),
-                fm('xx', *lmatch(np.conj(ZL), 50)[i], f=f), '!',
-                fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
+                fm('xx', *lmatch(np.conj(ZL), ZLINE)[i], f=f), '!',
+                fm('xx', *lmatch(np.conj(ZL), ZLINE, 'r')[i], f=f))
 
 def write_stub1(nw, data):
-    zo = 50
+    ZLINE = data.get('line', 50)
     print('MHZ      ZLINE  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT    ZLINE')
     for i in range(len(nw)):
         f = nw.f[i]
@@ -397,40 +400,42 @@ def write_stub1(nw, data):
         for i in range(2):
             for shorted in [ False, True ]:
                 print(fm('F', f / 1e6),
-                    fm('g', zo),
-                    fm('aa', *stub1(np.conj(ZS), shorted=shorted)[i]),
+                    fm('g', ZLINE),
+                    fm('aa', *stub1(np.conj(ZS), zo=ZLINE, shorted=shorted)[i]),
                     fm('cc', ZS, ZL),
-                    fm('aa', *stub1(np.conj(ZL), shorted=shorted)[i][::-1]),
-                    fm('g', zo),
+                    fm('aa', *stub1(np.conj(ZL), zo=ZLINE, shorted=shorted)[i][::-1]),
+                    fm('g', ZLINE),
                     'shorted' if shorted else 'open')
 
 def write_qwt1(nw, data):
-    zo = 50
+    ZLINE = data.get('line', 50)
     print('MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for minimum in [ False, True ]:
             print(fm('F', f / 1e6),
-                fm('ga', *qwt1(np.conj(ZS), minimum=minimum)),
-                fm('g', zo),
+                fm('ga', *qwt1(np.conj(ZS), zo=ZLINE, minimum=minimum)),
+                fm('g', ZLINE),
                 fm('cc', ZS, ZL),
-                fm('g', zo),
-                fm('ag', *qwt1(np.conj(ZL), minimum=minimum)[::-1]))
+                fm('g', ZLINE),
+                fm('ag', *qwt1(np.conj(ZL), zo=ZLINE, minimum=minimum)[::-1]))
 
 def write_qwt2(nw, data):
+    ZLINE = data.get('line', 50)
     print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6),
-                fm('gag', *qwt2(np.conj(ZS), shorted=shorted)),
+                fm('gag', *qwt2(np.conj(ZS), zo=ZLINE, shorted=shorted)),
                 fm('cc', ZS, ZL),
-                fm('gag', *qwt2(np.conj(ZL), shorted=shorted)[::-1]),
+                fm('gag', *qwt2(np.conj(ZL), zo=ZLINE, shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
 def write_qwt3(nw, data):
+    ZLINE = data.get('line', 50)
     z2 = data.get('z2')
     print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
@@ -438,11 +443,11 @@ def write_qwt3(nw, data):
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6), 
-                fm('ga', *qwt3(np.conj(ZS), z2, shorted=shorted)),
+                fm('ga', *qwt3(np.conj(ZS), z2, zo=ZLINE, shorted=shorted)),
                 fm('g', z2),
                 fm('cc', ZS, ZL),
                 fm('g', z2),
-                fm('ag', *qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]),
+                fm('ag', *qwt3(np.conj(ZL), z2, zo=ZLINE, shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
 def write_match(nw, data):
@@ -542,6 +547,8 @@ def main(*args):
             data['gin'] = to_complex(args.pop(0))
         elif opt == '-gout':
             data['gout'] = to_complex(args.pop(0))
+        elif opt == '-line':
+            data['line'] = float(args.pop(0))
 
         # binary operations
 

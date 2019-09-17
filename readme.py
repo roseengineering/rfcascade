@@ -74,6 +74,7 @@ as comments.  It can also output the network in following alternative formats:
 -qwt1         : match with quarter wavelength with series section
 -qwt2         : match with quarter wavelength and shunt stub
 -qwt3 <ohms>  : match with quarter wavelength and shunt stub of given impedance
+-line <ohms>  : line impedance to match to
 ```
 
 Only 50 ohm networks are supported.
