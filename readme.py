@@ -151,6 +151,10 @@ A L-section match example.
 
 { run("< example3.s2p cascade -lmatch") }
 
+A quarter wave transformer with a series section example.
+
+{ run("< example3.s2p cascade -qwt1") }
+
 A quarter wave transformer and stub match example.
 
 { run("< example3.s2p cascade -qwt2") }

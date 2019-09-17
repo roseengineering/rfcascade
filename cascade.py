@@ -16,6 +16,10 @@ def swr(G):
 ### matching
 
 def lmin(za, zo=50, minimum=True):
+   """
+   lm = location in degrees
+   zm = real-valued wave impedance at lm
+   """
    G = z2g(za, zo)
    s = swr(G)
    th = np.angle(G)
@@ -26,27 +30,7 @@ def lmin(za, zo=50, minimum=True):
        th = th + 2 * np.pi if th < 0 else th
        lm = th / 4 / np.pi
        zm = s * zo
-   lm = np.rad2deg(lm)
-   return lm, zm
-
-def stub1(za, zo=50, shorted=True): # match with a stub-series input 
-    """
-    -----------------/-----------|
-    main line zo    /            za
-    ---------------/---/----l----|
-                  /   d
-                 /___/
-    """
-    GL = z2g(za, zo)
-    thL = np.angle(GL)
-    bl = thL / 2 + np.array([1, -1]) * np.arccos(-abs(GL)) / 2
-    if shorted:
-        bd = np.arctan(-np.tan(2 * bl - thL) / 2)
-    else:
-        bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
-    d = np.mod([ bd, bl ], np.pi)
-    d = np.rad2deg(d)
-    return d.T
+   return lm * 360, zm
 
 def qwt1(za, zo=50, minimum=True):
     """
@@ -95,6 +79,25 @@ def qwt3(za, z2, zo=50, shorted=True):
         [ z1, d[0] ],
         [ z1, d[1] ]
     ])[0 if shorted else 1]
+
+def stub1(za, zo=50, shorted=True): # match with a stub-series input 
+    """
+    -----------------/-----------|
+    main line zo    /            za
+    ---------------/---/----l----|
+                  /   d
+                 /___/
+    """
+    GL = z2g(za, zo)
+    thL = np.angle(GL)
+    bl = thL / 2 + np.array([1, -1]) * np.arccos(-abs(GL)) / 2
+    if shorted:
+        bd = np.arctan(-np.tan(2 * bl - thL) / 2)
+    else:
+        bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
+    d = np.mod([ bd, bl ], np.pi)
+    d = np.rad2deg(d)
+    return d.T
 
 def lmatch(ZS, ZL, reverse=False):
     """
@@ -151,7 +154,8 @@ def gmsg(S):
 
 def gmag(S):
     K = rollet(S)
-    return gum(S) if np.isinf(K) else gmsg(S) * (K - np.sqrt(K**2 - 1))
+    if K < 1: return np.nan
+    return gmsg(S) * (K - np.sqrt(K**2 - 1))
 
 def gu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -491,7 +495,7 @@ def main(*args):
 
     b = a.copy()
     for S in b.s:
-        S[0,0], S[0,1], S[1,0], S[1,1] = -1, 0, 0, -1 
+        S[0,0], S[0,1], S[1,0], S[1,1] = 1, 0, 0, 1 
     stack.append(b)
     stack.append(a)
 
