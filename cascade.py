@@ -118,7 +118,7 @@ def lmatch(ZS, ZL, reverse=False):
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     K = rollet(S)
-    if K < 1: return np.nan, np.nan
+    if K < 1: K = np.nan
     D = det(S)
     B1 = 1 + np.abs(S11)**2 - np.abs(S22)**2 - np.abs(D)**2;
     B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
@@ -154,9 +154,8 @@ def gmsg(S):
 
 def gmag(S):
     K = rollet(S)
-    if K < 1: return np.nan
-    if np.isinf(K): return gum(S)
-    return gmsg(S) * (K - np.sqrt(K**2 - 1))
+    if K < 1: K = np.nan
+    return gum(S) if np.isinf(K) else gmsg(S) * (K - np.sqrt(K**2 - 1))
 
 def gu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -282,17 +281,18 @@ def shorted_stub(deg, zo=50):
 def to_complex(s):
     if '/' in s:
         r, theta = s.split('/')
-        return float(r) * np.exp(1j * float(theta) * np.pi / 180)
+        return float(r) * np.exp(1j * np.deg2rad(float(theta)))
     else:
         return complex(s)
 
 def matching(S, GS, GL):
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     if GS is None and GL is None:
-        GS, GL = smatch(S)
+        GS, GL = smatch(S) # if S12 * S21 != 0 else np.conj(S11), np.conj(S22)
     elif GL is None:
-        GL = np.conj(gout(S, GS))
+        GL = np.conj(gout(S, GS)) # if S12 * S21 != 0 else np.conj(S22)
     elif GS is None:
-        GS = np.conj(gin(S, GL))
+        GS = np.conj(gin(S, GL)) # if S12 * S21 != 0 else np.conj(S11)
     GIN, GOUT = gin(S, GL), gout(S, GS)
     return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
 
@@ -310,7 +310,7 @@ def fm(mode, *d, f=None):
     for m, x in zip(list(mode), d):
         if m == 'p':
             res.append('{:>10s}'.format('-') if np.isnan(x) else '{:10.4g}'.format(np.abs(x)))
-            res.append('{:>7s}'.format('-') if np.isnan(x) else '{:7.2f}'.format(np.angle(x) * 180 / np.pi))
+            res.append('{:>7s}'.format('-') if np.isnan(x) else '{:7.2f}'.format(np.rad2deg(np.angle(x))))
         if m == 'c':
             res.append('{:>16s}'.format('-') if np.isnan(x) else '{:16.4g}'.format(x))
         if m == 'd':
@@ -597,7 +597,7 @@ def main(*args):
             stack.append(read_network(args.pop(0)))
         elif opt == '-tline':
             x = to_complex(args.pop(0))
-            S = abcd2s(tline(np.angle(x) * 180 / np.pi, zo=np.abs(x)))
+            S = abcd2s(tline(np.rad2deg(np.angle(x)), zo=np.abs(x)))
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
         elif opt == '-series':
             x = to_complex(args.pop(0))
@@ -609,12 +609,12 @@ def main(*args):
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
         elif opt == '-open':
             x = to_complex(args.pop(0))
-            x = open_stub(np.angle(x) * 180 / np.pi, zo=np.abs(x))
+            x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
         elif opt == '-shorted':
             x = to_complex(args.pop(0))
-            x = shorted_stub(np.angle(x) * 180 / np.pi, zo=np.abs(x))
+            x = shorted_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
 
