@@ -10,9 +10,25 @@ def z2g(Z, Z0=50):
 def g2z(G, Z0=50):
     return Z0 * (1 + G) / (1 - G)
 
+def swr(G):
+    return (1 + np.abs(G)) / (1 - np.abs(G))
+    
 ### matching
 
-def to_stub1(za, zo=50, shorted=True): # match with a stub-series input 
+def lmin(za, zo=50, minimum=True):
+   G = z2g(za, zo)
+   s = swr(G)
+   th = np.angle(G)
+   if minimum:
+       lm = (th + np.pi) / 4 / np.pi
+       zm = zo / s
+   else:
+       th = th + 2 * np.pi if th < 0 else th
+       lm = th / 4 / np.pi
+       zm = s * zo
+   return lm, zm
+
+def stub1(za, zo=50, shorted=True): # match with a stub-series input 
     """
     -----------------/-----------|
     main line zo    /            za
@@ -31,7 +47,18 @@ def to_stub1(za, zo=50, shorted=True): # match with a stub-series input
     d = np.rad2deg(d)
     return d.T
 
-def to_qwt2(za, zo=50, shorted=True):
+def qwt1(za, zo=50, minimum=True):
+    """
+    ---------------==========---------|
+    main line Z0       Z1       Z0    ZL
+    ---------------==========---------|
+                     L1=1/4     Lm
+    """
+    lm, zm = lmin(za, zo=zo, minimum=True)
+    z1 = np.sqrt(zo * zm)
+    return z1, lm
+
+def qwt2(za, zo=50, shorted=True):
     """
     ---------------==========----|--|
     main line zo       z1        |  za
@@ -48,7 +75,7 @@ def to_qwt2(za, zo=50, shorted=True):
     res = np.array([ z1, d, z2 ]).T
     return res[1] if z2[0] < 0 else res[0]
 
-def to_qwt3(za, z2, zo=50, shorted=True):
+def qwt3(za, z2, zo=50, shorted=True):
     """
     ---------------==========----|--|
     main line zo       z1        |  za
@@ -363,19 +390,19 @@ def write_lmatch(nw, data):
                 fm('xx', *lmatch(np.conj(ZL), 50, 'r')[i], f=f))
 
 def write_stub1(nw, data):
-    print('MHZ     ZLINES  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT   ZLINES')
+    zo = 50
+    print('MHZ         Z0  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT       Z0')
     for i in range(len(nw)):
         f = nw.f[i]
-        z2 = data.get('z2')
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for i in range(2):
             for shorted in [ False, True ]:
                 print(fm('F', f / 1e6),
-                    fm('g', z2),
-                    fm('aa', *to_stub1(np.conj(ZS), z2, shorted=shorted)[i]),
+                    fm('g', zo),
+                    fm('aa', *stub1(np.conj(ZS), shorted=shorted)[i]),
                     fm('cc', ZS, ZL),
-                    fm('aa', *to_stub1(np.conj(ZL), z2, shorted=shorted)[i][::-1]),
-                    fm('g', z2),
+                    fm('aa', *stub1(np.conj(ZL), shorted=shorted)[i][::-1]),
+                    fm('g', zo),
                     'shorted' if shorted else 'open')
 
 def write_qwt2(nw, data):
@@ -385,24 +412,24 @@ def write_qwt2(nw, data):
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6),
-                fm('gag', *to_qwt2(np.conj(ZS), shorted=shorted)),
+                fm('gag', *qwt2(np.conj(ZS), shorted=shorted)),
                 fm('cc', ZS, ZL),
-                fm('gag', *to_qwt2(np.conj(ZL), shorted=shorted)[::-1]),
+                fm('gag', *qwt2(np.conj(ZL), shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
 def write_qwt3(nw, data):
+    z2 = data.get('z2')
     print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        z2 = data.get('z2')
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6), 
-                fm('ga', *to_qwt3(np.conj(ZS), z2, shorted=shorted)),
+                fm('ga', *qwt3(np.conj(ZS), z2, shorted=shorted)),
                 fm('g', z2),
                 fm('cc', ZS, ZL),
                 fm('g', z2),
-                fm('ag', *to_qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]),
+                fm('ag', *qwt3(np.conj(ZL), z2, shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
 def write_match(nw, data):
@@ -478,7 +505,6 @@ def main(*args):
             data['z2'] = float(args.pop(0))
             data['mode'] = 'qwt3'
         elif opt == '-stub1':
-            data['z2'] = float(args.pop(0))
             data['mode'] = 'stub1'
 
         # matching options
