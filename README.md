@@ -309,7 +309,7 @@ Show impedance matching information.
 
 ```
 $ < example3.s2p cascade -z
-MHZ      QIN          ZS              ZIN             ZOUT               ZL        QOUT
+MHZ       QS          ZS              ZIN             ZOUT               ZL          QL
 2000    1.47     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   2.72
 ```
 
@@ -319,7 +319,7 @@ Show gamma matching information.
 
 ```
 $ < example3.s2p cascade -g
-MHZ      QIN           GS                GIN                GOUT                GL         QOUT
+MHZ       QS           GS                GIN                GOUT                GL           QL
 2000    1.47     0.8179 -162.67     0.8179  162.67     0.7495  -52.57     0.7495   52.57   2.72
 ```
 
