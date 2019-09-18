@@ -582,9 +582,9 @@ def main(*args):
         elif opt == '-ccd':
             top.s = np.array([ ccd_transform(S) for S in top.s ])
         elif opt == '-lift':
+            henry = lambda x, f: complex(x) if 'j' in x or '/' in x else 2j * np.pi * f * float(x)
             x = args.pop(0)
-            Z = complex(x) if 'j' in x or '/' in x else 2j * np.pi * top.f[i] * float(x)
-            top.s = np.array([ lift_ground(S, z2g(Z)) for S in top.s ])
+            top.s = np.array([ lift_ground(top.s[i], z2g(henry(x, top.f[i]))) for i in range(len(top)) ])
 
         # push operations
 
