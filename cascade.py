@@ -197,9 +197,8 @@ def tothreeport(S):
         [       2*D12/(4-E),       2*D21/(4-E),     E/(4-E) ]
     ])
 
-def lift_ground(S, Z, Z0=50):
+def lift_ground(S, G):
     S = tothreeport(S)
-    G = z2g(Z, Z0)
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     S31 = S[2,0]
     S32 = S[2,1]
@@ -584,10 +583,8 @@ def main(*args):
             top.s = np.array([ ccd_transform(S) for S in top.s ])
         elif opt == '-lift':
             x = args.pop(0)
-            top.s = np.array([ lift_ground(
-                top.s[i], 
-                complex(x) if 'j' in x or '/' in x else 2j * np.pi * top.f[i] * float(x)
-            ) for i in range(len(top)) ])
+            Z = complex(x) if 'j' in x or '/' in x else 2j * np.pi * top.f[i] * float(x)
+            top.s = np.array([ lift_ground(S, z2g(Z)) for S in top.s ])
 
         # push operations
 
