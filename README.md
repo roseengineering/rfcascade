@@ -305,7 +305,7 @@ Show impedance matching information.
 
 
 ```
-$ < example3.s2p cascade -z
+$ < example2.s2p cascade -z
 MHZ       QS          ZS              ZIN             ZOUT               ZL          QL
 2000    1.47     5.124-7.542j     5.124+7.542j     33.68-91.48j     33.68+91.48j   2.72
 ```
@@ -315,7 +315,7 @@ Show gamma matching information.
 
 
 ```
-$ < example3.s2p cascade -g
+$ < example2.s2p cascade -g
 MHZ       QS           GS                GIN                GOUT                GL           QL
 2000    1.47     0.8179 -162.67     0.8179  162.67     0.7495  -52.57     0.7495   52.57   2.72
 ```
@@ -325,7 +325,7 @@ A stub match example.  Stub lengths are in degrees.
 
 
 ```
-$ < example3.s2p cascade -stub1
+$ < example2.s2p cascade -stub1
 MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE
 2000        50   17.93  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83   20.15       50 open
 2000        50   38.76   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83   47.65       50 shorted
@@ -338,7 +338,7 @@ A L-section match example.
 
 
 ```
-$ < example3.s2p cascade -lmatch
+$ < example2.s2p cascade -lmatch
 MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT
 2000   1.345nH  3.505pF !        -        -     5.124-7.542j     33.68+91.48j   4.61nH  738.6fF !  5.715nH  5.414nH
 2000    4.71pF  606.6pH !        -        -     5.124-7.542j     33.68+91.48j  39.99nH  8.574nH !  1.108pF  9.146nH
@@ -349,7 +349,7 @@ A quarter wave transformer with a series section example.
 
 
 ```
-$ < example3.s2p cascade -qwt1
+$ < example2.s2p cascade -qwt1
 MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT
 2000       158   81.33       50     5.124-7.542j     33.68+91.48j       50  153.72    132.1
 2000     15.83  171.33       50     5.124-7.542j     33.68+91.48j       50   63.72    18.92
@@ -360,7 +360,7 @@ A quarter wave transformer and stub match example.
 
 
 ```
-$ < example3.s2p cascade -qwt2
+$ < example2.s2p cascade -qwt2
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 2000     28.48   45.00    11.02     5.124-7.542j     33.68+91.48j    103.9  135.00    118.8 open
 2000     28.48  135.00    11.02     5.124-7.542j     33.68+91.48j    103.9   45.00    118.8 shorted
@@ -371,7 +371,7 @@ A quarter wave transformer and 72 ohm stub match example.
 
 
 ```
-$ < example3.s2p cascade -qwt3 72
+$ < example2.s2p cascade -qwt3 72
 MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT
 2000     28.48   72.98   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27  160.89    118.8 open
 2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 shorted
@@ -382,7 +382,7 @@ Match a network for maximum gain.
 
 
 ```
-$ < example4.s2p cascade -qwt2
+$ < example3.s2p cascade -qwt2
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 4000     65.39   45.00    11.78     1.593-11.56j      1.58+70.85j    70.89  135.00    398.7 open
 4000     65.39  135.00    11.78     1.593-11.56j      1.58+70.85j    70.89   45.00    398.7 shorted
@@ -393,7 +393,7 @@ Create a network of this match.
 
 
 ```
-$ < example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade
+$ < example3.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
 4000    0.001336   99.41      5.419 -173.66      0.158 -176.66   0.001339   88.91 !  14.68    1.012    1.168
@@ -405,7 +405,7 @@ for the load reflection coefficient in AN967.
 
 
 ```
-$ < example4.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade
+$ < example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
 4000      0.7444  157.00      1.681   -3.30          0    0.00     0.8438 -129.04 !  13.43      inf    1.185
