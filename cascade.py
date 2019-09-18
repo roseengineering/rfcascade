@@ -15,6 +15,11 @@ def swr(G):
     
 ### matching
 
+def balance(d, shorted=True):
+   d = np.deg2rad(d)
+   d = np.arctan(2 * tan(d) if shorted else tan(d) / 2)
+   return np.rad2deg(d)
+
 def lmin(za, zo=50, minimum=True):
    """
    lm = location in degrees
@@ -130,11 +135,11 @@ def smatch(S):
 
 def gin(S, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return S11 + S12 * S21 * GL / (1 - S22 * GL)
+    return S11 + (0 if S12 * S21 == 0 else S12 * S21 * GL / (1 - S22 * GL))
 
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return S22 + S12 * S21 * GS / (1 - S11 * GS)
+    return S22 + (0 if S12 * S21 == 0 else S12 * S21 * GS / (1 - S11 * GS))
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -159,9 +164,9 @@ def gmag(S):
 
 def gu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    U = (S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)
     K = rollet(S)
     if K < 1: return np.nan
+    U = (S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)
     return 1 / np.abs(1 - U)**2
 
 def det(S):
@@ -287,12 +292,13 @@ def to_complex(s):
 
 def matching(S, GS, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    w = S12 * S21
     if GS is None and GL is None:
-        GS, GL = smatch(S) # if S12 * S21 != 0 else np.conj(S11), np.conj(S22)
+        GS, GL = smatch(S) if w != 0 else (np.conj(S11), np.conj(S22))
     elif GL is None:
-        GL = np.conj(gout(S, GS)) # if S12 * S21 != 0 else np.conj(S22)
+        GL = np.conj(gout(S, GS)) if w != 0 else np.conj(S22)
     elif GS is None:
-        GS = np.conj(gin(S, GL)) # if S12 * S21 != 0 else np.conj(S11)
+        GS = np.conj(gin(S, GL)) if w != 0 else np.conj(S11)
     GIN, GOUT = gin(S, GL), gout(S, GS)
     return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
 
@@ -499,7 +505,7 @@ def main(*args):
 
     b = a.copy()
     for S in b.s:
-        S[0,0], S[0,1], S[1,0], S[1,1] = 1, 0, 0, 1 
+        S[0,0], S[0,1], S[1,0], S[1,1] = -1, 0, 0, -1 
     stack.append(b)
     stack.append(a)
 
@@ -539,14 +545,6 @@ def main(*args):
             data['gs'] = to_complex(args.pop(0))
         elif opt == '-gl':
             data['gl'] = to_complex(args.pop(0))
-        elif opt == '-zin':
-            data['gin'] = z2g(to_complex(args.pop(0)))
-        elif opt == '-zout':
-            data['gout'] = z2g(to_complex(args.pop(0)))
-        elif opt == '-gin':
-            data['gin'] = to_complex(args.pop(0))
-        elif opt == '-gout':
-            data['gout'] = to_complex(args.pop(0))
         elif opt == '-line':
             data['line'] = float(args.pop(0))
 
@@ -574,12 +572,11 @@ def main(*args):
 
         elif opt == '-unilateral':
             GS, GL = data.pop('gs', None), data.pop('gl', None)
-            GIN, GOUT = data.pop('gin', None), data.pop('gout', None)
             for S in top.s:
                 ZS, ZL, ZIN, ZOUT = matching(S, GS, GL)
-                S[0,0] = z2g(ZIN)if GIN is None else GIN 
+                S[0,0] = z2g(ZIN)
                 S[0,1] = 0
-                S[1,1] = z2g(ZOUT)if GOUT is None else GOUT
+                S[1,1] = z2g(ZOUT)
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
         elif opt == '-ccd':

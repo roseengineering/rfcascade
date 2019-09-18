@@ -47,18 +47,13 @@ input transformations as command line options:
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
-
--gin <complex>       : set the input gamma for unilateral operator
--zin <complex>       : set the input impedance for unilateral operator
--gout <complex>      : set the output gamma for unilateral operator
--zout <complex>      : set the output impedance for unilateral operator
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
 angle in degrees, for example '10/90'.  Transmission lines are given in complex form, with
 the magnitude setting the impedance and the angle setting the length.
 
-After the unilateral operator is used, it resets gs, gl, gin, and gout.
+After the unilateral operator is used, it resets gs, gl, zs, and zl.
 
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and Rollet stability information 
