@@ -17,7 +17,8 @@ def swr(G):
 
 def balance(d, shorted=True):
    d = np.deg2rad(d)
-   d = np.arctan(2 * tan(d) if shorted else tan(d) / 2)
+   d = np.arctan(2 * np.tan(d)) if shorted else np.arctan(np.tan(d) / 2)
+   d = np.mod(d, np.pi)
    return np.rad2deg(d)
 
 def lmin(za, zo=50, minimum=True):
@@ -80,10 +81,8 @@ def qwt3(za, z2, zo=50, shorted=True):
     d = np.arctan([ 1 / (bl * z2), -bl * z2 ])
     d = np.mod(d, np.pi)
     d = np.rad2deg(d)
-    return np.array([
-        [ z1, d[0] ],
-        [ z1, d[1] ]
-    ])[0 if shorted else 1]
+    i = 0 if shorted else 1
+    return np.array([ z1, balance(d[i], shorted=shorted), d[i] ])
 
 def stub1(za, zo=50, shorted=True): # match with a stub-series input 
     """
@@ -100,7 +99,7 @@ def stub1(za, zo=50, shorted=True): # match with a stub-series input
         bd = np.arctan(-np.tan(2 * bl - thL) / 2)
     else:
         bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
-    d = np.mod([ bd, bl ], np.pi)
+    d = np.mod([ balance(bd, shorted=shorted), bd, bl ], np.pi)
     d = np.rad2deg(d)
     return d.T
 
@@ -135,11 +134,13 @@ def smatch(S):
 
 def gin(S, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return S11 + (0 if S12 * S21 == 0 else S12 * S21 * GL / (1 - S22 * GL))
+    U = S12 * S21
+    return S11 + (0 if U == 0 else S12 * S21 * GL / (1 - S22 * GL))
 
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return S22 + (0 if S12 * S21 == 0 else S12 * S21 * GS / (1 - S11 * GS))
+    U = S12 * S21
+    return S22 + (0 if U == 0 else S12 * S21 * GS / (1 - S11 * GS))
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -292,13 +293,13 @@ def to_complex(s):
 
 def matching(S, GS, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    w = S12 * S21
+    U = S12 * S21
     if GS is None and GL is None:
-        GS, GL = smatch(S) if w != 0 else (np.conj(S11), np.conj(S22))
+        GS, GL = (np.conj(S11), np.conj(S22)) if U == 0 else smatch(S)
     elif GL is None:
-        GL = np.conj(gout(S, GS)) if w != 0 else np.conj(S22)
+        GL = np.conj(S22) if U == 0 else np.conj(gout(S, GS))
     elif GS is None:
-        GS = np.conj(gin(S, GL)) if w != 0 else np.conj(S11)
+        GS = np.conj(S11) if U == 0 else np.conj(gin(S, GL))
     GIN, GOUT = gin(S, GL), gout(S, GS)
     return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
 
@@ -399,7 +400,7 @@ def write_lmatch(nw, data):
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ      ZLINE  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT    ZLINE')
+    print('MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
@@ -407,9 +408,9 @@ def write_stub1(nw, data):
             for shorted in [ False, True ]:
                 print(fm('F', f / 1e6),
                     fm('g', ZLINE),
-                    fm('aa', *stub1(np.conj(ZS), zo=ZLINE, shorted=shorted)[i]),
+                    fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, shorted=shorted)[i]),
                     fm('cc', ZS, ZL),
-                    fm('aa', *stub1(np.conj(ZL), zo=ZLINE, shorted=shorted)[i][::-1]),
+                    fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, shorted=shorted)[i][::-1]),
                     fm('g', ZLINE),
                     'shorted' if shorted else 'open')
 
@@ -443,17 +444,17 @@ def write_qwt2(nw, data):
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
     z2 = data.get('z2')
-    print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
+    print('MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6), 
-                fm('ga', *qwt3(np.conj(ZS), z2, zo=ZLINE, shorted=shorted)),
+                fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, shorted=shorted)),
                 fm('g', z2),
                 fm('cc', ZS, ZL),
                 fm('g', z2),
-                fm('ag', *qwt3(np.conj(ZL), z2, zo=ZLINE, shorted=shorted)[::-1]),
+                fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, shorted=shorted)[::-1]),
                 'shorted' if shorted else 'open')
 
 def write_match(nw, data):

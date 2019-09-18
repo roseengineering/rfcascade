@@ -33,18 +33,13 @@ input transformations as command line options:
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
-
--gin <complex>       : set the input gamma for unilateral operator
--zin <complex>       : set the input impedance for unilateral operator
--gout <complex>      : set the output gamma for unilateral operator
--zout <complex>      : set the output impedance for unilateral operator
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
 angle in degrees, for example '10/90'.  Transmission lines are given in complex form, with
 the magnitude setting the impedance and the angle setting the length.
 
-After the unilateral operator is used, it resets gs, gl, gin, and gout.
+After the unilateral operator is used, it resets gs, gl, zs, and zl.
 
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and Rollet stability information 
@@ -331,11 +326,11 @@ A stub match example.  Stub lengths are in degrees.
 
 ```
 $ < example3.s2p cascade -stub1
-MHZ      ZLINE  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT    ZLINE
-2000        50  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83       50 open
-2000        50   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83       50 shorted
-2000        50   70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17       50 open
-2000        50  160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17       50 shorted
+MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE
+2000        50   17.93  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83   20.15       50 open
+2000        50   38.76   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83   47.65       50 shorted
+2000        50   35.31   70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17   33.09       50 open
+2000        50   14.48  160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17    5.59       50 shorted
 ```
 
 
@@ -377,9 +372,9 @@ A quarter wave transformer and 72 ohm stub match example.
 
 ```
 $ < example3.s2p cascade -qwt3 72
-MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
-2000     28.48   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27    118.8 open
-2000     28.48  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27    118.8 shorted
+MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT
+2000     28.48   72.98   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27  160.89    118.8 open
+2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 shorted
 ```
 
 
