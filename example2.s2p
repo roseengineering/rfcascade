@@ -1,2 +1,4 @@
-# mhz s ma r 50
+! example 14.6.1 on page 682 in Orfanidis on power gains
+! also example 14.8.1 on page 688 on simultaneous conjugate matching
+# ghz s ma r 50
 2 0.61 165  3.72 59  0.05 42  0.45 -48

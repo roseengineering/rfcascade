@@ -1,2 +1,4 @@
+! HP Application Note 967, also the example on page 340 of Gonzalezi's 
+! Microwave Transistor Amplifiers book.
 # ghz s ma r 50
-2 0.61 165  3.72 59  0.05 42  0.45 -48
+4 0.552 169  1.681 26   .049 23 0.839 -67

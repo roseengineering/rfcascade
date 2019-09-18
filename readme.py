@@ -133,44 +133,44 @@ Summarize the stabilized cascode amp.
 
 Show impedance matching information.
 
-{ run("< example3.s2p cascade -z") }
+{ run("< example2.s2p cascade -z") }
 
 Show gamma matching information.
 
-{ run("< example3.s2p cascade -g") }
+{ run("< example2.s2p cascade -g") }
 
 A stub match example.  Stub lengths are in degrees.
 
-{ run("< example3.s2p cascade -stub1") }
+{ run("< example2.s2p cascade -stub1") }
 
 A L-section match example.
 
-{ run("< example3.s2p cascade -lmatch") }
+{ run("< example2.s2p cascade -lmatch") }
 
 A quarter wave transformer with a series section example.
 
-{ run("< example3.s2p cascade -qwt1") }
+{ run("< example2.s2p cascade -qwt1") }
 
 A quarter wave transformer and stub match example.
 
-{ run("< example3.s2p cascade -qwt2") }
+{ run("< example2.s2p cascade -qwt2") }
 
 A quarter wave transformer and 72 ohm stub match example.
 
-{ run("< example3.s2p cascade -qwt3 72") }
+{ run("< example2.s2p cascade -qwt3 72") }
 
 Match a network for maximum gain.
 
-{ run("< example4.s2p cascade -qwt2") }
+{ run("< example3.s2p cascade -qwt2") }
 
 Create a network of this match.
 
-{ run("< example4.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade") }
+{ run("< example3.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade") }
 
 Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers.  Gonzalez has a corrected value 
 for the load reflection coefficient in AN967.
 
-{ run("< example4.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade") }
+{ run("< example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade") }
 
 """)
 
