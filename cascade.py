@@ -286,9 +286,9 @@ def shorted_stub(deg, zo=50):
 def to_complex(s):
     if '/' in s:
         r, theta = s.split('/')
-        return float(r) * np.exp(1j * np.deg2rad(float(theta)))
+        return np.double(r) * np.exp(1j * np.deg2rad(np.double(theta)))
     else:
-        return complex(s)
+        return np.complex(s)
 
 def matching(S, GS, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -498,16 +498,7 @@ def write_network(nw, data):
 def main(*args):
     args = list(args)
     data = {}
-    stack = []
-    a = read_network()
-
-    # make the first network on the stack a zero network
-
-    b = a.copy()
-    for S in b.s:
-        S[0,0], S[0,1], S[1,0], S[1,1] = -1, 0, 0, -1 
-    stack.append(b)
-    stack.append(a)
+    stack = [ read_network() ]
 
     while args:
         opt = args.pop(0)
@@ -530,7 +521,7 @@ def main(*args):
         elif opt == '-qwt2':
             data['mode'] = 'qwt2'
         elif opt == '-qwt3':
-            data['z2'] = float(args.pop(0))
+            data['z2'] = np.double(args.pop(0))
             data['mode'] = 'qwt3'
         elif opt == '-stub1':
             data['mode'] = 'stub1'
@@ -546,7 +537,7 @@ def main(*args):
         elif opt == '-gl':
             data['gl'] = to_complex(args.pop(0))
         elif opt == '-line':
-            data['line'] = float(args.pop(0))
+            data['line'] = np.double(args.pop(0))
 
         # binary operations
 
@@ -582,12 +573,19 @@ def main(*args):
         elif opt == '-ccd':
             top.s = np.array([ ccd_transform(S) for S in top.s ])
         elif opt == '-lift':
-            henry = lambda x, f: complex(x) if 'j' in x or '/' in x else 2j * np.pi * f * float(x)
+            henry = lambda x, f: np.complex(x) if 'j' in x or '/' in x else 2j * np.pi * f * np.double(x)
             x = args.pop(0)
             top.s = np.array([ lift_ground(top.s[i], z2g(henry(x, top.f[i]))) for i in range(len(top)) ])
 
         # push operations
 
+        elif opt == '-copy':
+            stack.append(top.copy())
+        elif opt == '-identity':
+            top = top.copy()
+            stack.append(top)
+            for S in top.s:
+                S[0,0], S[0,1], S[1,0], S[1,1] = 1, 0, 0, 1 
         elif opt == '-f':
             stack.append(read_network(args.pop(0)))
         elif opt == '-tline':

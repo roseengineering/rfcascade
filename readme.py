@@ -35,7 +35,9 @@ input transformations as command line options:
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -unilateral          : match network on top of stack and then isolate its input and output
+-copy                : copy top of stack
 
+-identity            : push an identity s-parameter matrix onto stack
 -shorted <complex>   : push an shorted shunt stub onto stack.
 -open <complex>      : push an open shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
@@ -56,7 +58,7 @@ the magnitude setting the impedance and the angle setting the length.
 After the unilateral operator is used, it resets gs, gl, zs, and zl.
 
 By default the utility writes out the network on the top of
-the stack in touchstone format with GUM and Rollet stability information 
+the stack in touchstone format with GUM and stability information 
 as comments.  It can also output the network in following alternative formats:
 
 ```
