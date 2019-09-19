@@ -8,7 +8,8 @@ def z2g(Z, Z0=50):
     return (Z - Z0) / (Z + Z0)
 
 def g2z(G, Z0=50):
-    return Z0 * (1 + G) / (1 - G)
+    Z = Z0 * (1 + G) / (1 - G)
+    return Z.real if np.isinf(Z) else Z
 
 def swr(G):
     return (1 + np.abs(G)) / (1 - np.abs(G))
@@ -300,7 +301,7 @@ def matching(S, GS, GL):
     elif GS is None:
         GS = np.conj(S11) if U == 0 else np.conj(gin(S, GL))
     GIN, GOUT = gin(S, GL), gout(S, GS)
-    return g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
+    return GS, GL, GIN, GOUT
 
 def notation(x, precision=5):
     UNITS = 'FH'
@@ -388,7 +389,8 @@ def write_lmatch(nw, data):
           'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
             print(fm('F', f / 1e6), 
                 fm('xx', *lmatch(ZLINE, np.conj(ZS))[i], f=f), '!',
@@ -402,7 +404,8 @@ def write_stub1(nw, data):
     print('MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
             for shorted in [ False, True ]:
                 print(fm('F', f / 1e6),
@@ -418,7 +421,8 @@ def write_qwt1(nw, data):
     print('MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
         for minimum in [ False, True ]:
             print(fm('F', f / 1e6),
                 fm('ga', *qwt1(np.conj(ZS), zo=ZLINE, minimum=minimum)),
@@ -432,7 +436,8 @@ def write_qwt2(nw, data):
     print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6),
                 fm('gag', *qwt2(np.conj(ZS), zo=ZLINE, shorted=shorted)),
@@ -446,7 +451,8 @@ def write_qwt3(nw, data):
     print('MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, _, _ = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
         for shorted in [ False, True ]:
             print(fm('F', f / 1e6), 
                 fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, shorted=shorted)),
@@ -460,7 +466,8 @@ def write_match(nw, data):
     print('MHZ       QS          ZS              ZIN             ZOUT               ZL          QL')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
         print(fm('Ffccccf', f / 1e6, QS, ZS, ZIN, ZOUT, ZL, QL))
 
@@ -468,9 +475,10 @@ def write_gamma(nw, data):
     print('MHZ       QS           GS                GIN                GOUT                GL           QL')
     for i in range(len(nw)):
         f = nw.f[i]
-        ZS, ZL, ZIN, ZOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffppppf', f / 1e6, QS, z2g(ZS), z2g(ZIN), z2g(ZOUT), z2g(ZL), QL))
+        print(fm('Ffppppf', f / 1e6, QS, GS, GIN, GOUT, GL, QL))
 
 def write_network(nw, data):
     mode = data.get('mode')
@@ -564,10 +572,10 @@ def main(*args):
         elif opt == '-unilateral':
             GS, GL = data.pop('gs', None), data.pop('gl', None)
             for S in top.s:
-                ZS, ZL, ZIN, ZOUT = matching(S, GS, GL)
-                S[0,0] = z2g(ZIN)
+                GS, GL, GIN, GOUT = matching(S, GS, GL)
+                S[0,0] = GIN
                 S[0,1] = 0
-                S[1,1] = z2g(ZOUT)
+                S[1,1] = GOUT
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
         elif opt == '-ccd':
