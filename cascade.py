@@ -16,9 +16,9 @@ def swr(G):
     
 ### matching
 
-def balance(d, shorted=True):
+def balance(d, short=True):
    d = np.deg2rad(d)
-   d = np.arctan(2 * np.tan(d)) if shorted else np.arctan(np.tan(d) / 2)
+   d = np.arctan(2 * np.tan(d)) if short else np.arctan(np.tan(d) / 2)
    d = np.mod(d, np.pi)
    return np.rad2deg(d)
 
@@ -50,7 +50,7 @@ def qwt1(za, zo=50, minimum=True):
     z1 = np.sqrt(zo * zm)
     return z1, lm
 
-def qwt2(za, zo=50, shorted=True):
+def qwt2(za, zo=50, short=True):
     """
     ---------------==========----|--|
     main line zo       z1        |  za
@@ -62,12 +62,12 @@ def qwt2(za, zo=50, shorted=True):
     ya = 1 / za
     gl, bl = ya.real, ya.imag
     z1 = np.sqrt(zo / gl) * np.array([1, 1])
-    z2 = 1 / bl * np.array([1, -1]) * (1 if shorted else -1)
+    z2 = 1 / bl * np.array([1, -1]) * (1 if short else -1)
     d = np.array([ 45, 135 ])
     res = np.array([ z1, d, z2 ]).T
     return res[1] if z2[0] < 0 else res[0]
 
-def qwt3(za, z2, zo=50, shorted=True):
+def qwt3(za, z2, zo=50, short=True):
     """
     ---------------==========----|--|
     main line zo       z1        |  za
@@ -82,10 +82,10 @@ def qwt3(za, z2, zo=50, shorted=True):
     d = np.arctan([ 1 / (bl * z2), -bl * z2 ])
     d = np.mod(d, np.pi)
     d = np.rad2deg(d)
-    i = 0 if shorted else 1
-    return np.array([ z1, balance(d[i], shorted=shorted), d[i] ])
+    i = 0 if short else 1
+    return np.array([ z1, balance(d[i], short=short), d[i] ])
 
-def stub1(za, zo=50, shorted=True): # match with a stub-series input 
+def stub1(za, zo=50, short=True): # match with a stub-series input 
     """
     -----------------/-----------|
     main line zo    /            za
@@ -96,11 +96,11 @@ def stub1(za, zo=50, shorted=True): # match with a stub-series input
     GL = z2g(za, zo)
     thL = np.angle(GL)
     bl = thL / 2 + np.array([1, -1]) * np.arccos(-abs(GL)) / 2
-    if shorted:
+    if short:
         bd = np.arctan(-np.tan(2 * bl - thL) / 2)
     else:
         bd = np.arctan(1 / (np.tan(2 * bl - thL) / 2))
-    d = np.mod([ balance(bd, shorted=shorted), bd, bl ], np.pi)
+    d = np.mod([ balance(bd, short=short), bd, bl ], np.pi)
     d = np.rad2deg(d)
     return d.T
 
@@ -280,7 +280,7 @@ def open_stub(deg, zo=50):
     theta = np.deg2rad(deg)
     return -1j * zo / np.tan(theta)
 
-def shorted_stub(deg, zo=50):
+def short_stub(deg, zo=50):
     theta = np.deg2rad(deg)
     return 1j * zo * np.tan(theta)
 
@@ -407,14 +407,14 @@ def write_stub1(nw, data):
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
-            for shorted in [ False, True ]:
+            for short in [ False, True ]:
                 print(fm('F', f / 1e6),
                     fm('g', ZLINE),
-                    fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, shorted=shorted)[i]),
+                    fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, short=short)[i]),
                     fm('cc', ZS, ZL),
-                    fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, shorted=shorted)[i][::-1]),
+                    fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, short=short)[i][::-1]),
                     fm('g', ZLINE),
-                    'shorted' if shorted else 'open')
+                    'short' if short else 'open')
 
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
@@ -438,12 +438,12 @@ def write_qwt2(nw, data):
         f = nw.f[i]
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
-        for shorted in [ False, True ]:
+        for short in [ False, True ]:
             print(fm('F', f / 1e6),
-                fm('gag', *qwt2(np.conj(ZS), zo=ZLINE, shorted=shorted)),
+                fm('gag', *qwt2(np.conj(ZS), zo=ZLINE, short=short)),
                 fm('cc', ZS, ZL),
-                fm('gag', *qwt2(np.conj(ZL), zo=ZLINE, shorted=shorted)[::-1]),
-                'shorted' if shorted else 'open')
+                fm('gag', *qwt2(np.conj(ZL), zo=ZLINE, short=short)[::-1]),
+                'short' if short else 'open')
 
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
@@ -453,14 +453,14 @@ def write_qwt3(nw, data):
         f = nw.f[i]
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
-        for shorted in [ False, True ]:
+        for short in [ False, True ]:
             print(fm('F', f / 1e6), 
-                fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, shorted=shorted)),
+                fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, short=short)),
                 fm('g', z2),
                 fm('cc', ZS, ZL),
                 fm('g', z2),
-                fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, shorted=shorted)[::-1]),
-                'shorted' if shorted else 'open')
+                fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
+                'short' if short else 'open')
 
 def write_match(nw, data):
     print('MHZ       QS          ZS              ZIN             ZOUT               ZL          QL')
@@ -613,9 +613,9 @@ def main(*args):
             x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
-        elif opt == '-shorted':
+        elif opt == '-short':
             x = to_complex(args.pop(0))
-            x = shorted_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
+            x = short_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
             stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
 

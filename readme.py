@@ -38,8 +38,8 @@ input transformations as command line options:
 -copy                : copy top of stack
 
 -identity            : push an identity s-parameter matrix onto stack
--shorted <complex>   : push an shorted shunt stub onto stack.
--open <complex>      : push an open shunt stub onto stack.
+-short <complex>     : push an shorted shunt stub onto stack.
+-open <complex>      : push an opened shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
 -series <complex>    : push a series resistor onto stack
 -shunt <complex>     : push a shunt resistor onto stack

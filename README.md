@@ -24,8 +24,8 @@ input transformations as command line options:
 -copy                : copy top of stack
 
 -identity            : push an identity s-parameter matrix onto stack
--shorted <complex>   : push an shorted shunt stub onto stack.
--open <complex>      : push an open shunt stub onto stack.
+-short <complex>     : push an shorted shunt stub onto stack.
+-open <complex>      : push an opened shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
 -series <complex>    : push a series resistor onto stack
 -shunt <complex>     : push a shunt resistor onto stack
@@ -330,9 +330,9 @@ A stub match example.  Stub lengths are in degrees.
 $ < example2.s2p cascade -stub1
 MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE
 2000        50   17.93  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83   20.15       50 open
-2000        50   38.76   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83   47.65       50 shorted
+2000        50   38.76   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83   47.65       50 short
 2000        50   35.31   70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17   33.09       50 open
-2000        50   14.48  160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17    5.59       50 shorted
+2000        50   14.48  160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17    5.59       50 short
 ```
 
 
@@ -365,7 +365,7 @@ A quarter wave transformer and stub match example.
 $ < example2.s2p cascade -qwt2
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 2000     28.48   45.00    11.02     5.124-7.542j     33.68+91.48j    103.9  135.00    118.8 open
-2000     28.48  135.00    11.02     5.124-7.542j     33.68+91.48j    103.9   45.00    118.8 shorted
+2000     28.48  135.00    11.02     5.124-7.542j     33.68+91.48j    103.9   45.00    118.8 short
 ```
 
 
@@ -376,7 +376,7 @@ A quarter wave transformer and 72 ohm stub match example.
 $ < example2.s2p cascade -qwt3 72
 MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT
 2000     28.48   72.98   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27  160.89    118.8 open
-2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 shorted
+2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 short
 ```
 
 
@@ -387,7 +387,7 @@ Match a network for maximum gain.
 $ < example3.s2p cascade -qwt2
 MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
 4000     65.39   45.00    11.78     1.593-11.56j      1.58+70.85j    70.89  135.00    398.7 open
-4000     65.39  135.00    11.78     1.593-11.56j      1.58+70.85j    70.89   45.00    398.7 shorted
+4000     65.39  135.00    11.78     1.593-11.56j      1.58+70.85j    70.89   45.00    398.7 short
 ```
 
 
