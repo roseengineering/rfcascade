@@ -8,8 +8,7 @@ def z2g(Z, Z0=50):
     return (Z - Z0) / (Z + Z0)
 
 def g2z(G, Z0=50):
-    Z = Z0 * (1 + G) / (1 - G)
-    return Z.real if np.isinf(Z) else Z
+    return np.inf if G == 1 else Z0 * (1 + G) / (1 - G)
 
 def swr(G):
     return (1 + np.abs(G)) / (1 - np.abs(G))
