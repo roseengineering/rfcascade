@@ -592,31 +592,34 @@ def main(*args):
             top = top.copy()
             stack.append(top)
             for S in top.s:
-                S[0,0], S[0,1], S[1,0], S[1,1] = 1, 0, 0, 1 
+                S[0,0], S[0,1], S[1,0], S[1,1] = 0, 1, 1, 0 
         elif opt == '-f':
             stack.append(read_network(args.pop(0)))
+
+        # cascade operations
+
         elif opt == '-tline':
             x = to_complex(args.pop(0))
             S = abcd2s(tline(np.rad2deg(np.angle(x)), zo=np.abs(x)))
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
         elif opt == '-series':
             x = to_complex(args.pop(0))
             S = abcd2s([[1, x], [0, 1]])
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
         elif opt == '-shunt':
             x = to_complex(args.pop(0))
             S = abcd2s([[1, 0], [1/x, 1]])
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
         elif opt == '-open':
             x = to_complex(args.pop(0))
             x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
         elif opt == '-short':
             x = to_complex(args.pop(0))
             x = short_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
-            stack.append(rf.Network(frequency=top.frequency, s=[S] * len(top)))
+            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
 
         # unrecognized
 

@@ -37,7 +37,7 @@ input transformations as command line options:
 -unilateral          : match network on top of stack and then isolate its input and output
 -copy                : copy top of stack
 
--identity            : push an identity s-parameter matrix onto stack
+-identity            : push an identity matrix onto stack
 -short <complex>     : push an shorted shunt stub onto stack.
 -open <complex>      : push an opened shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
@@ -102,16 +102,16 @@ Summarize the network.  GU is not in dB.
 
 Shunt a 330 ohm resistor across the output of the two-port network.  This makes the transistor unconditionally stable.
 
-{ run("< 2n5179_5ma.s2p cascade -shunt 330 -cascade") }
+{ run("< 2n5179_5ma.s2p cascade -shunt 330") }
 
 Cascade a series 20 ohm resistor with the output of the two-port network.
 
-{ run("< 2n5179_5ma.s2p cascade -series 20 -cascade") }
+{ run("< 2n5179_5ma.s2p cascade -series 20") }
 
 Lift terminal 3, the port connected to ground, and add a 10nH inductor.  Then cascade the result
 with a shunt 100 ohm resistor to stabilize the result.
 
-{ run("< 2n5179_5ma.s2p cascade -lift 10e-9 -shunt 100 -cascade") }
+{ run("< 2n5179_5ma.s2p cascade -lift 10e-9 -shunt 100") }
 
 Insert a one ohm resistor at the emitter to provide shunt feedback.
 
@@ -127,11 +127,11 @@ Create a cascode amplifier.  S12 is significantly reduced compared to a CE amp.
 
 Stabilize the cascode amp with a 100 ohm resistor across the output.
 
-{ run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade") }
+{ run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100") }
 
 Summarize the stabilized cascode amp.
 
-{ run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -cascade -s") }
+{ run("< 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -s") }
 
 Show impedance matching information.
 
@@ -167,12 +167,12 @@ Match a network for maximum gain.
 
 Create a network of this match.
 
-{ run("< example3.s2p cascade -tline 65.39/90 -open 11.78/45 -cascade -swap -cascade -open 70.89/135 -cascade -tline 398.7/90 -cascade") }
+{ run("< example3.s2p cascade -identity -tline 65.39/90 -open 11.78/45 -swap -cascade -open 70.89/135 -tline 398.7/90") }
 
 Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers.  Gonzalez has a corrected value 
 for the load reflection coefficient in AN967.
 
-{ run("< example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3 -cascade") }
+{ run("< example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3") }
 
 """)
 
