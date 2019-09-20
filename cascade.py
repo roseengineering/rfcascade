@@ -122,6 +122,16 @@ def lmatch(ZS, ZL, reverse=False):
 
 ### scattering parameters
 
+def sgain(S, g1, g2=None):
+    if g2 == 'a':
+        return sgain(S, g1, np.conj(gout(S, gG)))
+    if g2 == 'p':
+        return sgain(S, np.conj(gin(S,gL)), g1)
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    return (1 - np.abs(g1)**2) * (1 - np.abs(g2)**2) * np.abs(S21)**2 / np.abs(
+           (1 - S11 * g1) * (1 - S22 * g2) - S12 * S21 * g1 * g2) ** 2
+
+
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     K = rollet(S)
@@ -465,24 +475,28 @@ def write_qwt3(nw, data):
                 'short' if short else 'open')
 
 def write_match(nw, data):
-    print('MHZ       QS          ZS       SWRIN         ZIN             ZOUT      SWROUT          ZL          QL')
+    print('MHZ       QS          ZS       SWRIN         ZIN             ZOUT      SWROUT          ZL          QL !     GT')
     for i in range(len(nw)):
         f = nw.f[i]
+        S = nw.s[i]
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
         SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffcfccfcf', f / 1e6, QS, ZS, SWRIN, ZIN, ZOUT, SWROUT, ZL, QL))
+        print(fm('Ffcfccfcf', f / 1e6, QS, ZS, SWRIN, ZIN, ZOUT, SWROUT, ZL, QL), '!',
+              fm('d', sgain(S, GS, GL)))
 
 def write_gamma(nw, data):
-    print('MHZ       QS           GS        SWRIN          GIN                GOUT      SWROUT           GL           QL')
+    print('MHZ       QS           GS        SWRIN          GIN                GOUT      SWROUT           GL           QL !     GT')
     for i in range(len(nw)):
         f = nw.f[i]
+        S = nw.s[i]
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
         SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffpfppfpf', f / 1e6, QS, GS, SWRIN, GIN, GOUT, SWROUT, GL, QL))
+        print(fm('Ffpfppfpf', f / 1e6, QS, GS, SWRIN, GIN, GOUT, SWROUT, GL, QL), '!',
+              fm('d', sgain(S, GS, GL)))
 
 def write_network(nw, data):
     mode = data.get('mode')
