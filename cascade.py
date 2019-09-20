@@ -12,6 +12,9 @@ def g2z(G, Z0=50):
 
 def swr(G):
     return (1 + np.abs(G)) / (1 - np.abs(G))
+
+def mismatch(ZS, ZL):
+    return (ZL - np.conj(ZS)) / (ZL + ZS)
     
 ### matching
 
@@ -462,22 +465,24 @@ def write_qwt3(nw, data):
                 'short' if short else 'open')
 
 def write_match(nw, data):
-    print('MHZ       QS          ZS              ZIN             ZOUT               ZL          QL')
+    print('MHZ       QS          ZS       SWRIN         ZIN             ZOUT      SWROUT          ZL          QL')
     for i in range(len(nw)):
         f = nw.f[i]
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
+        SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffccccf', f / 1e6, QS, ZS, ZIN, ZOUT, ZL, QL))
+        print(fm('Ffcfccfcf', f / 1e6, QS, ZS, SWRIN, ZIN, ZOUT, SWROUT, ZL, QL))
 
 def write_gamma(nw, data):
-    print('MHZ       QS           GS                GIN                GOUT                GL           QL')
+    print('MHZ       QS           GS        SWRIN          GIN                GOUT      SWROUT           GL           QL')
     for i in range(len(nw)):
         f = nw.f[i]
         GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
-        ZS, ZL = g2z(GS), g2z(GL)
+        ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
+        SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffppppf', f / 1e6, QS, GS, GIN, GOUT, GL, QL))
+        print(fm('Ffpfppfpf', f / 1e6, QS, GS, SWRIN, GIN, GOUT, SWROUT, GL, QL))
 
 def write_network(nw, data):
     mode = data.get('mode')
