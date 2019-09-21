@@ -67,10 +67,11 @@ as comments.  It can also output the network in following alternative formats:
 -z            : show matching solutions in impedance
 -g            : show matching solutions in gamma
 -lmatch       : match with l-section networks
--stub1        : match with single shunt stub network
--qwt1         : match with quarter wavelength with series section
--qwt2         : match with quarter wavelength and shunt stub
--qwt3 <ohms>  : match with quarter wavelength and shunt stub of given impedance
+-stub1        : match with a single shunt stub network
+-stub2        : match with a double shunt stub network
+-qwt1         : match with a quarter wavelength with series section
+-qwt2         : match with a quarter wavelength and shunt stub
+-qwt3 <ohms>  : match with a quarter wavelength and shunt stub of given impedance
 -line <ohms>  : line impedance to match to
 ```
 

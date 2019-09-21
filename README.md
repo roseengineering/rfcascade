@@ -53,10 +53,11 @@ as comments.  It can also output the network in following alternative formats:
 -z            : show matching solutions in impedance
 -g            : show matching solutions in gamma
 -lmatch       : match with l-section networks
--stub1        : match with single shunt stub network
--qwt1         : match with quarter wavelength with series section
--qwt2         : match with quarter wavelength and shunt stub
--qwt3 <ohms>  : match with quarter wavelength and shunt stub of given impedance
+-stub1        : match with a single shunt stub network
+-stub2        : match with a double shunt stub network
+-qwt1         : match with a quarter wavelength with series section
+-qwt2         : match with a quarter wavelength and shunt stub
+-qwt3 <ohms>  : match with a quarter wavelength and shunt stub of given impedance
 -line <ohms>  : line impedance to match to
 ```
 
@@ -328,11 +329,11 @@ A stub match example.  Stub lengths are in degrees.
 
 ```
 $ < example2.s2p cascade -stub1
-MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE
-2000        50   17.93  109.38  153.77     5.124-7.542j     33.68+91.48j   42.99  113.83   20.15       50 open
-2000        50   38.76   19.38  153.77     5.124-7.542j     33.68+91.48j   42.99   23.83   47.65       50 short
-2000        50   35.31   70.62    8.90     5.124-7.542j     33.68+91.48j   84.44   66.17   33.09       50 open
-2000        50   14.48  160.62    8.90     5.124-7.542j     33.68+91.48j   84.44  156.17    5.59       50 short
+MHZ    (LBAL)  LSHUNT LSERIES    ZLINE          ZS               ZL         ZLINE LSERIES  LSHUNT  (LBAL)
+2000    17.93  109.38  153.77       50     5.124-7.542j     33.68+91.48j       50   42.99  113.83   20.15 o/o
+2000    38.76   19.38  153.77       50     5.124-7.542j     33.68+91.48j       50   42.99   23.83   47.65 s/s
+2000    35.31   70.62    8.90       50     5.124-7.542j     33.68+91.48j       50   84.44   66.17   33.09 o/o
+2000    14.48  160.62    8.90       50     5.124-7.542j     33.68+91.48j       50   84.44  156.17    5.59 s/s
 ```
 
 
@@ -363,9 +364,9 @@ A quarter wave transformer and stub match example.
 
 ```
 $ < example2.s2p cascade -qwt2
-MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
-2000     28.48   45.00    11.02     5.124-7.542j     33.68+91.48j    103.9  135.00    118.8 open
-2000     28.48  135.00    11.02     5.124-7.542j     33.68+91.48j    103.9   45.00    118.8 short
+MHZ       ZQWT  LSHUNT   ZSHUNT   (ZBAL)          ZS               ZL        (ZBAL)   ZSHUNT  LSHUNT     ZQWT
+2000     28.48   45.00    11.02    22.05     5.124-7.542j     33.68+91.48j    207.8    103.9  135.00    118.8 o/o
+2000     28.48  135.00    11.02    22.05     5.124-7.542j     33.68+91.48j    207.8    103.9   45.00    118.8 s/s
 ```
 
 
@@ -375,8 +376,8 @@ A quarter wave transformer and 72 ohm stub match example.
 ```
 $ < example2.s2p cascade -qwt3 72
 MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT
-2000     28.48   72.98   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27  160.89    118.8 open
-2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 short
+2000     28.48   72.98   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27  160.89    118.8 o/o
+2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 s/s
 ```
 
 
@@ -385,9 +386,9 @@ Match a network for maximum gain.
 
 ```
 $ < example3.s2p cascade -qwt2
-MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT
-4000     65.39   45.00    11.78     1.593-11.56j      1.58+70.85j    70.89  135.00    398.7 open
-4000     65.39  135.00    11.78     1.593-11.56j      1.58+70.85j    70.89   45.00    398.7 short
+MHZ       ZQWT  LSHUNT   ZSHUNT   (ZBAL)          ZS               ZL        (ZBAL)   ZSHUNT  LSHUNT     ZQWT
+4000     65.39   45.00    11.78    23.56     1.593-11.56j      1.58+70.85j    141.8    70.89  135.00    398.7 o/o
+4000     65.39  135.00    11.78    23.56     1.593-11.56j      1.58+70.85j    141.8    70.89   45.00    398.7 s/s
 ```
 
 

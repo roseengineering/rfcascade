@@ -87,7 +87,7 @@ def qwt3(za, z2, zo=50, short=True):
     i = 0 if short else 1
     return np.array([ z1, balance(d[i], short=short), d[i] ])
 
-def stub1(za, zo=50, short=True): # match with a stub-series input 
+def stub1(za, zo=50, short=True):
     """
     -----------------/-----------|
     main line zo    /            za
@@ -105,6 +105,30 @@ def stub1(za, zo=50, short=True): # match with a stub-series input
     d = np.mod([ balance(bd, short=short), bd, bl ], np.pi)
     d = np.rad2deg(d)
     return d.T
+
+def stub2(za, l=45, zo=50, mode='ss'):
+    """
+    -----------------/-----------/---|
+    main line Z0    /           /    ZL
+    ---------------/---/---l---/---/-|
+                  /   d1      /   d2
+                 /___/       /___/
+    """
+    cot = lambda x: 1 / np.tan(x)
+    acot = lambda x: np.arctan(1 / x)
+    zL = za / zo
+    l = np.deg2rad(l)
+    m = np.array(list(mode)) == 'o'
+    yL = 1 / zL 
+    gL, bL = yL.real, yL.imag
+    c = 1 / cot(l)
+    gmax = 1 + c**2
+    b = c + np.array([1, -1]) * np.sqrt(gL * (gmax - gL))
+    d1 = acot((c - b - gL * c) / gL) + m[0] * np.pi / 2
+    d2 = acot(bL - b) + m[1] * np.pi / 2
+    d12 = np.mod([d1, d2, balance(d1, short=not m[0]), balance(d2, short=not m[1])], np.pi)
+    d12 = np.rad2deg(d12)
+    return d12.T
 
 def lmatch(ZS, ZL, reverse=False):
     """
@@ -401,7 +425,8 @@ def write_lmatch(nw, data):
           'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
     for i in range(len(nw)):
         f = nw.f[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        S = nw.s[i]
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
             print(fm('F', f / 1e6), 
@@ -413,27 +438,50 @@ def write_lmatch(nw, data):
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ      ZLINE  (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)    ZLINE')
+    print('MHZ    (LBAL)  LSHUNT LSERIES    ZLINE          ZS               ZL         ZLINE LSERIES  LSHUNT  (LBAL)')
     for i in range(len(nw)):
         f = nw.f[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        S = nw.s[i]
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
             for short in [ False, True ]:
                 print(fm('F', f / 1e6),
-                    fm('g', ZLINE),
                     fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, short=short)[i]),
-                    fm('cc', ZS, ZL),
+                    fm('gccg', ZLINE, ZS, ZL, ZLINE),
                     fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, short=short)[i][::-1]),
+                    's/s' if short else 'o/o')
+
+def write_stub2(nw, data):
+    ZLINE = data.get('line', 50)
+    l = 45
+    for i in range(len(nw)):
+        f = nw.f[i]
+        S = nw.s[i]
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
+        for mode in [ 'ss', 'oo', 'so', 'os' ]:
+            r1 = stub2(np.conj(ZS), l, zo=ZLINE, mode=mode)
+            r2 = stub2(np.conj(ZL), l, zo=ZLINE, mode=mode)
+            for i in range(2):
+                print(fm('F', f / 1e6),
+                    fm('aaa', r1[i][0], l, r1[i][1]),
                     fm('g', ZLINE),
-                    'short' if short else 'open')
+                    fm('cc', ZS, ZL),
+                    fm('g', ZLINE),
+                    fm('aaa', r2[i][1], l, r2[i][0]),
+                    fm('g', ZLINE),
+                    '{}/{}'.format(mode, mode)
+                ) 
+
 
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
     print('MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        S = nw.s[i]
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for minimum in [ False, True ]:
             print(fm('F', f / 1e6),
@@ -445,17 +493,20 @@ def write_qwt1(nw, data):
 
 def write_qwt2(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT     ZQWT')
+    print('MHZ       ZQWT  LSHUNT   ZSHUNT   (ZBAL)          ZS               ZL        (ZBAL)   ZSHUNT  LSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        S = nw.s[i]
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
+            r1 = qwt2(np.conj(ZS), zo=ZLINE, short=short)
+            r2 = qwt2(np.conj(ZL), zo=ZLINE, short=short)
             print(fm('F', f / 1e6),
-                fm('gag', *qwt2(np.conj(ZS), zo=ZLINE, short=short)),
-                fm('cc', ZS, ZL),
-                fm('gag', *qwt2(np.conj(ZL), zo=ZLINE, short=short)[::-1]),
-                'short' if short else 'open')
+                fm('gag', *r1),
+                fm('gccg', 2 * r1[2], ZS, ZL, 2 * r2[2]),
+                fm('gag', *r2[::-1]),
+                's/s' if short else 'o/o')
 
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
@@ -463,7 +514,8 @@ def write_qwt3(nw, data):
     print('MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        S = nw.s[i]
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
             print(fm('F', f / 1e6), 
@@ -472,14 +524,14 @@ def write_qwt3(nw, data):
                 fm('cc', ZS, ZL),
                 fm('g', z2),
                 fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
-                'short' if short else 'open')
+                's/s' if short else 'o/o')
 
 def write_match(nw, data):
     print('MHZ       QS          ZS       SWRIN         ZIN             ZOUT      SWROUT          ZL          QL !     GT')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
         SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
@@ -491,7 +543,7 @@ def write_gamma(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        GS, GL, GIN, GOUT = matching(nw.s[i], data.get('gs'), data.get('gl'))
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
         SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
@@ -512,6 +564,8 @@ def write_network(nw, data):
         write_lmatch(nw, data)
     elif mode == 'stub1':
         write_stub1(nw, data)
+    elif mode == 'stub2':
+        write_stub2(nw, data)
     elif mode == 'qwt1':
         write_qwt1(nw, data)
     elif mode == 'qwt2':
@@ -551,6 +605,8 @@ def main(*args):
             data['mode'] = 'qwt3'
         elif opt == '-stub1':
             data['mode'] = 'stub1'
+        elif opt == '-stub2':
+            data['mode'] = 'stub2'
 
         # matching options
 
@@ -591,9 +647,7 @@ def main(*args):
             GS, GL = data.pop('gs', None), data.pop('gl', None)
             for S in top.s:
                 GS, GL, GIN, GOUT = matching(S, GS, GL)
-                S[0,0] = GIN
-                S[0,1] = 0
-                S[1,1] = GOUT
+                S[0,0], S[0,1], S[1,1] = GIN, 0, GOUT
         elif opt == '-cbg':
             top.s = np.array([ cbg_transform(S) for S in top.s ])
         elif opt == '-ccd':
