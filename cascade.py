@@ -126,7 +126,7 @@ def stub2(za, l=45, zo=50, mode='ss'):
     b = c + np.array([1, -1]) * np.sqrt(gL * (gmax - gL))
     d1 = acot((c - b - gL * c) / gL) + m[0] * np.pi / 2
     d2 = acot(bL - b) + m[1] * np.pi / 2
-    d12 = np.mod([d1, d2, balance(d1, short=not m[0]), balance(d2, short=not m[1])], np.pi)
+    d12 = np.mod([ balance(d1, short=not m[0]), balance(d2, short=not m[1]), d1, d2 ], np.pi)
     d12 = np.rad2deg(d12)
     return d12.T
 
@@ -438,7 +438,7 @@ def write_lmatch(nw, data):
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ    (LBAL)  LSHUNT LSERIES    ZLINE          ZS               ZL         ZLINE LSERIES  LSHUNT  (LBAL)')
+    print('MHZ    (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
@@ -448,13 +448,15 @@ def write_stub1(nw, data):
             for short in [ False, True ]:
                 print(fm('F', f / 1e6),
                     fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, short=short)[i]),
-                    fm('gccg', ZLINE, ZS, ZL, ZLINE),
+                    fm('cc', ZS, ZL),
                     fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, short=short)[i][::-1]),
                     's/s' if short else 'o/o')
 
 def write_stub2(nw, data):
     ZLINE = data.get('line', 50)
     l = 45
+    print('MHZ    (LBAL) LSERIES  (LBAL) !  LSHUNT LSERIES  LSHUNT          ZS               ZL'
+          '       LSHUNT LSERIES  LSHUNT !  (LBAL) LSERIES  (LBAL)')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
@@ -465,14 +467,12 @@ def write_stub2(nw, data):
             r2 = stub2(np.conj(ZL), l, zo=ZLINE, mode=mode)
             for i in range(2):
                 print(fm('F', f / 1e6),
-                    fm('aaa', r1[i][0], l, r1[i][1]),
-                    fm('g', ZLINE),
+                    fm('aaa', r1[i][0], l, r1[i][1]), '!',
+                    fm('aaa', r1[i][2], l, r1[i][3]),
                     fm('cc', ZS, ZL),
-                    fm('g', ZLINE),
+                    fm('aaa', r2[i][3], l, r2[i][2]), '!',
                     fm('aaa', r2[i][1], l, r2[i][0]),
-                    fm('g', ZLINE),
-                    '{}/{}'.format(mode, mode)
-                ) 
+                    '{}/{}'.format(mode, mode)) 
 
 
 def write_qwt1(nw, data):
