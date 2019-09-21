@@ -14,18 +14,13 @@ input transformations as command line options:
 -cascade             : cascade together the two networks on top of stack
 -deembed             : de-embed the output of the top two networks on the stack
 -ideembed            : de-embed the input of the top two networks on the stack
--swap                : swap the top two networks on the stack
 
--flip                : flip S11 and S22
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
 -lift <henries>      : lift network on top of stack from ground and insert an inductor
 -unilateral          : match network on top of stack and then isolate its input and output
--copy                : copy top of stack
 
--pass                : push a pass-through network onto stack
--block               : push an isolation network onto stack
 -short <complex>     : push an shorted shunt stub onto stack.
 -open <complex>      : push an opened shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
@@ -37,6 +32,12 @@ input transformations as command line options:
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
+
+-swap                : swap the top two networks on the stack
+-copy                : copy top of stack
+-pass                : push a pass-through network onto stack
+-block               : push an isolation network onto stack
+-flip                : flip S11 and S22
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
@@ -51,8 +52,8 @@ as comments.  It can also output the network in following alternative formats:
 
 ```
 -a            : display the network as ABCD matrices
--s            : summarize the network in terms of impedances, stability and gain (dB) values
--z            : show matching solutions in impedance
+-z            : summarize the network in terms of impedance, stability and gain (dB) values
+-m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
 -lmatch       : match with l-section networks
 -stub1        : match with a single shunt stub network
@@ -122,7 +123,7 @@ Summarize the network.  GU is not in dB.
 
 
 ```
-$ < 2n5179_5ma.s2p cascade -s
+$ < 2n5179_5ma.s2p cascade -z
 MHZ            Z11             Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
 0               139+0j           591+0j   1.09  16.62   5.41  23.13    inf  23.13   1.00      inf   0.3975    1.185
 100       31.84-38.55j     22.13-100.9j   1.09  16.62   5.41  23.13  24.70      -      -   0.4623   0.2799   0.8889
@@ -290,7 +291,7 @@ Summarize the stabilized cascode amp.
 
 
 ```
-$ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -s
+$ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -z
 MHZ            Z11             Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
 0               139+0j 98.66+9.406e-17j   1.09  13.04   0.49  14.62    inf  14.62   1.00      inf   0.1542    3.055
 100       38.12-41.92j       109-16.32j   0.97  14.27   0.69  15.92  37.50  15.93   1.00    71.73   0.1668    2.554
@@ -310,7 +311,7 @@ Show impedance matching information.
 
 
 ```
-$ < example2.s2p cascade -z
+$ < example2.s2p cascade -m
 MHZ       QS          ZS       SWRIN         ZIN             ZOUT      SWROUT          ZL          QL !     GT
 2000    1.47     5.124-7.542j   1.00     5.124+7.542j     33.68-91.48j   1.00     33.68+91.48j   2.72 !  16.18
 ```
