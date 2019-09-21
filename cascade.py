@@ -472,7 +472,7 @@ def write_stub2(nw, data):
                     fm('cc', ZS, ZL),
                     fm('aaa', r2[i][3], l, r2[i][2]), '!',
                     fm('aaa', r2[i][1], l, r2[i][0]),
-                    '{}/{}'.format(mode, mode)) 
+                    '{}/{}'.format(mode, mode[::-1])) 
 
 
 def write_qwt1(nw, data):
