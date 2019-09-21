@@ -643,6 +643,9 @@ def main(*args):
 
         # unary operations
 
+        elif opt == '-flip':
+            for S in top.s:
+                S[0,0], S[1,1] = S[1,1], S[0,0]
         elif opt == '-unilateral':
             GS, GL = data.pop('gs', None), data.pop('gl', None)
             for S in top.s:

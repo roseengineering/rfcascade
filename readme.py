@@ -30,6 +30,7 @@ input transformations as command line options:
 -ideembed            : de-embed the input of the top two networks on the stack
 -swap                : swap the top two networks on the stack
 
+-flip                : flip S11 and S22
 -cbg                 : transform network on top of stack into a common-base arrangement
 -ccd                 : transform network on top of stack into a common-collector arrangement
 -lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
@@ -37,7 +38,7 @@ input transformations as command line options:
 -unilateral          : match network on top of stack and then isolate its input and output
 -copy                : copy top of stack
 
--pass                : push a pass through network onto stack
+-pass                : push a pass-through network onto stack
 -block               : push an isolation network onto stack
 -short <complex>     : push an shorted shunt stub onto stack.
 -open <complex>      : push an opened shunt stub onto stack.
