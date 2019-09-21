@@ -13,8 +13,11 @@ def g2z(G, Z0=50):
 def swr(G):
     return (1 + np.abs(G)) / (1 - np.abs(G))
 
-def mismatch(ZS, ZL):
+def gmatch(ZS, ZL):
     return (ZL - np.conj(ZS)) / (ZL + ZS)
+
+def mismatch(G):
+    return 1 - np.abs(G)**2
     
 ### matching
 
@@ -393,7 +396,8 @@ def write_abcd(nw):
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        print(fm('F', f / 1e6), fm('pppp', *s2abcd(S).flatten()))
+        print(fm('F', f / 1e6), 
+              fm('pppp', *s2abcd(S).flatten()))
 
 def write_sparam(nw):
     print('# MHZ S MA R 50')
@@ -403,7 +407,9 @@ def write_sparam(nw):
         f = nw.f[i]
         S = nw.s[i]
         K = rollet(S)
-        print(fm('F', f / 1e6), fm('pppp', *S.T.flatten()), '!', fm('dgg', gum(S), K, mu(S)))
+        print(fm('F', f / 1e6),
+              fm('pppp', *S.T.flatten()), '!', 
+              fm('dgg', gum(S), K, mu(S)))
 
 def write_summary(nw):
     print('MHZ            Z11             Z22         GUI    S21    GUO    '
@@ -413,9 +419,9 @@ def write_summary(nw):
         S = nw.s[i]
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
-        print(fm('F', f / 1e6), fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), 
-            np.abs(S21)**2, guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, 
-            np.abs(det(S)), mu(S)))
+        print(fm('F', f / 1e6), 
+              fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), np.abs(S21)**2, 
+                 guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, np.abs(det(S)), mu(S)))
 
 ###
 
@@ -430,11 +436,11 @@ def write_lmatch(nw, data):
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
             print(fm('F', f / 1e6), 
-                fm('xx', *lmatch(ZLINE, np.conj(ZS))[i], f=f), '!',
-                fm('xx', *lmatch(ZLINE, np.conj(ZS), 'r')[i], f=f), 
-                fm('cc', ZS, ZL),
-                fm('xx', *lmatch(np.conj(ZL), ZLINE)[i], f=f), '!',
-                fm('xx', *lmatch(np.conj(ZL), ZLINE, 'r')[i], f=f))
+                  fm('xx', *lmatch(ZLINE, np.conj(ZS))[i], f=f), '!',
+                  fm('xx', *lmatch(ZLINE, np.conj(ZS), 'r')[i], f=f), 
+                  fm('cc', ZS, ZL),
+                  fm('xx', *lmatch(np.conj(ZL), ZLINE)[i], f=f), '!',
+                  fm('xx', *lmatch(np.conj(ZL), ZLINE, 'r')[i], f=f))
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
@@ -447,10 +453,10 @@ def write_stub1(nw, data):
         for i in range(2):
             for short in [ False, True ]:
                 print(fm('F', f / 1e6),
-                    fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, short=short)[i]),
-                    fm('cc', ZS, ZL),
-                    fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, short=short)[i][::-1]),
-                    's/s' if short else 'o/o')
+                      fm('aaa', *stub1(np.conj(ZS), zo=ZLINE, short=short)[i]),
+                      fm('cc', ZS, ZL),
+                      fm('aaa', *stub1(np.conj(ZL), zo=ZLINE, short=short)[i][::-1]),
+                      's/s' if short else 'o/o')
 
 def write_stub2(nw, data):
     ZLINE = data.get('line', 50)
@@ -467,12 +473,12 @@ def write_stub2(nw, data):
             r2 = stub2(np.conj(ZL), l, zo=ZLINE, mode=mode)
             for i in range(2):
                 print(fm('F', f / 1e6),
-                    fm('aaa', r1[i][0], l, r1[i][1]), '!',
-                    fm('aaa', r1[i][2], l, r1[i][3]),
-                    fm('cc', ZS, ZL),
-                    fm('aaa', r2[i][3], l, r2[i][2]), '!',
-                    fm('aaa', r2[i][1], l, r2[i][0]),
-                    '{}/{}'.format(mode, mode[::-1])) 
+                      fm('aaa', r1[i][0], l, r1[i][1]), '!',
+                      fm('aaa', r1[i][2], l, r1[i][3]),
+                      fm('cc', ZS, ZL),
+                      fm('aaa', r2[i][3], l, r2[i][2]), '!',
+                      fm('aaa', r2[i][1], l, r2[i][0]),
+                      '{}/{}'.format(mode, mode[::-1])) 
 
 
 def write_qwt1(nw, data):
@@ -485,11 +491,11 @@ def write_qwt1(nw, data):
         ZS, ZL = g2z(GS), g2z(GL)
         for minimum in [ False, True ]:
             print(fm('F', f / 1e6),
-                fm('ga', *qwt1(np.conj(ZS), zo=ZLINE, minimum=minimum)),
-                fm('g', ZLINE),
-                fm('cc', ZS, ZL),
-                fm('g', ZLINE),
-                fm('ag', *qwt1(np.conj(ZL), zo=ZLINE, minimum=minimum)[::-1]))
+                  fm('ga', *qwt1(np.conj(ZS), zo=ZLINE, minimum=minimum)),
+                  fm('g', ZLINE),
+                  fm('cc', ZS, ZL),
+                  fm('g', ZLINE),
+                  fm('ag', *qwt1(np.conj(ZL), zo=ZLINE, minimum=minimum)[::-1]))
 
 def write_qwt2(nw, data):
     ZLINE = data.get('line', 50)
@@ -503,10 +509,10 @@ def write_qwt2(nw, data):
             r1 = qwt2(np.conj(ZS), zo=ZLINE, short=short)
             r2 = qwt2(np.conj(ZL), zo=ZLINE, short=short)
             print(fm('F', f / 1e6),
-                fm('gag', *r1),
-                fm('gccg', 2 * r1[2], ZS, ZL, 2 * r2[2]),
-                fm('gag', *r2[::-1]),
-                's/s' if short else 'o/o')
+                  fm('gag', *r1),
+                  fm('gccg', 2 * r1[2], ZS, ZL, 2 * r2[2]),
+                  fm('gag', *r2[::-1]),
+                  's/s' if short else 'o/o')
 
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
@@ -519,35 +525,43 @@ def write_qwt3(nw, data):
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
             print(fm('F', f / 1e6), 
-                fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, short=short)),
-                fm('g', z2),
-                fm('cc', ZS, ZL),
-                fm('g', z2),
-                fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
-                's/s' if short else 'o/o')
+                  fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, short=short)),
+                  fm('g', z2),
+                  fm('cc', ZS, ZL),
+                  fm('g', z2),
+                  fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
+                  's/s' if short else 'o/o')
 
 def write_match(nw, data):
-    print('MHZ       QS          ZS       SWRIN         ZIN             ZOUT      SWROUT          ZL          QL !     GT')
+    print('MHZ       QS          ZS       SWRIN /   MLIN         ZIN             ZOUT       MLOUT / SWROUT          ZL          QL !     GT')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
-        SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
+        RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
+        SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffcfccfcf', f / 1e6, QS, ZS, SWRIN, ZIN, ZOUT, SWROUT, ZL, QL), '!',
+        print(fm('F', f / 1e6), 
+              fm('fcf', QS, ZS, SWRIN), '/',
+              fm('dccd', mismatch(RLIN), ZIN, ZOUT, mismatch(RLOUT)), '/',
+              fm('fcf', SWROUT, ZL, QL), '!',
               fm('d', sgain(S, GS, GL)))
 
 def write_gamma(nw, data):
-    print('MHZ       QS           GS        SWRIN          GIN                GOUT      SWROUT           GL           QL !     GT')
+    print('MHZ       QS           GS        SWRIN /   MLIN          GIN                GOUT       MLOUT / SWROUT           GL           QL !     GT')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
-        SWRIN, SWROUT = swr(mismatch(ZS, ZIN)), swr(mismatch(ZL, ZOUT))
+        RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
+        SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        print(fm('Ffpfppfpf', f / 1e6, QS, GS, SWRIN, GIN, GOUT, SWROUT, GL, QL), '!',
+        print(fm('F', f / 1e6), 
+              fm('fpf', QS, GS, SWRIN), '/',
+              fm('dppd', mismatch(RLIN), GIN, GOUT, mismatch(RLOUT)), '/',
+              fm('fpf', SWROUT, GL, QL), '!',
               fm('d', sgain(S, GS, GL)))
 
 def write_network(nw, data):
