@@ -661,10 +661,13 @@ def main(*args):
 
         elif opt == '-copy':
             stack.append(top.copy())
-        elif opt == '-identity':
-            top = top.copy()
-            stack.append(top)
-            for S in top.s:
+        elif opt == '-block':
+            stack.append(top.copy())
+            for S in stack[-1].s:
+                S[0,0], S[0,1], S[1,0], S[1,1] = 1, 0, 0, 1 
+        elif opt == '-pass':
+            stack.append(top.copy())
+            for S in stack[-1].s:
                 S[0,0], S[0,1], S[1,0], S[1,1] = 0, 1, 1, 0 
         elif opt == '-f':
             stack.append(read_network(args.pop(0)))

@@ -23,7 +23,8 @@ input transformations as command line options:
 -unilateral          : match network on top of stack and then isolate its input and output
 -copy                : copy top of stack
 
--identity            : push an identity matrix onto stack
+-pass                : push a pass through network onto stack
+-block               : push an isolation network onto stack
 -short <complex>     : push an shorted shunt stub onto stack.
 -open <complex>      : push an opened shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
@@ -396,7 +397,7 @@ Create a network of this match.
 
 
 ```
-$ < example3.s2p cascade -identity -tline 65.39/90 -open 11.78/45 -swap -cascade -open 70.89/135 -tline 398.7/90
+$ < example3.s2p cascade -pass -tline 65.39/90 -open 11.78/45 -swap -cascade -open 70.89/135 -tline 398.7/90
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
 4000    0.001336   99.41      5.419 -173.66      0.158 -176.66   0.001339   88.91 !  14.68    1.012    1.168

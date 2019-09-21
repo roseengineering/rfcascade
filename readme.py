@@ -37,7 +37,8 @@ input transformations as command line options:
 -unilateral          : match network on top of stack and then isolate its input and output
 -copy                : copy top of stack
 
--identity            : push an identity matrix onto stack
+-pass                : push a pass through network onto stack
+-block               : push an isolation network onto stack
 -short <complex>     : push an shorted shunt stub onto stack.
 -open <complex>      : push an opened shunt stub onto stack.
 -tline <complex>     : push a transmission line onto stack.
@@ -168,7 +169,7 @@ Match a network for maximum gain.
 
 Create a network of this match.
 
-{ run("< example3.s2p cascade -identity -tline 65.39/90 -open 11.78/45 -swap -cascade -open 70.89/135 -tline 398.7/90") }
+{ run("< example3.s2p cascade -pass -tline 65.39/90 -open 11.78/45 -swap -cascade -open 70.89/135 -tline 398.7/90") }
 
 Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers.  Gonzalez has a corrected value 
 for the load reflection coefficient in AN967.
