@@ -311,8 +311,8 @@ Show impedance matching information.
 
 ```
 $ < example2.s2p cascade -m
-MHZ       QS          ZS       SWRIN   MLIN         ZIN             ZOUT       MLOUT SWROUT          ZL          QL !     GT
-2000    1.47     5.124-7.542j   1.00   0.00     5.124+7.542j     33.68-91.48j   0.00   1.00     33.68+91.48j   2.72 !  16.18
+MHZ       QS          ZS       SWRIN   MLIN         ZIN             ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF      NM
+2000    1.47     5.124-7.542j   1.00   0.00     5.124+7.542j     33.68-91.48j   0.00   1.00     33.68+91.48j   2.72 !  16.18      -      -
 ```
 
 
@@ -321,8 +321,8 @@ Show gamma matching information.
 
 ```
 $ < example2.s2p cascade -g
-MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT
-2000    1.47     0.8179 -162.67   1.00   0.00     0.8179  162.67     0.7495  -52.57   0.00   1.00     0.7495   52.57   2.72 !  16.18
+MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT     NF      NM
+2000    1.47     0.8179 -162.67   1.00   0.00     0.8179  162.67     0.7495  -52.57   0.00   1.00     0.7495   52.57   2.72 !  16.18      -      -
 ```
 
 
