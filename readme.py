@@ -83,9 +83,8 @@ Only 50 ohm networks are supported.
 Installation
 ------------
 ```
-$ sudo pip install -r requirements.txt
-$ sudo cp cascade.py /usr/local/bin/cascade
-$ sudo chmod 755 /usr/local/bin/cascade
+$ cd <repo_directory>
+$ pip install .
 $ sh test.sh       # to run unit tests
 ```
 
