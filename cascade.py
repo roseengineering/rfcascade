@@ -18,6 +18,10 @@ def gmatch(ZS, ZL):
 
 def mismatch(G):
     return 1 - np.abs(G)**2
+
+def nfig(fmin, rn, gopt, GS):
+    return fmin + 4 * rn * np.abs(GS - gopt)**2 / (
+           np.abs(1 + gopt)**2 * (1 - np.abs(GS)**2))
     
 ### matching
 
@@ -158,11 +162,8 @@ def sgain(S, g1, g2=None):
     return (1 - np.abs(g1)**2) * (1 - np.abs(g2)**2) * np.abs(S21)**2 / np.abs(
            (1 - S11 * g1) * (1 - S22 * g2) - S12 * S21 * g1 * g2) ** 2
 
-
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    K = rollet(S)
-    if K < 1: K = np.nan
     D = det(S)
     B1 = 1 + np.abs(S11)**2 - np.abs(S22)**2 - np.abs(D)**2;
     B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
@@ -174,13 +175,11 @@ def smatch(S):
 
 def gin(S, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    U = S12 * S21
-    return S11 + (0 if U == 0 else S12 * S21 * GL / (1 - S22 * GL))
+    return S11 + np.nan_to_num(S12 * S21 * GL / (1 - S22 * GL))
 
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    U = S12 * S21
-    return S22 + (0 if U == 0 else S12 * S21 * GS / (1 - S11 * GS))
+    return S22 + np.nan_to_num(S12 * S21 * GS / (1 - S11 * GS))
 
 def gum(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -200,15 +199,15 @@ def gmsg(S):
 
 def gmag(S):
     K = rollet(S)
-    if K < 1: K = np.nan
-    return gum(S) if np.isinf(K) else gmsg(S) * (K - np.sqrt(K**2 - 1))
+    if K < 1: return np.nan
+    if K == np.inf: return gum(S) 
+    return gmsg(S) * (K - np.sqrt(K**2 - 1))
 
 def gu(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     K = rollet(S)
     if K < 1: return np.nan
-    U = (S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)
-    return 1 / np.abs(1 - U)**2
+    return 1 / np.abs(1 - ((S12 * S21 * np.conj(S11 * S22)) * gui(S) * guo(S)))**2
 
 def det(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -278,6 +277,14 @@ def ccd_transform(S):
 
 ### abcd
 
+def open_stub(deg, zo=50):
+    theta = np.deg2rad(deg)
+    return -1j * zo / np.tan(theta)
+
+def short_stub(deg, zo=50):
+    theta = np.deg2rad(deg)
+    return 1j * zo * np.tan(theta)
+
 def tline(deg, zo=50):
     theta = np.deg2rad(deg)
     return np.array([
@@ -313,15 +320,7 @@ def abcd2s(M, Z0=50):
         [S21, S22]
     ])
 
-### input/output
-
-def open_stub(deg, zo=50):
-    theta = np.deg2rad(deg)
-    return -1j * zo / np.tan(theta)
-
-def short_stub(deg, zo=50):
-    theta = np.deg2rad(deg)
-    return 1j * zo * np.tan(theta)
+### input
 
 def to_complex(s):
     if '/' in s:
@@ -330,15 +329,32 @@ def to_complex(s):
     else:
         return np.complex(s)
 
+def read_network(path=None):
+    if path is None:
+        buf = sys.stdin.read()
+        path = tempfile.mktemp() + '.s2p'
+        with open(path, 'w') as f:
+            f.write(buf)
+        nw = rf.Network(path)
+        os.unlink(path)
+    else:
+        nw = rf.Network(path)
+    if np.any(nw.z0 != 50):
+        print('Only networks referenced to 50 ohms supported', file=sys.stderr)
+        sys.exit(1)
+    return nw
+
+### output
+
 def matching(S, GS, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    U = S12 * S21
+    GMS, GML = smatch(S)
     if GS is None and GL is None:
-        GS, GL = (np.conj(S11), np.conj(S22)) if U == 0 else smatch(S)
+        GS, GL = GMS, GML
     elif GL is None:
-        GL = np.conj(S22) if U == 0 else np.conj(gout(S, GS))
+        GL = np.conj(gout(S, GS))
     elif GS is None:
-        GS = np.conj(S11) if U == 0 else np.conj(gin(S, GL))
+        GS = np.conj(gin(S, GL))
     GIN, GOUT = gin(S, GL), gout(S, GS)
     return GS, GL, GIN, GOUT
 
@@ -376,21 +392,6 @@ def fm(mode, *d, f=None):
             res.append('{:<5g}'.format(x))
     return ' '.join(res)
 
-def read_network(path=None):
-    if path is None:
-        buf = sys.stdin.read()
-        path = tempfile.mktemp() + '.s2p'
-        with open(path, 'w') as f:
-            f.write(buf)
-        nw = rf.Network(path)
-        os.unlink(path)
-    else:
-        nw = rf.Network(path)
-    if np.any(nw.z0 != 50):
-        print('Only networks referenced to 50 ohms supported', file=sys.stderr)
-        sys.exit(1)
-    return nw
-
 def write_abcd(nw):
     print('MHZ             A                  B                  C                  D')
     for i in range(len(nw)):
@@ -423,7 +424,7 @@ def write_summary(nw):
               fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), np.abs(S21)**2, 
                  guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, np.abs(det(S)), mu(S)))
 
-###
+### match
 
 def write_lmatch(nw, data):
     ZLINE = data.get('line', 50)
