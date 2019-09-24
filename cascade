@@ -390,6 +390,33 @@ def fm(mode, *d, f=None):
             res.append('{:<5g}'.format(x))
     return ' '.join(res)
 
+def show_network(nw, data):
+    mode = data.get('mode')
+    if mode == 'a': 
+        write_abcd(nw)
+    elif mode == 'z':
+        write_summary(nw)
+    elif mode == 'm':
+        write_match(nw, data)
+    elif mode == 'g':
+        write_gamma(nw, data)
+    elif mode == 'lmatch':
+        write_lmatch(nw, data)
+    elif mode == 'stub1':
+        write_stub1(nw, data)
+    elif mode == 'stub2':
+        write_stub2(nw, data)
+    elif mode == 'qwt1':
+        write_qwt1(nw, data)
+    elif mode == 'qwt2':
+        write_qwt2(nw, data)
+    elif mode == 'qwt3':
+        write_qwt3(nw, data)
+    else:
+        write_sparam(nw)
+
+### reports
+
 def write_abcd(nw):
     print('MHZ             A                  B                  C                  D')
     for i in range(len(nw)):
@@ -422,7 +449,7 @@ def write_summary(nw):
               fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), np.abs(S21)**2, 
                  guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, np.abs(det(S)), mu(S)))
 
-### match
+### networks
 
 def write_lmatch(nw, data):
     ZLINE = data.get('line', 50)
@@ -479,7 +506,6 @@ def write_stub2(nw, data):
                       fm('aaa', r2[i][1], l, r2[i][0]),
                       '{}/{}'.format(mode, mode[::-1])) 
 
-
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
     print('MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT')
@@ -531,6 +557,8 @@ def write_qwt3(nw, data):
                   fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
                   's/s' if short else 'o/o')
 
+### matching
+
 def write_match(nw, data):
     print('MHZ       QS          ZS       SWRIN /   MLIN         ZIN             ZOUT       MLOUT / SWROUT          ZL          QL !     GT')
     for i in range(len(nw)):
@@ -563,30 +591,7 @@ def write_gamma(nw, data):
               fm('fpf', SWROUT, GL, QL), '!',
               fm('d', sgain(S, GS, GL)))
 
-def write_network(nw, data):
-    mode = data.get('mode')
-    if mode == 'a': 
-        write_abcd(nw)
-    elif mode == 'z':
-        write_summary(nw)
-    elif mode == 'm':
-        write_match(nw, data)
-    elif mode == 'g':
-        write_gamma(nw, data)
-    elif mode == 'lmatch':
-        write_lmatch(nw, data)
-    elif mode == 'stub1':
-        write_stub1(nw, data)
-    elif mode == 'stub2':
-        write_stub2(nw, data)
-    elif mode == 'qwt1':
-        write_qwt1(nw, data)
-    elif mode == 'qwt2':
-        write_qwt2(nw, data)
-    elif mode == 'qwt3':
-        write_qwt3(nw, data)
-    else:
-        write_sparam(nw)
+# main
 
 def main(*args):
     args = list(args)
@@ -720,7 +725,7 @@ def main(*args):
             sys.exit(1)
 
     if stack: 
-        write_network(stack[-1], data)
+        show_network(stack[-1], data)
 
 
 if __name__ == '__main__':
