@@ -61,7 +61,7 @@ class Touchstone:
         v = [np.nan, np.nan, np.nan]
         for N in self.n:
             if N[0] == f:
-                fmin = N[1]
+                fmin = 10 ** (N[1] / 10)
                 gopt = N[2] * np.exp(1j * np.deg2rad(N[3]))
                 rn = N[4]
                 v = [ fmin, gopt, rn ]
@@ -120,7 +120,6 @@ def mismatch(G):
     return 1 - np.abs(G)**2
 
 def nfig(fmin, gopt, rn, GS):
-    fmin = 10 ** (fmin / 10)
     return fmin + 4 * rn * np.abs(GS - gopt)**2 / (np.abs(1 + gopt)**2 * (1 - np.abs(GS)**2))
 
 def nmeasure(f, ga):
@@ -709,8 +708,9 @@ def write_noise(nw, data):
             t = n / (noise - 1)
             GOPT = N[1]
             GMS, GML = smatch(S)
-            GS = (GMS - GOPT) * t + GOPT
+            GS = GOPT + t * np.nan_to_num(GMS - GOPT)
             format_gamma_body(f, S, N, GS)
+            if np.isnan(GMS): break
 
 # main
 
