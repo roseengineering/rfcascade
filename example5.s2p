@@ -1,7 +1,6 @@
 ! Example 4.3.3 in Gonzalez and HP AN970
-! FYI, my results for NF are totally off
+! Must normalize Rn = 9.42 so rn = .1884
 # ghz s ma r 50
 6 .641 -171.3 2.058 28.5 0.057 16.3 0.572 -95.7
 ! NOISE PARAMETERS
-6 2.9 .542 141 9.42
-
+6 2.9 .542 141 .1884

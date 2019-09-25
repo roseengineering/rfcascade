@@ -120,6 +120,9 @@ def mismatch(G):
     return 1 - np.abs(G)**2
 
 def nfig(fmin, gopt, rn, GS):
+    """
+    rn = normalized noise resistance
+    """
     return fmin + 4 * rn * np.abs(GS - gopt)**2 / (np.abs(1 + gopt)**2 * (1 - np.abs(GS)**2))
 
 def nmeasure(f, ga):

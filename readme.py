@@ -69,7 +69,7 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
--noise <n>:   : show matching solutions in gamma from Gopt to GMS in n steps
+-noise <n>:   : show matching solutions in gamma from Gopt to Gms in n steps
 -lmatch       : match with l-section networks
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
