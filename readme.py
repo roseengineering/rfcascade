@@ -69,6 +69,7 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
+-noise <n>:   : show matching solutions in gamma from Gopt to GMS in n steps
 -lmatch       : match with l-section networks
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
@@ -176,6 +177,10 @@ Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application 
 for the load reflection coefficient in AN967.
 
 { run("< example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3") }
+
+Use Gonzalez's analytic method on p.318, drawing a straight line from Gopt to Gms, to select GS.
+
+{ run("< example4.s2p cascade -noise 5") }
 
 """)
 

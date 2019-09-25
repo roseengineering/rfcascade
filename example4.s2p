@@ -1,3 +1,5 @@
 ! Example 4.3.2 in Gonzalez
 # ghz s ma r 50
 4 .6 146 1.97 32 .085 62 .52 -63
+! NOISE PARAMETERS
+4 3 .45 -150 .2

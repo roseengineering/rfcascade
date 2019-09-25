@@ -1,4 +1,5 @@
-! HP Application Note 967, also the example on page 340 of Gonzalezi's 
-! Microwave Transistor Amplifiers book.
+! Example 4.3.1 in Gonzalez, also HP Application Note 967
 # ghz s ma r 50
 4 0.552 169  1.681 26   .049 23 0.839 -67
+! NOISE PARAMETERS
+4 2.5 0.475 166 3.5

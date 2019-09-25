@@ -55,6 +55,7 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
+-noise <n>:   : show matching solutions in gamma from Gopt to GMS in n steps
 -lmatch       : match with l-section networks
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
@@ -311,7 +312,7 @@ Show impedance matching information.
 
 ```
 $ < example2.s2p cascade -m
-MHZ       QS          ZS       SWRIN   MLIN         ZIN             ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF      NM
+MHZ       QS          ZS       SWRIN   MLIN         ZIN             ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM
 2000    1.47     5.124-7.542j   1.00   0.00     5.124+7.542j     33.68-91.48j   0.00   1.00     33.68+91.48j   2.72 !  16.18      -      -
 ```
 
@@ -321,7 +322,7 @@ Show gamma matching information.
 
 ```
 $ < example2.s2p cascade -g
-MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT     NF      NM
+MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM
 2000    1.47     0.8179 -162.67   1.00   0.00     0.8179  162.67     0.7495  -52.57   0.00   1.00     0.7495   52.57   2.72 !  16.18      -      -
 ```
 
@@ -414,6 +415,20 @@ $ < example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
 4000      0.7444  157.00      1.681   -3.30          0    0.00     0.8438 -129.04 !  13.43      inf    1.185
+```
+
+
+Use Gonzalez's analytic method on p.318, drawing a straight line from Gopt to Gms, to select GS.
+
+
+```
+$ < example4.s2p cascade -noise 5
+MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM
+4000    0.56       0.45 -150.00   2.69  -1.02     0.7524  147.97     0.6227  -62.09   0.00   1.00     0.6227   62.09   1.80 !   9.76   3.00   0.46
+4000    0.79     0.5433 -149.17   2.22  -0.67     0.7644  147.95     0.6542  -61.71   0.00   1.00     0.6542   61.71   2.01 !  10.21   3.05   0.52
+4000    1.12     0.6367 -148.59   1.79  -0.36     0.7792  147.93     0.6914  -61.31   0.00   1.00     0.6914   61.31   2.32 !  10.63   3.24   0.83
+4000    1.65     0.7301 -148.15   1.39  -0.12     0.7983  147.89     0.7361  -60.89   0.00   1.00     0.7361   60.89   2.81 !  10.97   3.64   1.55
+4000    2.73     0.8236 -147.82   1.00   0.00     0.8236  147.82     0.7909  -60.46   0.00   1.00     0.7909   60.46   3.67 !  11.14   4.50   2.94
 ```
 
 

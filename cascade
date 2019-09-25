@@ -4,6 +4,106 @@ import numpy as np
 import skrf as rf 
 import sys, tempfile, os
 
+### touchstone class
+
+class Touchstone:
+
+    def __init__(self, fid=None, f=[], s=[], n=[]):
+        if fid: 
+            self.load_file(fid)
+        else:
+            self.f = f
+            self.s = s
+            self.n = n
+
+    def load_file(self, fid):
+        v = []
+        n = []
+        for line in fid.readlines(): 
+            line = line.split('!', 1)[0].strip().lower()
+            if len(line) and line[0] == '#':
+                toks = line[1:].strip().split()
+                toks.extend(['ghz', 's', 'ma', 'r', '50'][len(toks):])
+                frequency_unit = {'hz':1.0, 'khz':1e3, 'mhz':1e6, 'ghz':1e9}.get(toks[0])
+                parameter_format = toks[2]
+            elif len(line):
+                v.extend([ float(x) for x in line.split() ])
+
+        v = np.asarray(v)
+        pos = np.where(np.sign(np.diff(v[::9])) <= 0)
+        if len(pos[0]) != 0:
+            pos = pos[0][0] + 1
+            n = v[pos * 9:]
+            v = v[:pos * 9]
+        v = v.reshape((-1, 9))
+
+        self._f = v[:,0] * frequency_unit
+        self._n = np.asarray(n).reshape((-1, 5))
+        for N in self._n:
+            N[0] *= frequency_unit
+        if parameter_format == 'ri':
+            v = v[:,1::2] + 1j* v[:,2::2]
+        elif parameter_format == 'ma':
+            v = v[:,1::2] * np.exp(1j * np.deg2rad(v[:,2::2]))
+        elif parameter_format == 'db':
+            v = 10**(v[:,1::2] / 20.0) * np.exp(1j * np.deg2rad(v[:,2::2]))
+        self._s = np.transpose(v.reshape((-1, 2, 2)), axes=(0, 2, 1))
+
+    def copy(self):
+        return Touchstone(f=self.f, s=self.s, n=self.n)
+
+    def inv(self):
+        out = self.copy()
+        out.s = np.linalg.inv(self.s)
+        return out
+
+    def nparam(self, f):
+        v = [np.nan, np.nan, np.nan]
+        for N in self.n:
+            if N[0] == f:
+                fmin = N[1]
+                gopt = N[2] * np.exp(1j * np.deg2rad(N[3]))
+                rn = N[4]
+                v = [ fmin, gopt, rn ]
+        return v
+
+    @property
+    def s(self):
+        return self._s
+
+    @s.setter
+    def s(self, s):
+        self._s = np.array(s, dtype=np.complex)
+
+    @property
+    def n(self):
+        return self._n
+
+    @n.setter
+    def n(self, n):
+        self._n = np.array(n, dtype=np.double)
+
+    @property
+    def f(self):
+        return self._f
+
+    @f.setter
+    def f(self, f):
+        self._f = np.array(f, dtype=np.double)
+
+    def __len__(self):
+        return len(self.s)
+
+    def __pow__(self, other):
+        out = self.copy()
+        a = rf.Network(frequency=self._f / 1e9, s=self.s)
+        b = rf.Network(frequency=other._f / 1e9, s=other.s)
+        c = a ** b
+        out.s = c.s
+        return out
+
+### general
+
 def z2g(Z, Z0=50):
     return (Z - Z0) / (Z + Z0)
 
@@ -20,8 +120,8 @@ def mismatch(G):
     return 1 - np.abs(G)**2
 
 def nfig(fmin, gopt, rn, GS):
-    return fmin + 4 * rn * np.abs(GS - gopt)**2 / (
-           np.abs(1 + gopt)**2 * (1 - np.abs(GS)**2))
+    fmin = 10 ** (fmin / 10)
+    return fmin + 4 * rn * np.abs(GS - gopt)**2 / (np.abs(1 + gopt)**2 * (1 - np.abs(GS)**2))
 
 def nmeasure(f, ga):
     return (f - 1) / (1 - 1 / ga)
@@ -332,21 +432,6 @@ def to_complex(s):
     else:
         return np.complex(s)
 
-def read_network(path=None):
-    if path is None:
-        buf = sys.stdin.read()
-        path = tempfile.mktemp() + '.s2p'
-        with open(path, 'w') as f:
-            f.write(buf)
-        nw = rf.Network(path)
-        os.unlink(path)
-    else:
-        nw = rf.Network(path)
-    if np.any(nw.z0 != 50):
-        print('Only networks referenced to 50 ohms supported', file=sys.stderr)
-        sys.exit(1)
-    return nw
-
 ### output
 
 def matching(S, GS, GL):
@@ -566,11 +651,11 @@ def write_qwt3(nw, data):
 
 def write_match(nw, data):
     print('MHZ       QS          ZS       SWRIN   MLIN         ZIN             '
-          'ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF      NM')
+          'ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        N = np.array([np.nan, 0, np.nan])
+        N = nw.nparam(f)
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
 
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
@@ -588,11 +673,11 @@ def write_match(nw, data):
 
 def write_gamma(nw, data):
     print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
-          'GOUT       MLOUT SWROUT           GL           QL !     GT     NF      NM')
+          'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        N = np.array([np.nan, 0, np.nan])
+        N = nw.nparam(f)
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
 
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
@@ -611,19 +696,19 @@ def write_gamma(nw, data):
 def write_noise(nw, data):
     noise = np.maximum(2, data.get('noise'))
     print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
-          'GOUT       MLOUT SWROUT           GL           QL !     GT     NF      NM')
+          'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        N = np.array([np.nan, 0, np.nan])
+        N = nw.nparam(f)
         for n in range(noise):
             t = n / (noise - 1)
             GOPT = N[1]
             GMS, GML = smatch(S)
             GS = (GMS - GOPT) * t + GOPT
-            GL = GML
-            GIN, GOUT = gin(S, GL), gout(S, GS)
+            GL = None
 
+            GS, GL, GIN, GOUT = matching(S, GS, GL)
             ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
             RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
             SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
@@ -642,7 +727,7 @@ def write_noise(nw, data):
 def main(*args):
     args = list(args)
     data = {}
-    stack = [ read_network() ]
+    stack = [ Touchstone(sys.stdin) ]
 
     while args:
         opt = args.pop(0)
@@ -740,32 +825,33 @@ def main(*args):
             for S in stack[-1].s:
                 S[0,0], S[0,1], S[1,0], S[1,1] = 0, 1, 1, 0 
         elif opt == '-f':
-            stack.append(read_network(args.pop(0)))
+            with open(args.pop(0)) as f:
+                stack.append(Touchstone(f))
 
         # cascade operations
 
         elif opt == '-tline':
             x = to_complex(args.pop(0))
             S = abcd2s(tline(np.rad2deg(np.angle(x)), zo=np.abs(x)))
-            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
+            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
         elif opt == '-series':
             x = to_complex(args.pop(0))
             S = abcd2s([[1, x], [0, 1]])
-            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
+            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
         elif opt == '-shunt':
             x = to_complex(args.pop(0))
             S = abcd2s([[1, 0], [1/x, 1]])
-            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
+            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
         elif opt == '-open':
             x = to_complex(args.pop(0))
             x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
-            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
+            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
         elif opt == '-short':
             x = to_complex(args.pop(0))
             x = short_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
             S = abcd2s([[1, 0], [1/x, 1]])
-            stack[-1] **= rf.Network(frequency=top.frequency, s=[S] * len(top))
+            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
 
         # unrecognized
 
