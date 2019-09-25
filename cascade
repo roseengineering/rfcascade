@@ -52,11 +52,6 @@ class Touchstone:
     def copy(self):
         return Touchstone(f=self.f, s=self.s, n=self.n)
 
-    def inv(self):
-        out = self.copy()
-        out.s = np.linalg.inv(self.s)
-        return out
-
     def nparam(self, f):
         v = [np.nan, np.nan, np.nan]
         for N in self.n:
@@ -66,6 +61,12 @@ class Touchstone:
                 rn = N[4]
                 v = [ fmin, gopt, rn ]
         return v
+
+    @property
+    def inv(self):
+        out = self.copy()
+        out.s = np.linalg.inv(self.s)
+        return out
 
     @property
     def s(self):
