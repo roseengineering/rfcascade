@@ -710,7 +710,7 @@ def write_noise(nw, data):
             GMS, GML = smatch(S)
             GS = GOPT + t * np.nan_to_num(GMS - GOPT)
             format_gamma_body(f, S, N, GS)
-            if np.isnan(GMS): break
+            if np.isnan(GMS * GOPT): break
 
 # main
 
