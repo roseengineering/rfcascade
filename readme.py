@@ -28,30 +28,29 @@ input transformations as command line options:
 -cascade             : cascade together the two networks on top of stack
 -deembed             : de-embed the output of the top two networks on the stack
 -ideembed            : de-embed the input of the top two networks on the stack
+-swap                : swap the top two networks on the stack
 
--cbg                 : transform network on top of stack into a common-base arrangement
--ccd                 : transform network on top of stack into a common-collector arrangement
--lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
--lift <henries>      : lift network on top of stack from ground and insert an inductor
--unilateral          : match network on top of stack and then isolate its input and output
-
--short <complex>     : push an shorted shunt stub onto stack.
--open <complex>      : push an opened shunt stub onto stack.
--tline <complex>     : push a transmission line onto stack.
--series <complex>    : push a series resistor onto stack
--shunt <complex>     : push a shunt resistor onto stack
--f <filename>        : push a touchstone network onto stack
+-cbg                 : transform top network into a common-base arrangement
+-ccd                 : transform top network into a common-collector arrangement
+-lift <complex>      : lift top network from ground and insert an impedance
+-lift <henries>      : lift top network from ground and insert an inductor
+-unilateral          : match top network and isolate its input and output
+-short <complex>     : cascade top network with a shorted shunt stub 
+-open <complex>      : cascade top network with an opened shunt stub 
+-tline <complex>     : cascade top network with a transmission line
+-series <complex>    : cascade top network with a series resistor
+-shunt <complex>     : cascade top network with a shunt resistor
+-flip                : flip S11 and S22 of top network
+-copy                : copy top of stack
 
 -gs <complex>        : set the source gamma for matching
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
 
--swap                : swap the top two networks on the stack
--copy                : copy top of stack
+-f <filename>        : push a touchstone network onto stack
 -pass                : push a pass-through network onto stack
 -block               : push an isolation network onto stack
--flip                : flip S11 and S22
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
@@ -69,14 +68,14 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
--noise <n>:   : show matching solutions in gamma from Gopt to Gms in n steps
+-noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
 -lmatch       : match with l-section networks
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
 -qwt1         : match with a quarter wavelength with series section
 -qwt2         : match with a quarter wavelength and shunt stub
--qwt3 <ohms>  : match with a quarter wavelength and shunt stub of given impedance
--line <ohms>  : line impedance to match to
+-qwt3 <real>  : match with a quarter wavelength and shunt stub of given impedance
+-line <real>  : line impedance to match to
 ```
 
 Only 50 ohm networks are supported.
