@@ -14,30 +14,29 @@ input transformations as command line options:
 -cascade             : cascade together the two networks on top of stack
 -deembed             : de-embed the output of the top two networks on the stack
 -ideembed            : de-embed the input of the top two networks on the stack
+-swap                : swap the top two networks on the stack
 
--cbg                 : transform network on top of stack into a common-base arrangement
--ccd                 : transform network on top of stack into a common-collector arrangement
--lift <complex>      : lift network on top of stack from ground and insert an impedance, j required
--lift <henries>      : lift network on top of stack from ground and insert an inductor
--unilateral          : match network on top of stack and then isolate its input and output
-
--short <complex>     : push an shorted shunt stub onto stack.
--open <complex>      : push an opened shunt stub onto stack.
--tline <complex>     : push a transmission line onto stack.
--series <complex>    : push a series resistor onto stack
--shunt <complex>     : push a shunt resistor onto stack
--f <filename>        : push a touchstone network onto stack
+-cbg                 : transform top network into a common-base arrangement
+-ccd                 : transform top network into a common-collector arrangement
+-lift <complex>      : lift top network from ground and insert an impedance
+-lift <henries>      : lift top network from ground and insert an inductor
+-unilateral          : match top network and isolate its input and output
+-short <complex>     : cascade top network with a shorted shunt stub 
+-open <complex>      : cascade top network with an opened shunt stub 
+-tline <complex>     : cascade top network with a transmission line
+-series <complex>    : cascade top network with a series resistor
+-shunt <complex>     : cascade top network with a shunt resistor
+-flip                : flip S11 and S22 of top network
+-copy                : copy top of stack
 
 -gs <complex>        : set the source gamma for matching
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
 
--swap                : swap the top two networks on the stack
--copy                : copy top of stack
+-f <filename>        : push a touchstone network onto stack
 -pass                : push a pass-through network onto stack
 -block               : push an isolation network onto stack
--flip                : flip S11 and S22
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
@@ -55,14 +54,14 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
--noise <n>:   : show matching solutions in gamma from Gopt to Gms in n steps
+-noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
 -lmatch       : match with l-section networks
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
 -qwt1         : match with a quarter wavelength with series section
 -qwt2         : match with a quarter wavelength and shunt stub
--qwt3 <ohms>  : match with a quarter wavelength and shunt stub of given impedance
--line <ohms>  : line impedance to match to
+-qwt3 <real>  : match with a quarter wavelength and shunt stub of given impedance
+-line <real>  : line impedance to match to
 ```
 
 Only 50 ohm networks are supported.
@@ -146,7 +145,7 @@ Shunt a 330 ohm resistor across the output of the two-port network.  This makes 
 $ < 2n5179_5ma.s2p cascade -shunt 330
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
-0          0.471    0.00      5.949  180.00          0    0.00      0.618    0.00 !  18.67      inf    1.618
+0          0.471    0.00      5.949  180.00   2.58e-18    0.00      0.618   -0.00 !  18.67 1.567e+16    1.618
 100       0.4695  -88.72      6.069  124.55    0.02059   66.55     0.6577  -53.05 !  19.21    1.557    1.129
 200       0.3082 -143.49       3.91  103.15    0.03165   61.15     0.6784  -95.81 !  14.95    1.884    1.182
 300       0.2213  155.91      2.664   93.31     0.0415   67.31     0.7377 -135.77 !  12.14    2.142    1.199
@@ -167,7 +166,7 @@ Cascade a series 20 ohm resistor with the output of the two-port network.
 $ < 2n5179_5ma.s2p cascade -series 20
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
-0          0.471    0.00      6.575  180.00          0    0.00     0.8487    0.00 !  22.98      inf    1.178
+0          0.471   -0.00      6.575  180.00  2.851e-18   -0.00     0.8487   -0.00 !  22.98 5.804e+15    1.178
 100       0.4714  -93.44      6.155  115.16    0.02088   57.16     0.7407  -46.86 !  20.33    1.194    1.041
 200       0.3248 -148.73      3.448   92.65    0.02791   50.65     0.5297  -82.32 !  12.67    3.225     1.49
 300        0.248  155.65      2.105   86.17    0.03279   60.17     0.3788 -122.00 !   7.41    5.894    2.244
@@ -189,7 +188,7 @@ with a shunt 100 ohm resistor to stabilize the result.
 $ < 2n5179_5ma.s2p cascade -lift 10e-9 -shunt 100
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
-0          0.471    0.00      4.641  180.00  1.187e-18 -180.00     0.2621   -0.00 !  14.73 6.576e+16    3.815
+0          0.471   -0.00      4.641  180.00          0 -180.00     0.2621    0.00 !  14.73      inf    3.815
 100       0.2894  -31.98       3.67  112.81    0.03295  129.17     0.2602  -55.49 !  11.98    3.527    2.349
 200       0.2813    0.15      2.299   91.42     0.1193  112.36     0.2716  -97.16 !   7.92    1.653    1.612
 300       0.3553    4.07      1.669   75.50     0.2257   82.69     0.3018 -146.61 !   5.45    1.188      1.2
@@ -252,7 +251,7 @@ Create a cascode amplifier.  S12 is significantly reduced compared to a CE amp.
 $ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
-0          0.471    0.00      6.716  180.00          0    0.00     0.9865    0.00 !  33.34      inf    1.014
+0          0.471    0.00      6.716  180.00  9.102e-20    0.00     0.9865    0.00 !  33.34 1.711e+16    1.014
 100       0.4483  -80.32      7.881  132.15   0.001402  161.04      1.108   -7.70 !      -   -8.698   0.8867
 200       0.2328 -128.95      6.756  113.18   0.005638  172.67      1.305  -23.48 !      -   -8.781   0.7421
 300       0.0308  150.86      8.191   84.93    0.02932  164.18      1.743  -59.59 !      -   -4.073   0.5058
@@ -273,7 +272,7 @@ Stabilize the cascode amp with a 100 ohm resistor across the output.
 $ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
-0          0.471    0.00      4.487  180.00          0    0.00     0.3273    0.00 !  14.62      inf    3.055
+0          0.471    0.00      4.487  180.00          0 -180.00     0.3273    0.00 !  14.62      inf    3.055
 100       0.4465  -80.38      5.168  133.55  0.0009194  162.44     0.3832   -9.59 !  15.92    71.73    2.554
 200       0.2298 -130.26      4.346  117.98   0.003626  177.47     0.4864  -26.26 !  14.17    22.95    1.988
 300      0.05872  112.41      5.397   99.27    0.01931  178.52     0.7909  -55.60 !  18.92    1.877    1.122
@@ -293,7 +292,7 @@ Summarize the stabilized cascode amp.
 ```
 $ < 2n5179_5ma.s2p cascade -f cb.s2p -cascade -shunt 100 -z
 MHZ            Z11             Z22         GUI    S21    GUO    GUM   GMSG   GMAG     GU        K        D       MU
-0               139+0j 98.66+9.406e-17j   1.09  13.04   0.49  14.62    inf  14.62   1.00      inf   0.1542    3.055
+0       139+2.471e-30j 98.66+9.406e-17j   1.09  13.04   0.49  14.62    inf  14.62   1.00      inf   0.1542    3.055
 100       38.12-41.92j       109-16.32j   0.97  14.27   0.69  15.92  37.50  15.93   1.00    71.73   0.1668    2.554
 200       35.09-12.99j      104.8-59.1j   0.24  12.76   1.17  14.17  30.79  14.17   1.00    22.95   0.1134    1.988
 300       47.53+5.179j     25.58-89.17j   0.02  14.64   4.27  18.92  24.46  19.06   0.98    1.877   0.1426    1.122
@@ -414,7 +413,7 @@ for the load reflection coefficient in AN967.
 $ < example3.s2p cascade -gs .475/166 -unilateral -tline 50/29.3
 # MHZ S MA R 50
 ! MHZ           S11                S21                S12                S22      !    GUM        K       MU
-4000      0.7444  157.00      1.681   -3.30          0    0.00     0.8438 -129.04 !  13.43      inf    1.185
+4000      0.7444  157.00      1.681   -3.30  2.405e-17  162.66     0.8438 -129.04 !  13.43 1.588e+15    1.185
 ```
 
 
