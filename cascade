@@ -281,10 +281,12 @@ def smatch(S):
 
 def gin(S, GL):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    if np.isnan(GL): return np.nan
     return S11 + np.nan_to_num(S12 * S21 * GL / (1 - S22 * GL))
 
 def gout(S, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    if np.isnan(GS): return np.nan
     return S22 + np.nan_to_num(S12 * S21 * GS / (1 - S11 * GS))
 
 def gum(S):
@@ -710,8 +712,8 @@ def write_noise(nw, data):
         N = nw.nparam(f)
         for n in range(noise):
             t = n / (noise - 1)
-            GOPT = N[1]
             GMS, GML = smatch(S)
+            GOPT = N[1]
             GS = GOPT + t * np.nan_to_num(GMS - GOPT)
             format_gamma_body(f, S, N, GS)
             if np.isnan(GMS * GOPT): break
