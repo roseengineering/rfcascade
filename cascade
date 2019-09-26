@@ -1,20 +1,22 @@
 #!/usr/bin/python
 
 import numpy as np
-import skrf as rf 
 import sys, tempfile, os
 
 ### touchstone class
 
 class Touchstone:
 
-    def __init__(self, fid=None, f=[], s=[], n=[]):
+    def __init__(self, fid=None, f=[], s=[], n=[], a=[]):
         if fid: 
             self.load_file(fid)
         else:
             self.f = f
-            self.s = s
             self.n = n
+            if a: 
+               self.a = a
+            else:
+               self.s = s
 
     def load_file(self, fid):
         v = []
@@ -27,9 +29,9 @@ class Touchstone:
                 frequency_unit = {'hz':1.0, 'khz':1e3, 'mhz':1e6, 'ghz':1e9}.get(toks[0])
                 parameter_format = toks[2]
             elif len(line):
-                v.extend([ float(x) for x in line.split() ])
+                v.extend([ np.double(x) for x in line.split() ])
 
-        v = np.asarray(v)
+        v = np.array(v)
         pos = np.where(np.sign(np.diff(v[::9])) <= 0)
         if len(pos[0]) != 0:
             pos = pos[0][0] + 1
@@ -38,7 +40,7 @@ class Touchstone:
         v = v.reshape((-1, 9))
 
         self._f = v[:,0] * frequency_unit
-        self._n = np.asarray(n).reshape((-1, 5))
+        self._n = np.array(n).reshape((-1, 5))
         for N in self._n:
             N[0] *= frequency_unit
         if parameter_format == 'ri':
@@ -69,6 +71,14 @@ class Touchstone:
         return out
 
     @property
+    def a(self):
+        return np.array([ s2abcd(S) for S in self._s ])
+
+    @a.setter
+    def a(self, a):
+        self._s = np.array([ abcd2s(A) for A in a ])
+
+    @property
     def s(self):
         return self._s
 
@@ -97,10 +107,7 @@ class Touchstone:
 
     def __pow__(self, other):
         out = self.copy()
-        a = rf.Network(frequency=self.f / 1e9, s=self.s)
-        b = rf.Network(frequency=other.f / 1e9, s=other.s)
-        c = a ** b
-        out.s = c.s
+        out.a = [ np.matrix(A) * np.matrix(B) for A, B in zip(self.a, other.a) ]
         return out
 
 ### general
@@ -516,9 +523,9 @@ def write_abcd(nw):
     print('MHZ             A                  B                  C                  D')
     for i in range(len(nw)):
         f = nw.f[i]
-        S = nw.s[i]
+        A = nw.a[i]
         print(fm('F', f / 1e6), 
-              fm('pppp', *s2abcd(S).flatten()))
+              fm('pppp', *A.flatten()))
 
 def write_sparam(nw):
     print('# MHZ S MA R 50')
@@ -828,26 +835,26 @@ def main(*args):
 
         elif opt == '-tline':
             x = to_complex(args.pop(0))
-            S = abcd2s(tline(np.rad2deg(np.angle(x)), zo=np.abs(x)))
-            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
+            A = tline(np.rad2deg(np.angle(x)), zo=np.abs(x))
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
         elif opt == '-series':
             x = to_complex(args.pop(0))
-            S = abcd2s([[1, x], [0, 1]])
-            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
+            A = [[1, x], [0, 1]]
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
         elif opt == '-shunt':
             x = to_complex(args.pop(0))
-            S = abcd2s([[1, 0], [1/x, 1]])
-            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
+            A = [[1, 0], [1/x, 1]]
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
         elif opt == '-open':
             x = to_complex(args.pop(0))
             x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
-            S = abcd2s([[1, 0], [1/x, 1]])
-            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
+            A = [[1, 0], [1/x, 1]]
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
         elif opt == '-short':
             x = to_complex(args.pop(0))
             x = short_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
-            S = abcd2s([[1, 0], [1/x, 1]])
-            stack[-1] **= Touchstone(f=top.f, s=[S] * len(top))
+            A = [[1, 0], [1/x, 1]]
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
 
         # unrecognized
 
