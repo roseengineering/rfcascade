@@ -174,6 +174,10 @@ Create a network of this match.
 
 { run("< example3.s2p cascade -pass -tline 65.39/90 -open 11.78/45 -swap -cascade -open 70.89/135 -tline 398.7/90") }
 
+Match using double stubs.  LBAL gives the balanced stub length.
+
+{ run("< example3.s2p cascade -stub2") }
+
 Add 29.3 degrees of 50 ohm transmission line to the amplifier in HP Application Note 967 and on page 340 of Gonzalezi's Microwave Transistor Amplifiers.  Gonzalez has a corrected value 
 for the load reflection coefficient in AN967.
 
