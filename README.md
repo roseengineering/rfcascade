@@ -412,7 +412,7 @@ Match using double stubs.  LBAL gives the balanced stub length.
 
 ```
 $ < example3.s2p cascade -stub2
-MHZ    (LBAL) LSERIES  (LBAL) !  LSHUNT LSERIES  LSHUNT          ZS               ZL       LSHUNT LSERIES  LSHUNT !  (LBAL) LSERIES  (LBAL)
+MHZ      LBAL LSERIES    LBAL !  LSHUNT LSERIES  LSHUNT          ZS               ZL       LSHUNT LSERIES  LSHUNT !    LBAL LSERIES    LBAL
 4000    10.51   45.00   34.78 !  158.63   45.00  170.77     1.593-11.56j      1.58+70.85j  115.24   45.00  175.33 !  103.76   45.00   43.89 ss/ss
 4000   121.82   45.00   27.26 !   60.93   45.00  167.01     1.593-11.56j      1.58+70.85j   96.73   45.00    5.58 !   66.81   45.00   11.16 ss/ss
 4000    34.32   45.00   40.39 !   68.63   45.00   80.77     1.593-11.56j      1.58+70.85j   25.24   45.00   85.33 !   12.62   45.00   42.67 oo/oo
