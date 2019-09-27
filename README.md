@@ -19,7 +19,7 @@ input transformations as command line options:
 -cbg                 : transform top network into a common-base arrangement
 -ccd                 : transform top network into a common-collector arrangement
 -unilateral          : match top network and isolate its input and output
--lift <el>           : lift top network from ground and insert an Z/inductor/capacitor element
+-lift <el>           : lift top network from ground and insert a Z/inductor/capacitor element
 -series <el>         : cascade top network with a series Z/inductor/capacitor element
 -shunt <el>          : cascade top network with a shunt Z/inductor/capacitor element
 -short <complex>     : cascade top network with a short shunt stub 
@@ -43,8 +43,7 @@ angle in degrees, for example '10/90'.
 
 Transmission lines are given in complex form, with the magnitude setting the impedance and the angle 
 setting the length.  Open or shunt stubs are given the same way.
-A component element can be enter as an impedance using the same complex form.  Inductance and capacitance
-can also be entered for a component.  To do so add a 'h' suffix for inductance or a 'f' for capacitance.
+A component element can be entered as an impedance using the complex form.  It can also be entered as an inductance or capacitance.  To do so add a 'h' suffix for inductance or a 'f' for capacitance.
 
 After the '-unilateral' operator is used, it resets gs, gl, zs, and zl.
 

@@ -266,11 +266,7 @@ def lmatch(ZS, ZL, reverse=False):
 
 ### scattering parameters
 
-def sgain(S, g1, g2=None):
-    if g2 == 'a':
-        return sgain(S, g1, np.conj(gout(S, gG)))
-    if g2 == 'p':
-        return sgain(S, np.conj(gin(S,gL)), g1)
+def sgain(S, g1, g2):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return (1 - np.abs(g1)**2) * (1 - np.abs(g2)**2) * np.abs(S21)**2 / np.abs(
            (1 - S11 * g1) * (1 - S22 * g2) - S12 * S21 * g1 * g2) ** 2
