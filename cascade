@@ -267,7 +267,7 @@ def lmatch(ZS, ZL, reverse=False):
 
 def npassive(S, GT, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return 1 / GT if S12 == S21 and np.abs(S21) < 1 else np.nan
+    return 1 / GT if np.abs(S21 * S12) < 1 else np.nan
  
 def sgain(S, g1, g2):
     if g2 == 'a':
@@ -683,7 +683,7 @@ def write_match(nw, data):
         SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
         GT = sgain(S, GS, GL)
-        NF = npassive(S, GT, GS) if np.isnan(GOPT) else nfig(FMIN, GOPT, RN, GS)
+        NF = nfig(FMIN, GOPT, RN, GS) if len(nw.n) else npassive(S, GT, GS) 
         NM = nmeasure(NF, GT)
         print(fm('F', f / 1e6), 
               fm('fcf', QS, ZS, SWRIN),
@@ -695,14 +695,17 @@ def format_gamma_header():
     print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
           'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
 
-def format_gamma_body(f, S, FMIN, GOPT, RN, GS, GL):
+def format_gamma_body(nw, i, GS, GL):
+    f = nw.f[i]
+    S = nw.s[i]
+    FMIN, GOPT, RN = nw.nparam(f)
     GS, GL, GIN, GOUT = matching(S, GS, GL)
     ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
     RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
     SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
     QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
     GT = sgain(S, GS, GL)
-    NF = npassive(S, GT, GS) if np.isnan(GOPT) else nfig(FMIN, GOPT, RN, GS)
+    NF = nfig(FMIN, GOPT, RN, GS) if len(nw.n) else npassive(S, GT, GS) 
     NM = nmeasure(NF, GT)
     print(fm('F', f / 1e6), 
           fm('fpf', QS, GS, SWRIN),
@@ -713,10 +716,7 @@ def format_gamma_body(f, S, FMIN, GOPT, RN, GS, GL):
 def write_gamma(nw, data):
     format_gamma_header()
     for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
-        FMIN, GOPT, RN = nw.nparam(f)
-        format_gamma_body(f, S, FMIN, GOPT, RN, data.get('gs'), data.get('gl'))
+        format_gamma_body(nw, i, data.get('gs'), data.get('gl'))
 
 def write_noise(nw, data):
     format_gamma_header()
@@ -724,12 +724,12 @@ def write_noise(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        FMIN, GOPT, RN = nw.nparam(f)
         for n in range(noise):
             t = n / (noise - 1)
             GMS, GML = smatch(S)
+            GOPT = nw.nparam(f)[1]
             GS, GL = GOPT + t * np.nan_to_num(GMS - GOPT), None
-            format_gamma_body(f, S, FMIN, GOPT, RN, GS, GL)
+            format_gamma_body(nw, i, GS, GL)
             if np.isnan(GMS * GOPT): break
 
 # main
