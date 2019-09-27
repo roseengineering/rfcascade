@@ -268,7 +268,7 @@ def lmatch(ZS, ZL, reverse=False):
 def npassive(S, GT, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     return 1 / GT if S12 == S21 and np.abs(S21) < 1 else np.nan
-    
+ 
 def sgain(S, g1, g2):
     if g2 == 'a':
         return sgain(S, g1, np.conj(gout(S, g1)))
