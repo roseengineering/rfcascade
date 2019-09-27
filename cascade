@@ -582,8 +582,8 @@ def write_stub1(nw, data):
 def write_stub2(nw, data):
     ZLINE = data.get('line', 50)
     l = 45
-    print('MHZ    (LBAL) LSERIES  (LBAL) !  LSHUNT LSERIES  LSHUNT          ZS               ZL'
-          '       LSHUNT LSERIES  LSHUNT !  (LBAL) LSERIES  (LBAL)')
+    print('MHZ      LBAL LSERIES    LBAL !  LSHUNT LSERIES  LSHUNT          ZS               ZL'
+          '       LSHUNT LSERIES  LSHUNT !    LBAL LSERIES    LBAL')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
