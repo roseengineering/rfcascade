@@ -55,14 +55,13 @@ class Touchstone:
         return Touchstone(f=self.f, s=self.s, n=self.n)
 
     def nparam(self, f):
-        v = [np.nan, np.nan, np.nan]
         for N in self.n:
             if N[0] == f:
                 fmin = 10 ** (N[1] / 10)
                 gopt = N[2] * np.exp(1j * np.deg2rad(N[3]))
                 rn = N[4]
-                v = [ fmin, gopt, rn ]
-        return v
+                return fmin, gopt, rn
+        return np.nan, np.nan, np.nan
 
     @property
     def inv(self):
@@ -266,10 +265,18 @@ def lmatch(ZS, ZL, reverse=False):
 
 ### scattering parameters
 
-def sgain(S, g1, g2):
+def npassive(S, GT, GS):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
-    return (1 - np.abs(g1)**2) * (1 - np.abs(g2)**2) * np.abs(S21)**2 / np.abs(
-           (1 - S11 * g1) * (1 - S22 * g2) - S12 * S21 * g1 * g2) ** 2
+    return 1 / GT if S12 == S21 and np.abs(S21) < 1 else np.nan
+    
+def sgain(S, g1, g2):
+    if g2 == 'a':
+        return sgain(S, g1, np.conj(gout(S, g1)))
+    if g2 == 'p':
+        return sgain(S, np.conj(gin(S,g1)), g1)
+    S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
+    return (1 - np.abs(g1)**2) * (1 - np.abs(g2)**2) * np.abs(S21)**2 / (
+           np.abs((1 - S11 * g1) * (1 - S22 * g2) - S12 * S21 * g1 * g2)**2)
 
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
@@ -668,7 +675,7 @@ def write_match(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        N = nw.nparam(f)
+        FMIN, GOPT, RN = nw.nparam(f)
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
 
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
@@ -676,7 +683,7 @@ def write_match(nw, data):
         SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
         QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
         GT = sgain(S, GS, GL)
-        NF = nfig(*N, GS)
+        NF = npassive(S, GT, GS) if np.isnan(GOPT) else nfig(FMIN, GOPT, RN, GS)
         NM = nmeasure(NF, GT)
         print(fm('F', f / 1e6), 
               fm('fcf', QS, ZS, SWRIN),
@@ -688,14 +695,14 @@ def format_gamma_header():
     print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
           'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
 
-def format_gamma_body(f, S, N, GS, GL=None):
+def format_gamma_body(f, S, FMIN, GOPT, RN, GS, GL):
     GS, GL, GIN, GOUT = matching(S, GS, GL)
     ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
     RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
     SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
     QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
     GT = sgain(S, GS, GL)
-    NF = nfig(*N, GS)
+    NF = npassive(S, GT, GS) if np.isnan(GOPT) else nfig(FMIN, GOPT, RN, GS)
     NM = nmeasure(NF, GT)
     print(fm('F', f / 1e6), 
           fm('fpf', QS, GS, SWRIN),
@@ -708,8 +715,8 @@ def write_gamma(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        N = nw.nparam(f)
-        format_gamma_body(f, S, N, data.get('gs'), data.get('gl'))
+        FMIN, GOPT, RN = nw.nparam(f)
+        format_gamma_body(f, S, FMIN, GOPT, RN, data.get('gs'), data.get('gl'))
 
 def write_noise(nw, data):
     format_gamma_header()
@@ -717,13 +724,12 @@ def write_noise(nw, data):
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
-        N = nw.nparam(f)
+        FMIN, GOPT, RN = nw.nparam(f)
         for n in range(noise):
             t = n / (noise - 1)
             GMS, GML = smatch(S)
-            GOPT = N[1]
-            GS = GOPT + t * np.nan_to_num(GMS - GOPT)
-            format_gamma_body(f, S, N, GS)
+            GS, GL = GOPT + t * np.nan_to_num(GMS - GOPT), None
+            format_gamma_body(f, S, FMIN, GOPT, RN, GS, GL)
             if np.isnan(GMS * GOPT): break
 
 # main
