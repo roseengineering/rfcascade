@@ -441,7 +441,7 @@ def to_complex(s, f=None):
     elif s[-1] == 'h':
         return 2j * np.pi * f * np.double(s[:-1])
     elif s[-1] == 'f':
-        return 1 / (2j * np.pi * f * np.double(s[:-1]))
+        return -1j * (1 / (2 * np.pi * f * np.double(s[:-1])))
     else:
         return np.complex(s)
 
