@@ -32,32 +32,35 @@ input transformations as command line options:
 
 -cbg                 : transform top network into a common-base arrangement
 -ccd                 : transform top network into a common-collector arrangement
--lift <complex>      : lift top network from ground and insert an impedance
--lift <henries>      : lift top network from ground and insert an inductor
 -unilateral          : match top network and isolate its input and output
--short <complex>     : cascade top network with a shorted shunt stub 
--open <complex>      : cascade top network with an opened shunt stub 
+-lift <el>           : lift top network from ground and insert an Z/inductor/capacitor element
+-series <el>         : cascade top network with a series Z/inductor/capacitor element
+-shunt <el>          : cascade top network with a shunt Z/inductor/capacitor element
+-short <complex>     : cascade top network with a short shunt stub 
+-open <complex>      : cascade top network with an open shunt stub 
 -tline <complex>     : cascade top network with a transmission line
--series <complex>    : cascade top network with a series resistor
--shunt <complex>     : cascade top network with a shunt resistor
 -flip                : flip S11 and S22 of top network
--copy                : copy top of stack
 
 -gs <complex>        : set the source gamma for matching
 -zs <complex>        : set the source impedance for matching
 -gl <complex>        : set the load gamma for matching
 -zl <complex>        : set the load impedance for matching
 
--f <filename>        : push a touchstone network onto stack
 -pass                : push a pass-through network onto stack
 -block               : push an isolation network onto stack
+-copy                : push a copy of top network onto stack
+-f <filename>        : push a touchstone file onto stack
 ```
 
 Complex numbers can also be entered in 'polar' notation.  Use a '/' to separate the magnitude and 
-angle in degrees, for example '10/90'.  Transmission lines are given in complex form, with
-the magnitude setting the impedance and the angle setting the length.
+angle in degrees, for example '10/90'.  
 
-After the unilateral operator is used, it resets gs, gl, zs, and zl.
+Transmission lines are given in complex form, with the magnitude setting the impedance and the angle 
+setting the length.  Open or shunt stubs are given the same way.
+A component element can be enter as an impedance using the same complex form.  Inductance and capacitance
+can also be entered for a component.  To do so add a 'h' suffix for inductance or a 'f' for capacitance.
+
+After the '-unilateral' operator is used, it resets gs, gl, zs, and zl.
 
 By default the utility writes out the network on the top of
 the stack in touchstone format with GUM and stability information 
@@ -114,11 +117,11 @@ Cascade a series 20 ohm resistor with the output of the two-port network.
 Lift terminal 3, the port connected to ground, and add a 10nH inductor.  Then cascade the result
 with a shunt 100 ohm resistor to stabilize the result.
 
-{ run("< 2n5179_5ma.s2p cascade -lift 10e-9 -shunt 100") }
+{ run("< 2n5179_5ma.s2p cascade -lift 10e-9h -shunt 100") }
 
 Insert a one ohm resistor at the emitter to provide shunt feedback.
 
-{ run("< 2n5179_5ma.s2p cascade -lift 1+0j") }
+{ run("< 2n5179_5ma.s2p cascade -lift 1") }
 
 Transform the common emitter s-parameter input into a common-base.
 

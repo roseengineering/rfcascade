@@ -437,10 +437,15 @@ def abcd2s(M, Z0=50):
 
 ### input
 
-def to_complex(s):
+def to_complex(s, f=None):
+    s = s.strip().lower()
     if '/' in s:
         r, theta = s.split('/')
         return np.double(r) * np.exp(1j * np.deg2rad(np.double(theta)))
+    elif s[-1] == 'h':
+        return 2j * np.pi * f * np.double(s[:-1])
+    elif s[-1] == 'f':
+        return 1 / (2j * np.pi * f * np.double(s[:-1]))
     else:
         return np.complex(s)
 
@@ -796,7 +801,7 @@ def main(*args):
             a = stack.pop()
             stack.append(a.inv ** b)
 
-        # unary operations
+        # unary transformation operations
 
         elif opt == '-flip':
             for S in top.s:
@@ -811,9 +816,31 @@ def main(*args):
         elif opt == '-ccd':
             top.s = np.array([ ccd_transform(S) for S in top.s ])
         elif opt == '-lift':
-            henry = lambda x, f: np.complex(x) if 'j' in x or '/' in x else 2j * np.pi * f * np.double(x)
             x = args.pop(0)
-            top.s = np.array([ lift_ground(top.s[i], z2g(henry(x, top.f[i]))) for i in range(len(top)) ])
+            top.s = np.array([ lift_ground(S, z2g(to_complex(x, f=f))) for f, S in zip(top.f, top.s) ])
+
+        # unary cascade operations
+
+        elif opt == '-tline':
+            x = to_complex(args.pop(0))
+            A = tline(np.rad2deg(np.angle(x)), zo=np.abs(x))
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
+        elif opt == '-open':
+            x = to_complex(args.pop(0))
+            x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
+            A = [[1, 0], [1/x, 1]]
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
+        elif opt == '-short':
+            x = to_complex(args.pop(0))
+            x = short_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
+            A = [[1, 0], [1/x, 1]]
+            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
+        elif opt == '-series':
+            x = args.pop(0)
+            stack[-1] **= Touchstone(f=top.f, a=[[[1, to_complex(x, f=f)], [0, 1]] for f in top.f ])
+        elif opt == '-shunt':
+            x = args.pop(0)
+            stack[-1] **= Touchstone(f=top.f, a=[[[1, 0], [1/to_complex(x, f=f), 1]] for f in top.f ])
 
         # push operations
 
@@ -830,31 +857,6 @@ def main(*args):
         elif opt == '-f':
             with open(args.pop(0)) as f:
                 stack.append(Touchstone(f))
-
-        # cascade operations
-
-        elif opt == '-tline':
-            x = to_complex(args.pop(0))
-            A = tline(np.rad2deg(np.angle(x)), zo=np.abs(x))
-            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
-        elif opt == '-series':
-            x = to_complex(args.pop(0))
-            A = [[1, x], [0, 1]]
-            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
-        elif opt == '-shunt':
-            x = to_complex(args.pop(0))
-            A = [[1, 0], [1/x, 1]]
-            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
-        elif opt == '-open':
-            x = to_complex(args.pop(0))
-            x = open_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
-            A = [[1, 0], [1/x, 1]]
-            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
-        elif opt == '-short':
-            x = to_complex(args.pop(0))
-            x = short_stub(np.rad2deg(np.angle(x)), zo=np.abs(x))
-            A = [[1, 0], [1/x, 1]]
-            stack[-1] **= Touchstone(f=top.f, a=[A] * len(top))
 
         # unrecognized
 
