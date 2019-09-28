@@ -33,7 +33,6 @@ input transformations as command line options:
 -zl <complex>        : set the load impedance for matching
 
 -pass                : push a pass-through network onto stack
--block               : push an isolation network onto stack
 -copy                : push a copy of top network onto stack
 -f <filename>        : push a touchstone file onto stack
 ```
