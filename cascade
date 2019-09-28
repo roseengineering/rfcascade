@@ -106,8 +106,27 @@ class Touchstone:
 
     def __pow__(self, other):
         out = self.copy()
-        out.a = [ np.matrix(A) * np.matrix(B) for A, B in zip(self.a, other.a) ]
+        out.s = [ cascade(A, B) for A, B in zip(self.s, other.s) ]
         return out
+
+def cascade(A, B):
+    k, l = 1, 2
+    C = np.zeros((4, 4), dtype='complex')
+    C[:2, :2] = A.copy()
+    C[2:, 2:] = B.copy()
+    D = np.zeros(C.shape, dtype='complex')
+    for i in range(4):
+        for j in range(4):
+            D[i, j] = \
+                C[i, j] + \
+                (C[k, j] * C[i, l] * (1 - C[l, k]) + \
+                 C[l, j] * C[i, k] * (1 - C[k, l]) + \
+                 C[k, j] * C[l, l] * C[i, k] + \
+                 C[l, j] * C[k, k] * C[i, l]) / \
+                ((1 - C[k, l]) * (1 - C[l, k]) - C[k, k] * C[l, l])
+    D = np.delete(D, (k, l), 0)
+    D = np.delete(D, (k, l), 1)
+    return D
 
 ### general
 
