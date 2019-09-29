@@ -25,7 +25,7 @@ input transformations as command line options:
 -short <complex>     : cascade top network with a short shunt stub 
 -open <complex>      : cascade top network with an open shunt stub 
 -tline <complex>     : cascade top network with a transmission line
--flip                : flip S11 and S22 of top network
+-flip                : flip top network, swapping S11 with S22 and S21 with S12
 
 -gs <complex>        : set the source gamma for matching
 -zs <complex>        : set the source impedance for matching
