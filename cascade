@@ -204,7 +204,7 @@ def qwt2(za, zo=50, short=True):
     z1 = np.sqrt(zo / gl) * np.array([1, 1])
     z2 = 1 / bl * np.array([1, -1]) * (1 if short else -1)
     d = np.array([ 45, 135 ])
-    res = np.array([ z1, d, z2 ]).T
+    res = np.array([ z1, z2, d, 2 * z2 ]).T
     return res[1] if z2[0] < 0 else res[0]
 
 def qwt3(za, z2, zo=50, short=True):
@@ -223,7 +223,7 @@ def qwt3(za, z2, zo=50, short=True):
     d = np.mod(d, np.pi)
     d = np.rad2deg(d)
     i = 0 if short else 1
-    return np.array([ z1, balance(d[i], short=short), d[i] ])
+    return np.array([ z1, z2, d[i], balance(d[i], short=short) ])
 
 def stub1(za, zo=50, short=True):
     """
@@ -651,25 +651,23 @@ def write_qwt1(nw, data):
 
 def write_qwt2(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT  LSHUNT   ZSHUNT   (ZBAL)          ZS               ZL        (ZBAL)   ZSHUNT  LSHUNT     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL        (ZBAL)  LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
-            r1 = qwt2(np.conj(ZS), zo=ZLINE, short=short)
-            r2 = qwt2(np.conj(ZL), zo=ZLINE, short=short)
             print(fm('F', f / 1e6),
-                  fm('gag', *r1),
-                  fm('gccg', 2 * r1[2], ZS, ZL, 2 * r2[2]),
-                  fm('gag', *r2[::-1]),
+                  fm('ggag', *qwt2(np.conj(ZS), zo=ZLINE, short=short)),
+                  fm('cc',ZS, ZL),
+                  fm('gagg', *qwt2(np.conj(ZL), zo=ZLINE, short=short)[::-1]),
                   's/s' if short else 'o/o')
 
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
     z2 = data.get('z2')
-    print('MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT  LSHUNT  (LBAL)          ZS               ZL       (LBAL)  LSHUNT   ZSHUNT     ZQWT')
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
@@ -677,11 +675,9 @@ def write_qwt3(nw, data):
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
             print(fm('F', f / 1e6), 
-                  fm('gaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, short=short)),
-                  fm('g', z2),
+                  fm('ggaa', *qwt3(np.conj(ZS), z2, zo=ZLINE, short=short)),
                   fm('cc', ZS, ZL),
-                  fm('g', z2),
-                  fm('aag', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
+                  fm('aagg', *qwt3(np.conj(ZL), z2, zo=ZLINE, short=short)[::-1]),
                   's/s' if short else 'o/o')
 
 ### show matching

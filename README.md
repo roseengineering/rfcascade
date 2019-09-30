@@ -368,9 +368,9 @@ A quarter wave transformer and stub match example.
 
 ```
 $ < example2.s2p cascade -qwt2
-MHZ       ZQWT  LSHUNT   ZSHUNT   (ZBAL)          ZS               ZL        (ZBAL)   ZSHUNT  LSHUNT     ZQWT
-2000     28.48   45.00    11.02    22.05     5.124-7.542j     33.68+91.48j    207.8    103.9  135.00    118.8 o/o
-2000     28.48  135.00    11.02    22.05     5.124-7.542j     33.68+91.48j    207.8    103.9   45.00    118.8 s/s
+MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL        (ZBAL)  LSHUNT   ZSHUNT     ZQWT
+2000     28.48    11.02   45.00    22.05     5.124-7.542j     33.68+91.48j    207.8  135.00    103.9    118.8 o/o
+2000     28.48    11.02  135.00    22.05     5.124-7.542j     33.68+91.48j    207.8   45.00    103.9    118.8 s/s
 ```
 
 
@@ -379,9 +379,9 @@ A quarter wave transformer and 72 ohm stub match example.
 
 ```
 $ < example2.s2p cascade -qwt3 72
-MHZ       ZQWT  (LBAL)  LSHUNT   ZSHUNT          ZS               ZL        ZSHUNT  LSHUNT  (LBAL)     ZQWT
-2000     28.48   72.98   81.30       72     5.124-7.542j     33.68+91.48j       72  145.27  160.89    118.8 o/o
-2000     28.48  162.98  171.30       72     5.124-7.542j     33.68+91.48j       72   55.27   70.89    118.8 s/s
+MHZ       ZQWT   ZSHUNT  LSHUNT  (LBAL)          ZS               ZL       (LBAL)  LSHUNT   ZSHUNT     ZQWT
+2000     28.48       72   81.30   72.98     5.124-7.542j     33.68+91.48j  160.89  145.27       72    118.8 o/o
+2000     28.48       72  171.30  162.98     5.124-7.542j     33.68+91.48j   70.89   55.27       72    118.8 s/s
 ```
 
 
@@ -390,9 +390,9 @@ Match a network for maximum gain.
 
 ```
 $ < example3.s2p cascade -qwt2
-MHZ       ZQWT  LSHUNT   ZSHUNT   (ZBAL)          ZS               ZL        (ZBAL)   ZSHUNT  LSHUNT     ZQWT
-4000     65.39   45.00    11.78    23.56     1.593-11.56j      1.58+70.85j    141.8    70.89  135.00    398.7 o/o
-4000     65.39  135.00    11.78    23.56     1.593-11.56j      1.58+70.85j    141.8    70.89   45.00    398.7 s/s
+MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL        (ZBAL)  LSHUNT   ZSHUNT     ZQWT
+4000     65.39    11.78   45.00    23.56     1.593-11.56j      1.58+70.85j    141.8  135.00    70.89    398.7 o/o
+4000     65.39    11.78  135.00    23.56     1.593-11.56j      1.58+70.85j    141.8   45.00    70.89    398.7 s/s
 ```
 
 
