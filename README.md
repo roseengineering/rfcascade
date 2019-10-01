@@ -57,7 +57,8 @@ as comments.  It can also output the network in following alternative formats:
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
 -noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
--lmatch1      : match with l-section networks
+-lmatch       : match with l-section networks
+-sec1         : match with a short section of transmission line
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
 -qwt1         : match with a quarter wavelength with series section
@@ -345,7 +346,7 @@ A L-section match example.
 
 
 ```
-$ < example2.s2p cascade -lmatch1
+$ < example2.s2p cascade -lmatch
 MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT
 2000   1.345nH  3.505pF !        -        -     5.124-7.542j     33.68+91.48j   4.61nH  738.6fF !  5.715nH  5.414nH
 2000    4.71pF  606.6pH !        -        -     5.124-7.542j     33.68+91.48j  39.99nH  8.574nH !  1.108pF  9.146nH
@@ -357,9 +358,9 @@ A quarter wave transformer with a series section example.
 
 ```
 $ < example2.s2p cascade -qwt1
-MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT
-2000       158   81.33       50     5.124-7.542j     33.68+91.48j       50  153.72    132.1
-2000     15.83  171.33       50     5.124-7.542j     33.68+91.48j       50   63.72    18.92
+MHZ       ZQWT  ZSERIES LSERIES          ZS               ZL      LSERIES  ZSERIES     ZQWT
+2000       158       50   81.33     5.124-7.542j     33.68+91.48j  153.72       50    132.1
+2000     15.83       50  171.33     5.124-7.542j     33.68+91.48j   63.72       50    18.92
 ```
 
 

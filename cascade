@@ -179,6 +179,13 @@ def lmin(za, zo=50, minimum=True):
        zm = s * zo
    return lm * 360, zm
 
+def sec1(za, zo=50):
+    r, x = za.real, za.imag
+    z1 = np.sqrt(r * zo - x**2 * zo / (zo - r))
+    d = np.arctan(z1 * (zo - r) / (x * zo))
+    d = np.mod(d, np.pi)
+    return z1, np.rad2deg(d)
+
 def qwt1(za, zo=50, minimum=True):
     """
     ---------------==========---------|
@@ -188,7 +195,7 @@ def qwt1(za, zo=50, minimum=True):
     """
     lm, zm = lmin(za, zo=zo, minimum=minimum)
     z1 = np.sqrt(zo * zm)
-    return z1, lm
+    return z1, zo, lm
 
 def qwt2(za, zo=50, short=True):
     """
@@ -529,8 +536,8 @@ def show_network(nw, data):
         write_gamma(nw, data)
     elif mode == 'noise':
         write_noise(nw, data)
-    elif mode == 'lmatch1':
-        write_lmatch1(nw, data)
+    elif mode == 'lmatch':
+        write_lmatch(nw, data)
     elif mode == 'stub1':
         write_stub1(nw, data)
     elif mode == 'stub2':
@@ -541,6 +548,8 @@ def show_network(nw, data):
         write_qwt2(nw, data)
     elif mode == 'qwt3':
         write_qwt3(nw, data)
+    elif mode == 'sec1':
+        write_sec1(nw, data)
     else:
         write_sparam(nw)
 
@@ -569,9 +578,7 @@ def write_sparam(nw):
 def write_summary(nw):
     print('MHZ            Z11             Z22         GUI    S21    GUO    '
           'GUM   GMSG   GMAG     GU        K        D       MU')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
         print(fm('F', f / 1e6), 
@@ -580,13 +587,22 @@ def write_summary(nw):
 
 ### matching networks
 
-def write_lmatch1(nw, data):
+def write_sec1(nw, data):
+    ZLINE = data.get('line', 50)
+    print('MHZ   ZSERIES  LSERIES          ZS               ZL      LSERIES  ZSERIES')
+    for f, S in zip(nw.f, nw.s):
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
+        print(fm('F', f / 1e6), 
+              fm('ga', *sec1(np.conj(ZS), zo=ZLINE)),
+              fm('cc', ZS, ZL),
+              fm('ag', *sec1(np.conj(ZL), zo=ZLINE)[::-1]))
+
+def write_lmatch(nw, data):
     ZLINE = data.get('line', 50)
     print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          '
           'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
@@ -600,9 +616,7 @@ def write_lmatch1(nw, data):
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
     print('MHZ    (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
@@ -618,9 +632,7 @@ def write_stub2(nw, data):
     l = 45
     print('MHZ    (LBAL)  LSHUNT LSERIES  LSHUNT  (LBAL)          ZS               ZL'
           '       (LBAL)  LSHUNT LSERIES  LSHUNT  (LBAL)')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for mode in [ 'ss', 'oo', 'so', 'os' ]:
@@ -635,26 +647,20 @@ def write_stub2(nw, data):
 
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT LSERIES  ZSERIES          ZS               ZL       ZSERIES LSERIES     ZQWT')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    print('MHZ       ZQWT  ZSERIES LSERIES          ZS               ZL      LSERIES  ZSERIES     ZQWT')
+    for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for minimum in [ False, True ]:
             print(fm('F', f / 1e6),
-                  fm('ga', *qwt1(np.conj(ZS), zo=ZLINE, minimum=minimum)),
-                  fm('g', ZLINE),
+                  fm('gga', *qwt1(np.conj(ZS), zo=ZLINE, minimum=minimum)),
                   fm('cc', ZS, ZL),
-                  fm('g', ZLINE),
-                  fm('ag', *qwt1(np.conj(ZL), zo=ZLINE, minimum=minimum)[::-1]))
+                  fm('agg', *qwt1(np.conj(ZL), zo=ZLINE, minimum=minimum)[::-1]))
 
 def write_qwt2(nw, data):
     ZLINE = data.get('line', 50)
     print('MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL        (ZBAL)  LSHUNT   ZSHUNT     ZQWT')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
@@ -668,9 +674,7 @@ def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
     z2 = data.get('z2')
     print('MHZ       ZQWT   ZSHUNT  LSHUNT  (LBAL)          ZS               ZL       (LBAL)  LSHUNT   ZSHUNT     ZQWT')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for short in [ False, True ]:
@@ -685,12 +689,10 @@ def write_qwt3(nw, data):
 def write_match(nw, data):
     print('MHZ       QS          ZS       SWRIN   MLIN         ZIN             '
           'ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    for f, S in zip(nw.f, nw.s):
         FMIN, GOPT, RN = nw.nparam(f)
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
-
+        ###
         ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
         RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
         SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
@@ -769,8 +771,10 @@ def main(*args):
         elif opt == '-noise':
             data['mode'] = 'noise'
             data['noise'] = np.int(args.pop(0))
-        elif opt == '-lmatch1':
-            data['mode'] = 'lmatch1'
+        elif opt == '-lmatch':
+            data['mode'] = 'lmatch'
+        elif opt == '-sec1':
+            data['mode'] = 'sec1'
         elif opt == '-qwt1':
             data['mode'] = 'qwt1'
         elif opt == '-qwt2':
