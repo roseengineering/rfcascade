@@ -167,6 +167,12 @@ A quarter wave transformer and 72 ohm stub match example.
 
 { run("< example2.s2p cascade -qwt3 72") }
 
+Match using a short transformer section.  (See Rizzi p132)
+
+{ run("< 2n5179_5ma.s2p cascade -sec1") }
+
+## More examples
+
 Match a network for maximum gain.
 
 { run("< example3.s2p cascade -qwt2") }
