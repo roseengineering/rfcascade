@@ -629,21 +629,21 @@ def write_stub1(nw, data):
 
 def write_stub2(nw, data):
     ZLINE = data.get('line', 50)
-    l = 45
     print('MHZ    (LBAL)  LSHUNT LSERIES  LSHUNT  (LBAL)          ZS               ZL'
           '       (LBAL)  LSHUNT LSERIES  LSHUNT  (LBAL)')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
-        for mode in [ 'ss', 'oo', 'so', 'os' ]:
-            r1 = stub2(np.conj(ZS), l, zo=ZLINE, mode=mode)
-            r2 = stub2(np.conj(ZL), l, zo=ZLINE, mode=mode)
-            for i in range(2):
-                print(fm('F', f / 1e6),
-                      fm('aaaaa', *r1[i]),
-                      fm('cc', ZS, ZL),
-                      fm('aaaaa', *r2[i][::-1]),
-                      '{}/{}'.format(mode, mode[::-1])) 
+        for l in [ 45, 135 ]:
+            for mode in [ 'ss', 'oo', 'so', 'os' ]:
+                r1 = stub2(np.conj(ZS), l, zo=ZLINE, mode=mode)
+                r2 = stub2(np.conj(ZL), l, zo=ZLINE, mode=mode)
+                for i in range(2):
+                    print(fm('F', f / 1e6),
+                          fm('aaaaa', *r1[i]),
+                          fm('cc', ZS, ZL),
+                          fm('aaaaa', *r2[i][::-1]),
+                          '{}/{}'.format(mode, mode[::-1])) 
 
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
@@ -686,31 +686,41 @@ def write_qwt3(nw, data):
 
 ### show matching
 
+def write_gamma(nw, data):
+    GS, GL = data.get('gs'), data.get('gl')
+    format_match_header(gamma=True)
+    for i in range(len(nw)):
+        format_match_body(nw, i, GS, GL, gamma=True)
+
+def write_noise(nw, data):
+    format_match_header(gamma=True)
+    noise = np.maximum(2, data.get('noise'))
+    for i in range(len(nw)):
+        f = nw.f[i]
+        S = nw.s[i]
+        for n in range(noise):
+            t = n / (noise - 1)
+            GMS, GML = smatch(S)
+            GOPT = nw.nparam(f)[1]
+            GS, GL = GOPT + t * np.nan_to_num(GMS - GOPT), None
+            format_match_body(nw, i, GS, GL, gamma=True)
+            if np.isnan(GMS * GOPT): break
+
 def write_match(nw, data):
-    print('MHZ       QS          ZS       SWRIN   MLIN         ZIN             '
-          'ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM')
-    for f, S in zip(nw.f, nw.s):
-        FMIN, GOPT, RN = nw.nparam(f)
-        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
-        ###
-        ZS, ZL, ZIN, ZOUT = g2z(GS), g2z(GL), g2z(GIN), g2z(GOUT)
-        RLIN, RLOUT = gmatch(ZS, ZIN), gmatch(ZL, ZOUT)
-        SWRIN, SWROUT = swr(RLIN), swr(RLOUT)
-        QS, QL = np.abs(ZS.imag / ZS.real), np.abs(ZL.imag / ZL.real)
-        GT = sgain(S, GS, GL)
-        NF = nfig(FMIN, GOPT, RN, GS) if len(nw.n) else npassive(S, GT, GS) 
-        NM = nmeasure(NF, GT)
-        print(fm('F', f / 1e6), 
-              fm('fcf', QS, ZS, SWRIN),
-              fm('dccd', mismatch(RLIN), ZIN, ZOUT, mismatch(RLOUT)),
-              fm('fcf', SWROUT, ZL, QL), '!',
-              fm('ddd', GT, NF, NM))
+    GS, GL = data.get('gs'), data.get('gl')
+    format_match_header()
+    for i in range(len(nw)):
+        format_match_body(nw, i, GS, GL)
 
-def format_gamma_header():
-    print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
-          'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
+def format_match_header(gamma=False):
+    if gamma:
+        print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
+              'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
+    else:
+        print('MHZ       QS          ZS       SWRIN   MLIN         ZIN             '
+              'ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM')
 
-def format_gamma_body(nw, i, GS, GL):
+def format_match_body(nw, i, GS, GL, gamma=False):
     f = nw.f[i]
     S = nw.s[i]
     FMIN, GOPT, RN = nw.nparam(f)
@@ -722,30 +732,18 @@ def format_gamma_body(nw, i, GS, GL):
     GT = sgain(S, GS, GL)
     NF = nfig(FMIN, GOPT, RN, GS) if len(nw.n) else npassive(S, GT, GS) 
     NM = nmeasure(NF, GT)
-    print(fm('F', f / 1e6), 
-          fm('fpf', QS, GS, SWRIN),
-          fm('dppd', mismatch(RLIN), GIN, GOUT, mismatch(RLOUT)),
-          fm('fpf', SWROUT, GL, QL), '!',
-          fm('ddd', GT, NF, NM))
-
-def write_gamma(nw, data):
-    format_gamma_header()
-    for i in range(len(nw)):
-        format_gamma_body(nw, i, data.get('gs'), data.get('gl'))
-
-def write_noise(nw, data):
-    format_gamma_header()
-    noise = np.maximum(2, data.get('noise'))
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
-        for n in range(noise):
-            t = n / (noise - 1)
-            GMS, GML = smatch(S)
-            GOPT = nw.nparam(f)[1]
-            GS, GL = GOPT + t * np.nan_to_num(GMS - GOPT), None
-            format_gamma_body(nw, i, GS, GL)
-            if np.isnan(GMS * GOPT): break
+    if gamma:
+        print(fm('F', f / 1e6), 
+              fm('fpf', QS, GS, SWRIN),
+              fm('dppd', mismatch(RLIN), GIN, GOUT, mismatch(RLOUT)),
+              fm('fpf', SWROUT, GL, QL), '!',
+              fm('ddd', GT, NF, NM))
+    else:
+        print(fm('F', f / 1e6), 
+              fm('fcf', QS, ZS, SWRIN),
+              fm('dccd', mismatch(RLIN), ZIN, ZOUT, mismatch(RLOUT)),
+              fm('fcf', SWROUT, ZL, QL), '!',
+              fm('ddd', GT, NF, NM))
 
 # main
 
