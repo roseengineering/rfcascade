@@ -49,13 +49,15 @@ EOF
 < /tmp/cascade_input python cascade | diff - /tmp/cascade_output
 
 cat > /tmp/cascade_output <<EOF
-MHZ             A                  B                  C                  D
+# MHZ A MA
+! MHZ             A                  B                  C                  D
 1        0.08687  -26.78      10.33 -116.70   0.004851  -59.83     0.3382  -73.43
 EOF
 < /tmp/cascade_input python cascade -a | diff - /tmp/cascade_output
 
 cat > /tmp/cascade_output <<EOF
-MHZ             A                  B                  C                  D
+# MHZ A MA
+! MHZ             A                  B                  C                  D
 1        0.09409  150.79      11.19   60.87   0.005254  117.74      1.012   18.75
 EOF
 < /tmp/cascade_input python cascade -cbg -a | diff - /tmp/cascade_output

@@ -307,8 +307,8 @@ def sgain(S, g1, g2):
 def smatch(S):
     S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
     D = det(S)
-    B1 = 1 + np.abs(S11)**2 - np.abs(S22)**2 - np.abs(D)**2;
-    B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2;
+    B1 = 1 + np.abs(S11)**2 - np.abs(S22)**2 - np.abs(D)**2
+    B2 = 1 + np.abs(S22)**2 - np.abs(S11)**2 - np.abs(D)**2
     C1 = S11 - D * np.conj(S22)
     C2 = S22 - D * np.conj(S11)
     GS = (B1 - np.sign(B1) * np.sqrt(B1**2 - 4 * np.abs(C1)**2)) / (2 * C1)
@@ -556,28 +556,25 @@ def show_network(nw, data):
 ### show reports
 
 def write_abcd(nw):
-    print('MHZ             A                  B                  C                  D')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        A = nw.a[i]
+    print('# MHZ A MA')
+    print('! MHZ             A                  B                  C                  D')
+    for f, A in zip(nw.f, nw.a):
         print(fm('F', f / 1e6), 
               fm('pppp', *A.flatten()))
 
 def write_sparam(nw):
     print('# MHZ S MA R 50')
-    print('! MHZ           S11                S21                '
-          'S12                S22      !    GUM        K       MU')
-    for i in range(len(nw)):
-        f = nw.f[i]
-        S = nw.s[i]
+    print('! MHZ           S11                S21                S12'
+          '                S22      !    GUM        K       MU')
+    for f, S in zip(nw.f, nw.s):
         K = rollet(S)
         print(fm('F', f / 1e6),
               fm('pppp', *S.T.flatten()), '!', 
               fm('dgg', gum(S), K, mu(S)))
 
 def write_summary(nw):
-    print('MHZ            Z11             Z22         GUI    S21    GUO    '
-          'GUM   GMSG   GMAG     GU        K        D       MU')
+    print('MHZ            Z11             Z22         GUI    S21    GUO'
+          '    GUM   GMSG   GMAG     GU        K        D       MU')
     for f, S in zip(nw.f, nw.s):
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
@@ -589,7 +586,8 @@ def write_summary(nw):
 
 def write_sec1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ   ZSERIES  LSERIES          ZS               ZL      LSERIES  ZSERIES')
+    print('MHZ   ZSERIES  LSERIES          ZS               ZL'
+          '      LSERIES  ZSERIES')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -600,8 +598,8 @@ def write_sec1(nw, data):
 
 def write_lmatch(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          '
-          'ZS               ZL         SHUNT   SERIES !   SERIES    SHUNT')
+    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL'
+          '         SHUNT   SERIES !   SERIES    SHUNT')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -615,7 +613,8 @@ def write_lmatch(nw, data):
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ    (LBAL)  LSHUNT LSERIES          ZS               ZL      LSERIES  LSHUNT  (LBAL)')
+    print('MHZ    (LBAL)  LSHUNT LSERIES          ZS               ZL'
+          '      LSERIES  LSHUNT  (LBAL)')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -647,7 +646,8 @@ def write_stub2(nw, data):
 
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT  ZSERIES LSERIES          ZS               ZL      LSERIES  ZSERIES     ZQWT')
+    print('MHZ       ZQWT  ZSERIES LSERIES          ZS               ZL'
+          '      LSERIES  ZSERIES     ZQWT')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -659,7 +659,8 @@ def write_qwt1(nw, data):
 
 def write_qwt2(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL        (ZBAL)  LSHUNT   ZSHUNT     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL'
+          '        (ZBAL)  LSHUNT   ZSHUNT     ZQWT')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -673,7 +674,8 @@ def write_qwt2(nw, data):
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
     z2 = data.get('z2')
-    print('MHZ       ZQWT   ZSHUNT  LSHUNT  (LBAL)          ZS               ZL       (LBAL)  LSHUNT   ZSHUNT     ZQWT')
+    print('MHZ       ZQWT   ZSHUNT  LSHUNT  (LBAL)          ZS               ZL'
+          '       (LBAL)  LSHUNT   ZSHUNT     ZQWT')
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
