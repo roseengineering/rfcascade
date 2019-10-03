@@ -27,6 +27,7 @@ class Touchstone:
                 toks = line[1:].strip().split()
                 toks.extend(['ghz', 's', 'ma', 'r', '50'][len(toks):])
                 frequency_unit = {'hz':1.0, 'khz':1e3, 'mhz':1e6, 'ghz':1e9}.get(toks[0])
+                parameter_type = toks[1]
                 parameter_format = toks[2]
             elif len(line):
                 v.extend([ np.double(x) for x in line.split() ])
@@ -39,9 +40,10 @@ class Touchstone:
             v = v[:pos * 9]
         v = v.reshape((-1, 9))
 
-        self._f = v[:,0] * frequency_unit
-        self._n = np.array(n).reshape((-1, 5))
-        for N in self._n:
+        self.f = v[:,0] * frequency_unit
+        self.n = np.array(n).reshape((-1, 5))
+
+        for N in self.n:
             N[0] *= frequency_unit
         if parameter_format == 'ri':
             v = v[:,1::2] + 1j* v[:,2::2]
@@ -49,7 +51,13 @@ class Touchstone:
             v = v[:,1::2] * np.exp(1j * np.deg2rad(v[:,2::2]))
         elif parameter_format == 'db':
             v = 10**(v[:,1::2] / 20.0) * np.exp(1j * np.deg2rad(v[:,2::2]))
-        self._s = np.transpose(v.reshape((-1, 2, 2)), axes=(0, 2, 1))
+
+        if parameter_type == 'a':
+            self.a = v.reshape((-1, 2, 2))
+        elif parameter_type == 's':
+            self.s = np.transpose(v.reshape((-1, 2, 2)), axes=(0, 2, 1))
+        else:
+            raise ValueError
 
     def copy(self):
         return Touchstone(f=self.f, s=self.s, n=self.n)
