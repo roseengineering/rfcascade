@@ -1,7 +1,6 @@
 #!/usr/bin/python
 
 import numpy as np
-import sys, tempfile, os
 
 ### touchstone class
 
@@ -896,6 +895,7 @@ def main(*args):
 
 
 if __name__ == '__main__':
+    import sys
     np.seterr(divide='ignore', invalid='ignore')
     main(*sys.argv[1:])
 
