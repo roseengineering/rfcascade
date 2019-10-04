@@ -536,9 +536,9 @@ def fm(mode, *d, f=None):
         if m == 'f':
             res.append(h(x, '{:>6s}', '{:6.2f}'))
         if m == 'F': 
-            res.append(h(x, '{:<5s}', '{:<5g}'))
+            res.append(h(x, '{:<6s}', '{:<6g}'))
         if m == 'c':
-            res.append(h(x, '{:>16s}', '{:16.4g}'))
+            res.append(h(x, '{:>17s}', '{:17.4g}'))
         if m == 'a':
             res.append(h(x, '{:>7s}', '{:7.2f}'))
         if m == 'g': 
