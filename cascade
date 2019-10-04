@@ -498,6 +498,7 @@ def matching(S, GS, GL):
     return GS, GL, GIN, GOUT
 
 def notation(x, precision=5):
+    if np.isnan(x): return x
     UNITS = 'FH'
     SUFFIX = ["f", "p", "n", "u", "m", "", "k", "M", "G"]
     exp = np.floor(np.log10(np.absolute(x)))
@@ -507,28 +508,43 @@ def notation(x, precision=5):
     return "%6.4g%s%s" % (np.absolute(value), SUFFIX[p-4], UNITS[0 if x < 0 else 1])
 
 def fm(mode, *d, f=None):
+    def h(x, a, b=None): 
+        if type(x) == str:
+            return a.format(x)
+        return a.format('-') if np.isnan(x) else b.format(x)
+
     res = []
     for m, x in zip(list(mode), d):
         if m == 'p':
-            res.append('{:>10s}'.format('-') if np.isnan(x) else '{:10.4g}'.format(np.abs(x)))
-            res.append('{:>7s}'.format('-') if np.isnan(x) else '{:7.2f}'.format(np.rad2deg(np.angle(x))))
-        if m == 'c':
-            res.append('{:>16s}'.format('-') if np.isnan(x) else '{:16.4g}'.format(x))
+            if type(x) == str:
+                res.append(h(x, '{:>18s}'))
+            else:
+                res.append(h(np.abs(x), '{:>10s}', '{:10.4g}'))
+                res.append(h(np.rad2deg(np.angle(x)), '{:>7s}', '{:7.2f}'))
         if m == 'd':
-            x = 10 * np.log10(x)
-            res.append('{:>6s}'.format('-') if np.isnan(x) else '{:6.2f}'.format(x))
-        if m == 'f':
-            res.append('{:>6s}'.format('-') if np.isnan(x) else '{:6.2f}'.format(x))
-        if m == 'a':
-            res.append('{:>7s}'.format('-') if np.isnan(x) else '{:7.2f}'.format(x))
-        if m == 'g': 
-            res.append('{:>8s}'.format('-') if np.isnan(x) else '{:8.4g}'.format(x))
+            if type(x) == str:
+                res.append(h(x, '{:>6s}'))
+            else:
+                res.append(h(10 * np.log10(x), '{:>6s}', '{:6.2f}'))
         if m == 'x': 
-            w = 2 * np.pi * f
-            x = 1 / (w * x) if x < 0 else x / w
-            res.append('{:>8s}'.format('-') if np.isnan(x) or np.isinf(x) else notation(x))
+            if type(x) == str:
+                res.append(h(x, '{:>8s}'))
+            else:
+                w = 2 * np.pi * f
+                x = 1 / (w * x) if x < 0 else x / w
+                res.append(h(notation(x), '{:>8s}'))
+        if m == 'f':
+            res.append(h(x, '{:>6s}', '{:6.2f}'))
         if m == 'F': 
-            res.append('{:<5g}'.format(x))
+            res.append(h(x, '{:<5s}', '{:<5g}'))
+        if m == 'c':
+            res.append(h(x, '{:>16s}', '{:16.4g}'))
+        if m == 'a':
+            res.append(h(x, '{:>7s}', '{:7.2f}'))
+        if m == 'g': 
+            res.append(h(x, '{:>9s}', '{:9.4g}'))
+        if m == 's':
+            res.append(x)
     return ' '.join(res)
 
 def show_network(nw, data):
@@ -564,64 +580,58 @@ def show_network(nw, data):
 
 def write_abcd(nw):
     print('# MHZ A MA')
-    print('! MHZ             A                  B                  C                  D')
+    print(fm('Fpppp','! MHZ','A','B','C','D'))
     for f, A in zip(nw.f, nw.a):
-        print(fm('F', f / 1e6), 
+        print(fm('F', f / 1e6),
               fm('pppp', *A.flatten()))
 
 def write_sparam(nw):
     print('# MHZ S MA R 50')
-    print('! MHZ           S11                S21                S12'
-          '                S22      !    GUM        K       MU')
+    print(fm('Fppppsdgg','! MHZ','S11','S21','S12','S22','!','GUM','K','MU'))
     for f, S in zip(nw.f, nw.s):
         K = rollet(S)
         print(fm('F', f / 1e6),
-              fm('pppp', *S.T.flatten()), '!', 
-              fm('dgg', gum(S), K, mu(S)))
+              fm('ppppsdgg', *S.T.flatten(), '!', gum(S), K, mu(S)))
 
 def write_summary(nw):
-    print('MHZ            Z11             Z22         GUI    S21    GUO'
-          '    GUM   GMSG   GMAG     GU        K        D       MU')
+    print(fm('Fccddddddfggg','MHZ','Z11','Z22','GUI','S21','GUO','GUM','GMSG','GMAG','GU','K','D','MU'))
     for f, S in zip(nw.f, nw.s):
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
         print(fm('F', f / 1e6), 
               fm('ccddddddfggg', g2z(S11), g2z(S22), gui(S), np.abs(S21)**2, 
-                 guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, np.abs(det(S)), mu(S)))
+              guo(S), gum(S), gmsg(S), gmag(S), gu(S), K, np.abs(det(S)), mu(S)))
 
 ### matching networks
 
 def write_sec1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ   ZSERIES  LSERIES          ZS               ZL'
-          '      LSERIES  ZSERIES')
+    print(fm('Fgaccag','MHZ','ZSERIES','LSERIES','ZS','ZL','LSERIES','ZSERIES'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
-        print(fm('F', f / 1e6), 
-              fm('ga', *sec1(np.conj(ZS), zo=ZLINE)),
-              fm('cc', ZS, ZL),
+        print(fm('F', f / 1e6),
+              fm('ga', *sec1(np.conj(ZS), zo=ZLINE)), 
+              fm('cc', ZS, ZL), 
               fm('ag', *sec1(np.conj(ZL), zo=ZLINE)[::-1]))
 
 def write_lmatch(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ      SHUNT   SERIES !   SERIES    SHUNT          ZS               ZL'
-          '         SHUNT   SERIES !   SERIES    SHUNT')
+    print(fm('Fxxsxxccxxsxx','MHZ','SHUNT','SERIES','!','SERIES','SHUNT','ZS','ZL','SHUNT','SERIES','!','SERIES','SHUNT'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
         for i in range(2):
             print(fm('F', f / 1e6), 
-                  fm('xx', *lmatch(ZLINE, np.conj(ZS))[i], f=f), '!',
+                  fm('xxs', *lmatch(ZLINE, np.conj(ZS))[i], '!', f=f),
                   fm('xx', *lmatch(ZLINE, np.conj(ZS), 'r')[i], f=f), 
                   fm('cc', ZS, ZL),
-                  fm('xx', *lmatch(np.conj(ZL), ZLINE)[i], f=f), '!',
+                  fm('xxs', *lmatch(np.conj(ZL), ZLINE)[i], '!', f=f),
                   fm('xx', *lmatch(np.conj(ZL), ZLINE, 'r')[i], f=f))
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ    (LBAL)  LSHUNT LSERIES          ZS               ZL'
-          '      LSERIES  LSHUNT  (LBAL)')
+    print(fm('Faaaccaas','MHZ','(LBAL)','LSHUNT','LSERIES','ZS','ZL','LSERIES','LSHUNT','(LBAL)'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -635,8 +645,8 @@ def write_stub1(nw, data):
 
 def write_stub2(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ    (LBAL)  LSHUNT LSERIES  LSHUNT  (LBAL)          ZS               ZL'
-          '       (LBAL)  LSHUNT LSERIES  LSHUNT  (LBAL)')
+    print(fm('Faaaaaccaaaaa','MHZ','(LBAL)','LSHUNT','LSERIES','LSHUNT','(LBAL)',
+             'ZS','ZL','(LBAL)','LSHUNT','LSERIES','LSHUNT','(LBAL)'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -653,8 +663,7 @@ def write_stub2(nw, data):
 
 def write_qwt1(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT  ZSERIES LSERIES          ZS               ZL'
-          '      LSERIES  ZSERIES     ZQWT')
+    print(fm('Fggaccagg','MHZ','ZQWT','ZSERIES','LSERIES','ZS','ZL','LSERIES','ZSERIES','ZQWT'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -666,8 +675,7 @@ def write_qwt1(nw, data):
 
 def write_qwt2(nw, data):
     ZLINE = data.get('line', 50)
-    print('MHZ       ZQWT   ZSHUNT  LSHUNT   (ZBAL)          ZS               ZL'
-          '        (ZBAL)  LSHUNT   ZSHUNT     ZQWT')
+    print(fm('Fggagccgagg','MHZ','ZQWT','ZSHUNT','LSHUNT','(ZBAL)','ZS','ZL','(ZBAL)','LSHUNT','ZSHUNT','ZQWT'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
@@ -681,8 +689,7 @@ def write_qwt2(nw, data):
 def write_qwt3(nw, data):
     ZLINE = data.get('line', 50)
     z2 = data.get('z2')
-    print('MHZ       ZQWT   ZSHUNT  LSHUNT  (LBAL)          ZS               ZL'
-          '       (LBAL)  LSHUNT   ZSHUNT     ZQWT')
+    print(fm('Fggaaccaagg','MHZ','ZQWT','ZSHUNT','LSHUNT','(LBAL)','ZS','ZL','(LBAL)','LSHUNT','ZSHUNT','ZQWT'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
