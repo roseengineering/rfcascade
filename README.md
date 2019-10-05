@@ -57,7 +57,8 @@ as comments.  It can also output the network in following alternative formats:
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
 -noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
--lmatch       : match with l-section networks
+-lmatch1      : match with lumped l-section networks
+-lmatch2      : match with transmission line l-section networks
 -sec1         : match with a short section of transmission line
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
@@ -347,7 +348,7 @@ A L-section match example.
 
 
 ```
-$ < example2.s2p cascade -lmatch
+$ < example2.s2p cascade -lmatch1
 MHZ       SHUNT   SERIES !   SERIES    SHUNT                ZS                ZL    SHUNT   SERIES !   SERIES    SHUNT
 2000    1.345nH  3.505pF !        -        -      5.124-7.542j      33.68+91.48j   4.61nH  738.6fF !  5.715nH  5.414nH
 2000     4.71pF  606.6pH !        -        -      5.124-7.542j      33.68+91.48j  39.99nH  8.574nH !  1.108pF  9.146nH
