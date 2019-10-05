@@ -71,7 +71,8 @@ as comments.  It can also output the network in following alternative formats:
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
 -noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
--lmatch       : match with l-section networks
+-lmatch1      : match with lumped l-section networks
+-lmatch2      : match with transmission line l-section networks
 -sec1         : match with a short section of transmission line
 -stub1        : match with a single shunt stub network
 -stub2        : match with a double shunt stub network
@@ -153,7 +154,7 @@ A stub match example.  Stub lengths are in degrees.
 
 A L-section match example.
 
-{ run("< example2.s2p cascade -lmatch") }
+{ run("< example2.s2p cascade -lmatch1") }
 
 A quarter wave transformer with a series section example.
 

@@ -350,8 +350,8 @@ def gmsg(S):
 
 def gmag(S):
     K = rollet(S)
+    if np.isinf(K): return gum(S) 
     if K < 1: return np.nan
-    if K == np.inf: return gum(S) 
     return gmsg(S) * (K - np.sqrt(K**2 - 1))
 
 def gu(S):
@@ -498,7 +498,6 @@ def matching(S, GS, GL):
     return GS, GL, GIN, GOUT
 
 def notation(x, precision=5):
-    if np.isnan(x): return x
     UNITS = 'FH'
     SUFFIX = ["f", "p", "n", "u", "m", "", "k", "M", "G"]
     exp = np.floor(np.log10(np.absolute(x)))
@@ -507,7 +506,7 @@ def notation(x, precision=5):
     value = (mant * 10**exp) / 10**(3 * p)
     return "%6.4g%s%s" % (np.absolute(value), SUFFIX[p-4], UNITS[0 if x < 0 else 1])
 
-def fm(mode, *d, f=None):
+def fm(mode, *d, f=None, ra=None):
     def h(x, a, b=None): 
         if type(x) == str:
             return a.format(x)
@@ -527,12 +526,23 @@ def fm(mode, *d, f=None):
             else:
                 res.append(h(10 * np.log10(x), '{:>6s}', '{:6.2f}'))
         if m == 'x': 
-            if type(x) == str:
-                res.append(h(x, '{:>8s}'))
-            else:
+            if type(x) != str:
                 w = 2 * np.pi * f
                 x = 1 / (w * x) if x < 0 else x / w
-                res.append(h(notation(x), '{:>8s}'))
+                x = np.nan if np.isnan(x) or np.isinf(x) else notation(x)
+            res.append(h(x, '{:>8s}'))
+        if m == 'y':
+            if type(x) != str and not np.isnan(x):
+                zo = ra / 3
+                w = 2 * np.pi * f
+                x = np.nan if x > 0 else '%.0f/%.2f' % (zo, np.rad2deg(-zo / (w * x)))
+            res.append(h(x, '{:>8s}'))
+        if m == 'z': 
+            if type(x) != str and not np.isnan(x):
+                zo = ra * 3
+                w = 2 * np.pi * f
+                x = np.nan if x < 0 else '%.0f/%.2f' % (zo, np.rad2deg(x / (w * zo)))
+            res.append(h(x, '{:>8s}'))
         if m == 'f':
             res.append(h(x, '{:>6s}', '{:6.2f}'))
         if m == 'F': 
@@ -559,8 +569,10 @@ def show_network(nw, data):
         write_gamma(nw, data)
     elif mode == 'noise':
         write_noise(nw, data)
-    elif mode == 'lmatch':
-        write_lmatch(nw, data)
+    elif mode == 'lmatch1':
+        write_lmatch1(nw, data)
+    elif mode == 'lmatch2':
+        write_lmatch2(nw, data)
     elif mode == 'stub1':
         write_stub1(nw, data)
     elif mode == 'stub2':
@@ -615,7 +627,7 @@ def write_sec1(nw, data):
               fm('cc', ZS, ZL), 
               fm('ag', *sec1(np.conj(ZL), zo=ZLINE)[::-1]))
 
-def write_lmatch(nw, data):
+def write_lmatch1(nw, data):
     ZLINE = data.get('line', 50)
     print(fm('Fxxsxxccxxsxx','MHZ','SHUNT','SERIES','!','SERIES','SHUNT','ZS','ZL','SHUNT','SERIES','!','SERIES','SHUNT'))
     for f, S in zip(nw.f, nw.s):
@@ -628,6 +640,20 @@ def write_lmatch(nw, data):
                   fm('cc', ZS, ZL),
                   fm('xxs', *lmatch(np.conj(ZL), ZLINE)[i], '!', f=f),
                   fm('xx', *lmatch(np.conj(ZL), ZLINE, 'r')[i], f=f))
+
+def write_lmatch2(nw, data):
+    ZLINE = data.get('line', 50)
+    print(fm('Fxxsxxccxxsxx','MHZ','SHUNT','SERIES','!','SERIES','SHUNT','ZS','ZL','SHUNT','SERIES','!','SERIES','SHUNT'))
+    for f, S in zip(nw.f, nw.s):
+        GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
+        ZS, ZL = g2z(GS), g2z(GL)
+        for i in range(2):
+            print(fm('F', f / 1e6), 
+                  fm('yzs', *lmatch(ZLINE, np.conj(ZS))[i], '!', f=f, ra=ZS.real),
+                  fm('zy', *lmatch(ZLINE, np.conj(ZS), 'r')[i], f=f, ra=ZS.real), 
+                  fm('cc', ZS, ZL),
+                  fm('yzs', *lmatch(np.conj(ZL), ZLINE)[i], '!', f=f, ra=ZL.real),
+                  fm('zy', *lmatch(np.conj(ZL), ZLINE, 'r')[i], f=f, ra=ZL.real))
 
 def write_stub1(nw, data):
     ZLINE = data.get('line', 50)
@@ -730,11 +756,9 @@ def write_match(nw, data):
 
 def format_match_header(gamma=False):
     if gamma:
-        print('MHZ       QS           GS        SWRIN   MLIN          GIN                '
-              'GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM')
+        print(fm('Ffpfdppdfpfsddd','MHZ','QS','GS','SWRIN','MLIN','GIN','GOUT','MLOUT','SWROUT','GL','QL','!','GT','NF','NM'))
     else:
-        print('MHZ       QS          ZS       SWRIN   MLIN         ZIN             '
-              'ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM')
+        print(fm('Ffcfdccdfcfsddd','MHZ','QS','ZS','SWRIN','MLIN','ZIN','ZOUT','MLOUT','SWROUT','ZL','QL','!','GT','NF','NM'))
 
 def format_match_body(nw, i, GS, GL, gamma=False):
     f = nw.f[i]
@@ -785,8 +809,10 @@ def main(*args):
         elif opt == '-noise':
             data['mode'] = 'noise'
             data['noise'] = np.int(args.pop(0))
-        elif opt == '-lmatch':
-            data['mode'] = 'lmatch'
+        elif opt == '-lmatch1':
+            data['mode'] = 'lmatch1'
+        elif opt == '-lmatch2':
+            data['mode'] = 'lmatch2'
         elif opt == '-sec1':
             data['mode'] = 'sec1'
         elif opt == '-qwt1':

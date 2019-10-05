@@ -315,7 +315,7 @@ Show impedance matching information.
 
 ```
 $ < example2.s2p cascade -m
-MHZ       QS          ZS       SWRIN   MLIN         ZIN             ZOUT       MLOUT SWROUT          ZL          QL !     GT     NF     NM
+MHZ        QS                ZS  SWRIN   MLIN               ZIN              ZOUT  MLOUT SWROUT                ZL     QL !     GT     NF     NM
 2000     1.47      5.124-7.542j   1.00   0.00      5.124+7.542j      33.68-91.48j   0.00   1.00      33.68+91.48j   2.72 !  16.18      -      -
 ```
 
@@ -325,7 +325,7 @@ Show gamma matching information.
 
 ```
 $ < example2.s2p cascade -g
-MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM
+MHZ        QS                 GS  SWRIN   MLIN                GIN               GOUT  MLOUT SWROUT                 GL     QL !     GT     NF     NM
 2000     1.47     0.8179 -162.67   1.00   0.00     0.8179  162.67     0.7495  -52.57   0.00   1.00     0.7495   52.57   2.72 !  16.18      -      -
 ```
 
@@ -473,7 +473,7 @@ Use Gonzalez's analytic method on p.318, drawing a straight line from Gopt to Gm
 
 ```
 $ < example4.s2p cascade -noise 5
-MHZ       QS           GS        SWRIN   MLIN          GIN                GOUT       MLOUT SWROUT           GL           QL !     GT     NF     NM
+MHZ        QS                 GS  SWRIN   MLIN                GIN               GOUT  MLOUT SWROUT                 GL     QL !     GT     NF     NM
 4000     0.56       0.45 -150.00   2.69  -1.02     0.7524  147.97     0.6227  -62.09   0.00   1.00     0.6227   62.09   1.80 !   9.76   3.00   0.46
 4000     0.79     0.5433 -149.17   2.22  -0.67     0.7644  147.95     0.6542  -61.71   0.00   1.00     0.6542   61.71   2.01 !  10.21   3.05   0.52
 4000     1.12     0.6367 -148.59   1.79  -0.36     0.7792  147.93     0.6914  -61.31   0.00   1.00     0.6914   61.31   2.32 !  10.63   3.24   0.83
