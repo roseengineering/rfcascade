@@ -606,7 +606,7 @@ def write_sparam(nw):
               fm('ppppsdgg', *S.T.flatten(), '!', gum(S), K, mu(S)))
 
 def write_summary(nw):
-    print(fm('Fccddddddfggg','MHZ','Z11','Z22','GUI','S21','GUO','GUM','GMSG','GMAG','GU','K','D','MU'))
+    print(fm('Fccddddddfggg','MHZ','Z1','Z2','GUI','S21','GUO','GUM','GMSG','GMAG','GU','K','D','MU'))
     for f, S in zip(nw.f, nw.s):
         S11, S12, S21, S22 = S[0,0], S[0,1], S[1,0], S[1,1]
         K = rollet(S)
