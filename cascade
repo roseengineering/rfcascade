@@ -534,7 +534,7 @@ def fm(mode, *d, f=None, ra=None):
         if m == 'y':
             if type(x) != str and not np.isnan(x):
                 zo = ra / 3
-                th = np.rad2deg(-x * zo)
+                th = np.rad2deg(-zo / x)
                 x = np.nan if th < 0 or th > 12 else '%.0f/%.1f' % (zo, th)
             res.append(h(x, '{:>8s}'))
         if m == 'z': 
