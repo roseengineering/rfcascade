@@ -535,14 +535,14 @@ def fm(mode, *d, f=None, ra=None):
             if type(x) != str and not np.isnan(x):
                 zo = ra / 3
                 th = np.rad2deg(-zo / x)
-                x = np.nan if th < 0 or th > 12 or zo > 999 else '%.1f/%.1f' % (zo, th)
-            res.append(h(x, '{:>9s}'))
+                x = np.nan if th < 0 or th > 24 or zo > 999 else '%.1f/%.1f' % (zo, th)
+            res.append(h(x, '{:>10s}'))
         if m == 'z': 
             if type(x) != str and not np.isnan(x):
                 zo = ra * 3
                 th = np.rad2deg(x / zo)
-                x = np.nan if th < 0 or th > 12 or zo > 999 else '%.1f/%.1f' % (zo, th)
-            res.append(h(x, '{:>9s}'))
+                x = np.nan if th < 0 or th > 24 or zo > 999 else '%.1f/%.1f' % (zo, th)
+            res.append(h(x, '{:>10s}'))
         if m == 'f':
             res.append(h(x, '{:>6s}', '{:6.2f}'))
         if m == 'F': 
