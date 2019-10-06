@@ -535,14 +535,14 @@ def fm(mode, *d, f=None, ra=None):
             if type(x) != str and not np.isnan(x):
                 zo = ra / 3
                 th = np.rad2deg(-zo / x)
-                x = np.nan if th < 0 or th > 12 else '%.0f/%.1f' % (zo, th)
-            res.append(h(x, '{:>8s}'))
+                x = np.nan if th < 0 or th > 12 else '%.1f/%.1f' % (zo, th)
+            res.append(h(x, '{:>9s}'))
         if m == 'z': 
             if type(x) != str and not np.isnan(x):
                 zo = ra * 3
                 th = np.rad2deg(x / zo)
-                x = np.nan if th < 0 or th > 12 else '%.0f/%.1f' % (zo, th)
-            res.append(h(x, '{:>8s}'))
+                x = np.nan if th < 0 or th > 12 else '%.1f/%.1f' % (zo, th)
+            res.append(h(x, '{:>9s}'))
         if m == 'f':
             res.append(h(x, '{:>6s}', '{:6.2f}'))
         if m == 'F': 
@@ -643,7 +643,7 @@ def write_lmatch1(nw, data):
 
 def write_lmatch2(nw, data):
     ZLINE = data.get('line', 50)
-    print(fm('Fxxsxxccxxsxx','MHZ','SHUNT','SERIES','!','SERIES','SHUNT','ZS','ZL','SHUNT','SERIES','!','SERIES','SHUNT'))
+    print(fm('Fyzszyccyzszy','MHZ','SHUNT','SERIES','!','SERIES','SHUNT','ZS','ZL','SHUNT','SERIES','!','SERIES','SHUNT'))
     for f, S in zip(nw.f, nw.s):
         GS, GL, GIN, GOUT = matching(S, data.get('gs'), data.get('gl'))
         ZS, ZL = g2z(GS), g2z(GL)
