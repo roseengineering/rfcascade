@@ -855,10 +855,6 @@ def main(*args):
             b = stack.pop()
             a = stack.pop()
             stack.append(a ** b.inv)
-        elif opt == '-ideembed':
-            b = stack.pop()
-            a = stack.pop()
-            stack.append(a.inv ** b)
 
         # unary transformation operations
 

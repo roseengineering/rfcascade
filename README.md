@@ -12,8 +12,7 @@ input transformations as command line options:
 
 ```
 -cascade             : cascade together the two networks on top of stack
--deembed             : de-embed the output of the top two networks on the stack
--ideembed            : de-embed the input of the top two networks on the stack
+-deembed             : de-embed the top two networks on the stack
 -swap                : swap the top two networks on the stack
 
 -cbg                 : transform top network into a common-base arrangement
