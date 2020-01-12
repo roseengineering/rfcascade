@@ -69,7 +69,8 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
--noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
+-gnoise <int> : show matching solutions in gamma from Gopt to Gms in int steps
+-znoise <int> : show matching solutions in impedance from Gopt to Gms in int steps
 -lmatch1      : match with lumped l-section networks
 -lmatch2      : match with transmission line l-section networks
 -sec1         : match with a short section of transmission line
@@ -192,7 +193,8 @@ for the load reflection coefficient in AN967.
 
 Use Gonzalez's analytic method on p.318, drawing a straight line from Gopt to Gms, to select GS.
 
-{ run("< example4.s2p cascade -noise 5") }
+{ run("< example4.s2p cascade -gnoise 5") }
+{ run("< example4.s2p cascade -znoise 5") }
 
 """)
 

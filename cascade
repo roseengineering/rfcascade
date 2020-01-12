@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import numpy as np
 
@@ -546,7 +546,7 @@ def fm(mode, *d, f=None, ra=None):
         if m == 'f':
             res.append(h(x, '{:>6s}', '{:6.2f}'))
         if m == 'F': 
-            res.append(h(x, '{:<6s}', '{:<6g}'))
+            res.append(h(x, '{:<6s}', '{:<6.4g}'))
         if m == 'c':
             res.append(h(x, '{:>17s}', '{:17.4g}'))
         if m == 'a':
@@ -567,8 +567,10 @@ def show_network(nw, data):
         write_match(nw, data)
     elif mode == 'g':
         write_gamma(nw, data)
-    elif mode == 'noise':
-        write_noise(nw, data)
+    elif mode == 'gnoise':
+        write_noise(nw, data, gamma=True)
+    elif mode == 'znoise':
+        write_noise(nw, data, gamma=False)
     elif mode == 'lmatch1':
         write_lmatch1(nw, data)
     elif mode == 'lmatch2':
@@ -734,18 +736,18 @@ def write_gamma(nw, data):
     for i in range(len(nw)):
         format_match_body(nw, i, GS, GL, gamma=True)
 
-def write_noise(nw, data):
-    format_match_header(gamma=True)
-    noise = np.maximum(2, data.get('noise'))
+def write_noise(nw, data, gamma):
+    format_match_header(gamma=gamma)
+    noise = np.maximum(1, data.get('noise'))
     for i in range(len(nw)):
         f = nw.f[i]
         S = nw.s[i]
         for n in range(noise):
-            t = n / (noise - 1)
+            t = n / np.maximum(1, noise - 1)
             GMS, GML = smatch(S)
             GOPT = nw.nparam(f)[1]
             GS, GL = GOPT + t * np.nan_to_num(GMS - GOPT), None
-            format_match_body(nw, i, GS, GL, gamma=True)
+            format_match_body(nw, i, GS, GL, gamma=gamma)
             if np.isnan(GMS * GOPT): break
 
 def write_match(nw, data):
@@ -806,8 +808,11 @@ def main(*args):
             data['mode'] = 'm'
         elif opt == '-g':
             data['mode'] = 'g'
-        elif opt == '-noise':
-            data['mode'] = 'noise'
+        elif opt == '-gnoise':
+            data['mode'] = 'gnoise'
+            data['noise'] = np.int(args.pop(0))
+        elif opt == '-znoise':
+            data['mode'] = 'znoise'
             data['noise'] = np.int(args.pop(0))
         elif opt == '-lmatch1':
             data['mode'] = 'lmatch1'

@@ -55,7 +55,8 @@ as comments.  It can also output the network in following alternative formats:
 -z            : summarize the network in terms of impedance, stability and gain (dB) values
 -m            : show matching solutions in impedance
 -g            : show matching solutions in gamma
--noise <int>  : show matching solutions in gamma from Gopt to Gms in int steps
+-gnoise <int> : show matching solutions in gamma from Gopt to Gms in int steps
+-znoise <int> : show matching solutions in impedance from Gopt to Gms in int steps
 -lmatch1      : match with lumped l-section networks
 -lmatch2      : match with transmission line l-section networks
 -sec1         : match with a short section of transmission line
@@ -472,13 +473,24 @@ Use Gonzalez's analytic method on p.318, drawing a straight line from Gopt to Gm
 
 
 ```
-$ < example4.s2p cascade -noise 5
+$ < example4.s2p cascade -gnoise 5
 MHZ        QS                 GS  SWRIN   MLIN                GIN               GOUT  MLOUT SWROUT                 GL     QL !     GT     NF     NM
 4000     0.56       0.45 -150.00   2.69  -1.02     0.7524  147.97     0.6227  -62.09   0.00   1.00     0.6227   62.09   1.80 !   9.76   3.00   0.46
 4000     0.79     0.5433 -149.17   2.22  -0.67     0.7644  147.95     0.6542  -61.71   0.00   1.00     0.6542   61.71   2.01 !  10.21   3.05   0.52
 4000     1.12     0.6367 -148.59   1.79  -0.36     0.7792  147.93     0.6914  -61.31   0.00   1.00     0.6914   61.31   2.32 !  10.63   3.24   0.83
 4000     1.65     0.7301 -148.15   1.39  -0.12     0.7983  147.89     0.7361  -60.89   0.00   1.00     0.7361   60.89   2.81 !  10.97   3.64   1.55
 4000     2.73     0.8236 -147.82   1.00   0.00     0.8236  147.82     0.7909  -60.46   0.00   1.00     0.7909   60.46   3.67 !  11.14   4.50   2.94
+```
+
+
+```
+$ < example4.s2p cascade -znoise 5
+MHZ        QS                ZS  SWRIN   MLIN               ZIN              ZOUT  MLOUT SWROUT                ZL     QL !     GT     NF     NM
+4000     0.56      20.12-11.35j   2.69  -1.02      7.632+14.04j      38.04-68.38j   0.00   1.00      38.04+68.38j   1.80 !   9.76   3.00   0.46
+4000     0.79      15.82-12.49j   2.22  -0.67      7.218+14.08j      35.41-71.31j   0.00   1.00      35.41+71.31j   2.01 !  10.21   3.05   0.52
+4000     1.12      11.93-13.31j   1.79  -0.36      6.708+14.13j       32.06-74.5j   0.00   1.00       32.06+74.5j   2.32 !  10.63   3.24   0.83
+4000     1.65      8.418-13.89j   1.39  -0.12      6.067+14.19j       27.74-77.9j   0.00   1.00       27.74+77.9j   2.81 !  10.97   3.64   1.55
+4000     2.73      5.236-14.28j   1.00   0.00      5.236+14.28j      22.15-81.37j   0.00   1.00      22.15+81.37j   3.67 !  11.14   4.50   2.94
 ```
 
 
